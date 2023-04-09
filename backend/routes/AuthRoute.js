@@ -17,7 +17,7 @@ const nocache = (_, resp, next) => {
 
 const generateAccessToken = (req, resp) => {
     // set response header
-    resp.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    resp.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
     // get channel name
     const channelName = req.params.channel;
     if (!channelName) {

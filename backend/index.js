@@ -1,14 +1,11 @@
 const express = require("express")
 const app = express()
-const server = require("http").createServer(app)
-
 const session = require("express-session")
 const MongoStore = require("connect-mongo");
 const passport = require("passport");
 const cookieParser = require("cookie-parser")
 const morgan = require("morgan")
 const cors = require("cors");
-const Enums = require("./utils/Enums");
 require("dotenv").config()
 
 
@@ -68,4 +65,4 @@ require("./AllRoutes")(app)
 
 
 
-server.listen(8000, () => console.log(`server started at port 8000`))
+app.listen(8000, () => console.log(`server started at port 8000`))

@@ -14,14 +14,18 @@
 }
 .Debate_room_main_text {
   font-weight: bold;
-  font-size: 2.3rem;
+  font-size: 2rem;
   display: flex;
   align-items: center;
   gap: 10px;
   position: relative;
   width: fit-content;
 }
-.Debate_room_main_text ::after {
+.main_text_one {
+  color: var(--primary_color);
+  position: relative;
+}
+.main_text_one::after {
   content: "";
   bottom: 0;
   width: 100%;
@@ -37,9 +41,6 @@
     rgb(64 70 221 / 52%),
     rgb(64 70 221 / 62%)
   );
-}
-.main_text_one {
-  color: var(--primary_color);
 }
 .round_text {
   color: var(--dark_primary_text_color);

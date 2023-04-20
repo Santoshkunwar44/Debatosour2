@@ -28,7 +28,9 @@ const Navbar = () => {
           <Link to={"/chatbot"}>
             <li className={`${location === "/chatbot" && "active_li"}`}>chatbot </li>
           </Link>
-          <li>Profile</li>
+          <Link to={`/profile/${data?._id}`}>
+            <li className={`${location === "/profile" && "active_li"}`}>Profile</li>
+          </Link>
         </ul>
         {
           data ?

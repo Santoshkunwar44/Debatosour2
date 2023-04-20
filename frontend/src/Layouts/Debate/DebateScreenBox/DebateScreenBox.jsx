@@ -2,8 +2,10 @@ import { useSelector } from 'react-redux'
 import DebatorView from '../DebatorView/DebatorView'
 import "./DebateScreenBox.css"
 import { useEffect, useState } from 'react';
+import NotStartedView from '../DebatorView/NotStartedView/NotStartedView';
+import NoneJoined from '../NoneJoined/NoneJoined';
 
-const DebateScreenBox = ({ roomMembers, activeSpeakers }) => {
+const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive }) => {
   const { activeDebate, activeParticipants } = useSelector((state) => state.debate);
 
 
@@ -64,7 +66,6 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers }) => {
       setTeams(TeamArray)
     }
   }, [activeDebate, roomMembers])
-
   return (
 
     <div className="DebateScreenBoxWrapper">
@@ -80,11 +81,14 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers }) => {
               </div>
               <div className="left_team">
                 {
-                  teams[0] && teams[0].members.map((mem) => (
 
-                    <DebatorView activeSpeakers={activeSpeakers} debator={mem} key={mem.id} />
+                  isLive ?
 
-                  ))
+                    teams[0] && teams[0].members.map((mem) => (
+
+                      <DebatorView activeSpeakers={activeSpeakers} debator={mem} key={mem.id} />
+
+                    )) : <NotStartedView team={activeDebate?.teams[0]?.members} />
                 }
 
               </div>
@@ -95,11 +99,10 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers }) => {
                 <div className='team_name teamTwo'> {teams[1]?.name}</div>
               </div>
               <div className="right_team">
-
                 {
-                  teams[1] && teams[1]?.members.map((member) => (
+                  isLive ? teams[1] && teams[1].members.length > 0 ? teams[1]?.members.map((member) => (
                     <DebatorView pink={true} activeSpeakers={activeSpeakers} debator={member} key={member._id} />
-                  ))
+                  )) : <NoneJoined team={teams[1]} /> : <NotStartedView pink={true} team={activeDebate?.teams[1]?.members} />
                 }
               </div>
             </div>

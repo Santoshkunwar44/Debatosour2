@@ -60,7 +60,7 @@
   width: 100%;
   box-shadow: 0px 0px 3px white;
 }
-.login_with_google_box :hover {
+.login_with_google_box:hover {
   border-color: rgb(210 216 224);
   box-shadow: 0px 0px 3px #686de0;
 }
@@ -99,21 +99,21 @@
   gap: 10px;
 }
 
-.input_item {
+.auth_input_item {
   display: flex;
   flex-direction: column;
   width: 100%;
   gap: 8px;
   flex: 1;
 }
-.input_item label {
+.auth_input_item label {
   font-size: 13px;
   color: #686de0;
 }
-.input_element {
+.auth_input_item .input_element {
   border: 1px solid rgb(234, 239, 245);
   border-radius: 5px;
-  height: 45px;
+  height: 40px;
   width: 100%;
   outline: none;
   padding: 0 10px;
@@ -122,10 +122,15 @@
   font-size: 13px;
   color: rgb(99, 109, 126);
 }
-.input_element:focus {
+.auth_input_item .input_element::placeholder {
+  color: rgba(128, 128, 128, 0.678);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+.auth_input_item .input_element:focus {
   box-shadow: 0px 0px 3px #686de0;
 }
-.input_element :hover {
+.auth_input_item .input_element :hover {
   box-shadow: 0px 0px 3px #686de0;
 }
 .error_input {

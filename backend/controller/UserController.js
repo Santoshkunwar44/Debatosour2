@@ -1,4 +1,5 @@
 const UserModel = require("../models/UserModel");
+const { isUserUpdated } = require("../services/AuthService");
 
 class UserController {
     async addUser(req, res) {
@@ -20,13 +21,15 @@ class UserController {
     async updateUser(req, res) {
         const { userId } = req.params;
         try {
-            const updatedUser = await User.findByIdAndUpdate(userId, {
+            const updatedUser = await UserModel.findByIdAndUpdate(userId, {
                 $set: req.body
             }, {
                 new: true,
+
             })
             res.status(200).json({ message: updatedUser, success: true })
         } catch (error) {
+            console.log(error)
             res.status(500).json({ message: error, success: false })
         }
     }
@@ -34,7 +37,7 @@ class UserController {
     async deleteUser(req, res) {
         const { userId } = req.params;
         try {
-            await User.findByIdAndDelete(userId)
+            await UserModel.findByIdAndDelete(userId)
             res.status(200).json({ message: "User deleted successfully", success: true })
         } catch (error) {
             res.status(500).json({ message: error, success: false })
@@ -45,12 +48,12 @@ class UserController {
         const sessionUser = req.session?.passport?.user || req.session.user;
 
         if (sessionUser) {
-
-
-            res.status(200).json({ message: sessionUser, success: true })
+            let updatedUser = await isUserUpdated(sessionUser)
+            console.log(updatedUser)
+            return res.status(200).json({ message: updatedUser, success: true })
         } else {
 
-            res.status(403).json({ message: "You are not logged in", success: false })
+            return res.status(403).json({ message: "You are not logged in", success: false })
         }
     }
 

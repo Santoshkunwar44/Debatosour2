@@ -22,6 +22,8 @@ const UserSchema = mongoose.Schema({
     },
     lastLoggedIn: Number
 
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model("User", UserSchema)

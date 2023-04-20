@@ -69,13 +69,13 @@
 .text2 {
   color: rgb(14, 11, 61) !important    ;
 }
-.currentDebates_bg {
+/* .currentDebates_bg {
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-}
+} */
 .shallow_eclipse {
   background-color: red;
   width: 200px;

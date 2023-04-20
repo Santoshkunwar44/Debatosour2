@@ -9,7 +9,6 @@ class AuthService {
             try {
                 const User = await UserModel.findOne({ email })
                 if (User) {
-                    console.log(User._id)
                     await UserModel.findByIdAndUpdate(User._id, {
                         $set: {
                             lastLoggedIn: Date.now()

@@ -4,7 +4,7 @@
   border-radius: 10px;
   padding: 1rem;
 }
-h2 {
+.teamFormWrapper h2 {
   text-transform: uppercase;
   font-weight: bold;
   letter-spacing: normal;
@@ -25,15 +25,14 @@ h2 {
   padding: 0 10px;
   border: none;
   outline: none;
+  color: rgba(128, 128, 128, 0.733);
+  font-size: 14px;
   height: 45px;
   background-color: rgb(251, 251, 251);
   padding-right: 10px;
 }
-
-svg {
-  cursor: pointer;
+.search_team_name_input::placeholder,
+.addMember_input::placeholder {
   font-size: 12px;
-}
-svg :hover {
-  scale: 1.2;
+  color: rgba(128, 128, 128, 0.705);
 }

@@ -68,6 +68,7 @@ const DebateRoom = () => {
 
     return () => {
       closeTracks()
+      AddActiveDebate(null)
     }
   }, [])
 
@@ -164,6 +165,7 @@ const DebateRoom = () => {
     if (!debateId) return;
     try {
       const res = await getDebateByIdApi(debateId)
+      console.log("the active debate ", res)
       if (res.status !== 200) throw Error(res.data.message)
       AddActiveDebate(res.data.message[0]);
     } catch (error) {
@@ -293,12 +295,13 @@ const DebateRoom = () => {
       <div className='DebateRoomWrapper' >
         <div className='debate_room_top_header'>
           <h1 className='Debate_room_main_text'>
-            <h1 className='main_text_one'>{isLive ? "ENJOY" : "NOT STARTED"}</h1> DABATEE  </h1>
+            <img width={"50px"} src="/images/error_dino.png" alt="dinosour" />
+            <h1 className='main_text_one'>  {isLive ? "ENJOY" : "NOT STARTED"}</h1>   </h1>
           <div className='round_text'>
             ROUND 0/{activeDebate?.noOfRounds}
           </div>
         </div>
-        <DebateScreenBox activeSpeakers={activeSpeakers} roomMembers={RoomMembers} />
+        <DebateScreenBox isLive={isLive} activeSpeakers={activeSpeakers} roomMembers={RoomMembers} />
         {
           isUserParticipant === null ? ".." : (isUserParticipant && isLive && WatchType === "PARTICIPANT") ? <DebateAction
             handleMicToggle={handleMicTogggle}

@@ -31,7 +31,9 @@
   gap: 0.6rem;
 }
 .debate_topic {
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: bold;
+
   color: rgb(14, 11, 61);
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -127,4 +129,18 @@
 .DebateCardWrapper .button svg {
   font-size: 14px;
   color: rgb(14, 11, 61);
+}
+.delete_debate_btn {
+  align-items: center;
+  display: flex;
+  color: white !important;
+  opacity: 0.8;
+  background-color: red !important;
+  transition: all 0.3s ease;
+}
+.delete_debate_btn:hover {
+  opacity: 1;
+}
+.delete_debate_btn svg {
+  font-size: 15px;
 }

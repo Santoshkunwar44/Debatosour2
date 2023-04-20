@@ -4,7 +4,7 @@ import { BsFillSendFill } from "react-icons/bs"
 import { MdKeyboardVoice } from 'react-icons/md';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 
-const MessageInput = ({ isLiveChat }) => {
+const MessageInput = ({ isLiveChat, handleSubmit }) => {
 
   const [voiceText, setVoiceText] = useState("");
   const {

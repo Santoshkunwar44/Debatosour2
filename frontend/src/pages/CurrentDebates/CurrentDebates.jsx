@@ -8,6 +8,9 @@ import { actionCreators } from "../../redux/store"
 import { useDispatch } from "react-redux"
 import './CurrentDebates.css'
 import { Enums } from "../../redux/action/actionTypes/Enumss"
+import Skeletonlay from "../../Layouts/Skeleton/Skeleton"
+import Skeleton from "../../Layouts/Skeleton/Skeleton"
+import NoLiveDebate from "../../Layouts/Debate/NoLiveDebate/NoLiveDebate"
 
 
 const CurrentDebates = () => {
@@ -73,7 +76,7 @@ const CurrentDebates = () => {
             theDebateArr ? theDebateArr.length > 0 ? theDebateArr.map(debate => (
 
               <DebateCard key={debate._id} debate={debate} isLive={currentDebateTab === "LIVE_TAB"} />
-            )) : <>NOT ONGOING DEBATES</> : <p>loading..</p>
+            )) : <><NoLiveDebate text={currentDebateTab === "LIVE_TAB" ? "No Live Debates" : "No Upcoming Debates"} /></> : <p><Skeleton type={"debate_card"} /></p>
           }
 
         </div>

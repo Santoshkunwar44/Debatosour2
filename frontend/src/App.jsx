@@ -2,7 +2,6 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { Navigate, Route, Routes } from "react-router-dom"
 import { bindActionCreators } from "redux";
-import { AppWrapper, GlobalWrapper } from './App.css'
 import Signup from "./pages/Auth/Signup/Signup";
 import ChatBot from "./pages/chatbot/ChatBot";
 import DebateRoom from "./pages/debateRoom/DebateRoom";
@@ -14,21 +13,22 @@ import Login from "./pages/Auth/Login/Login";
 import { Loader } from "./Layouts/Loader/Loader";
 import CurrentDebates from "./pages/CurrentDebates/CurrentDebates";
 import CreateDebate from "./pages/CreateDebate/CreateDebate";
+import "./App.css"
+import Profile from "./pages/profile/Profile";
 
 function App() {
   const { data } = useSelector((state) => state.user)
-  const { isLoading } = useSelector((state) => state.other)
+  const { isLoading, refresh } = useSelector((state) => state.other)
 
 
-  console.log("the user data", data)
-  console.log("is loading", isLoading)
 
   const dispatch = useDispatch()
+
   const { AddLoggedInUser, setIsLoading } = bindActionCreators(actionCreators, dispatch)
 
   useEffect(() => {
     fetchCurrentUser()
-  }, [])
+  }, [refresh])
 
   const fetchCurrentUser = async () => {
     setIsLoading(true)
@@ -47,7 +47,6 @@ function App() {
     }
 
   }
-  console.log(process.env.REACT_APP_BACKEND_URL)
 
   return (
     <>
@@ -64,9 +63,11 @@ function App() {
           <Route path="/live_debates" element={<CurrentDebates />} />
           <Route path="/chatbot" element={<ChatBot />} />
           <Route path="/create" element={<CreateDebate />} />
+          <Route path="/profile/:profileId" element={!data ? <Navigate to={"/login"} /> : <Profile />} />
           <Route path="/login" element={data ? <Navigate to={"/"} /> : <Login />} />
           <Route path="/signup" element={data ? <Navigate to={"/"} /> : <Signup />} />
           <Route path="/debate_room/:debateId" element={<DebateRoom />} />
+
         </Routes>
       </div>
 

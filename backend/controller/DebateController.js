@@ -34,7 +34,9 @@ class DebateController {
                 }).populate(['admin', "teams.members"]).sort({ "startTime": 1 })
 
             } else {
-                fetchedDebate = await DebateModel.find(searchQuery).populate(['admin', "teams.members"]).sort({ "startTime": 1 })
+                fetchedDebate = await DebateModel.find({
+                    ...searchQuery,
+                }).populate(['admin', "teams.members"]).sort({ "startTime": 1 })
 
             }
             res.status(200).json({ message: fetchedDebate, success: true })
@@ -61,6 +63,40 @@ class DebateController {
 
         } catch (error) {
             res.status(500).json({ message: error.message, sucess: false })
+        }
+    }
+
+    async deleteDebate(req, res) {
+        const { debateId } = req.params
+        try {
+            await DebateModel.findByIdAndDelete(debateId)
+            res.status(200).json({ message: "successfully deleted", success: true })
+        } catch (error) {
+            console.log(error.message)
+            res.status(500).json({ message: "Something went wrong", success: false })
+
+        }
+    }
+    async usersDebateCounts(req, res) {
+        const { userId } = req.params;
+
+        try {
+            const upcomingDebate = await DebateModel.find({
+                admin: userId,
+                startTime: { $gt: new Date() }
+            }).count()
+            const liveDebate = await DebateModel.find({
+                admin: userId,
+                $and: [
+                    { startTime: { $lt: new Date() } },
+                    { endTime: { $gt: new Date() } }
+                ]
+            }).count()
+            res.status(200).json({ message: { upcomingDebate, liveDebate }, success: true })
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: error, success: false })
+
         }
     }
 }

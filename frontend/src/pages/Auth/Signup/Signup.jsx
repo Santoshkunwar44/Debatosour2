@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AddLoggedInUser } from '../../../redux/action/actionCreators';
 import { RegisterUserApi } from '../../../utils/Api';
 import "../Auth.css"
+import AvatarCarousel from '../../../Layouts/Slider/Avatar/Avatar';
+
 
 
 
@@ -17,6 +19,7 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    avatar: "",
     others: {
       missingFields: [],
       error: ""
@@ -53,11 +56,11 @@ const Signup = () => {
         lastName: userDetails.lastName,
         password: userDetails.password,
         email: userDetails.email,
+        avatar: userDetails.avatar
       }
 
 
       const res = await RegisterUserApi(payloadData);
-      console.log(res)
       if (res.status === 200) {
         AddLoggedInUser(res.data.message)
         navigate("/")
@@ -105,10 +108,16 @@ const Signup = () => {
           <div className="right_hr"></div>
 
         </div>
+
+        <div className='auth_input_item'>
+
+          <label>Choose Avatar </label>
+          <AvatarCarousel currentAvatar={userDetails.avatar} onChange={handleInputChange} />
+        </div>
         <div className='form_wrapper'>
           <div className='single_item'>
 
-            <div className='input_item'>
+            <div className='auth_input_item'>
 
               <label>First Name</label>
               <input className="input_element" type="text" placeholder='First Name'
@@ -116,7 +125,7 @@ const Signup = () => {
                 onChange={(e) => handleInputChange("firstName", e.target.value)} />
 
             </div>
-            <div className='input_item'>
+            <div className='auth_input_item'>
 
               <label>Last Name</label>
               <input className="input_element" type="text" placeholder='Last Name'
@@ -125,7 +134,7 @@ const Signup = () => {
 
             </div>
           </div>
-          <div className='input_item'>
+          <div className='auth_input_item'>
 
             <label>Email</label>
             <input className="input_element" type="email" placeholder='Enter your email address'
@@ -135,7 +144,7 @@ const Signup = () => {
           </div>
           <div className="single_item">
 
-            <div className='input_item'>
+            <div className='auth_input_item'>
 
               <label>Password</label>
               <input className={`input_element ${userDetails?.password !== userDetails.confirmPassword ? "error_input" : ""}`} type="password" placeholder='Enter your password'
@@ -143,7 +152,7 @@ const Signup = () => {
                 onChange={(e) => handleInputChange("password", e.target.value)} />
 
             </div>
-            <div className='input_item'>
+            <div className='auth_input_item'>
 
               <label>Confirm Password</label>
               <input className={`input_element ${userDetails?.password !== userDetails.confirmPassword ? "error_input" : ""}`} type="password" placeholder='Confirm password'

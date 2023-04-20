@@ -104,3 +104,10 @@ export const AddStreamRef = (payload) => {
         })
     }
 }
+export const SetRefreshNow = () => {
+    return (dispatch) => {
+        dispatch({
+            type: ActionTypes.SET_REFRESH
+        })
+    }
+}

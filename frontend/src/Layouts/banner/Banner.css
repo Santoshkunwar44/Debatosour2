@@ -83,7 +83,7 @@
   font-weight: 700;
   color: rgb(14, 11, 61);
 }
-.secondary_main_text {
+.secondary_main_banner_text {
   color: rgb(14, 11, 61);
   text-align: center;
   width: 85%;
@@ -97,10 +97,11 @@
 }
 
 .banne_bottom_option_box {
-  width: 40%;
   text-align: center;
   display: flex;
   gap: 10px;
+  font-size: 14px;
+  letter-spacing: 1px;
   align-items: center;
   justify-content: space-between;
 }
@@ -116,9 +117,16 @@
   gap: 10px;
   padding: 0 10px;
   background-color: white;
-  border: 1px solid rgb(64 70 221);
+  border: 1px solid var(--primary_color);
+  font-size: 14px;
+  letter-spacing: 1px;
+  border-radius: 3px;
   outline: none;
-  color: rgb(64 70 221);
+  color: var(--primary_color);
+}
+.prepare_for_debate_btn:hover {
+  background-color: var(--primary_color);
+  color: white !important ;
 }
 
 .debate_link_box {
@@ -139,27 +147,30 @@
   outline: none;
   transform: skewX(350deg);
 }
-::placeholder {
+.BannerWrapper input::placeholder {
   color: #a3a3a3;
-
   font-size: 12px;
 }
 .banner_bottom_button_option_button {
-  border: 1px solid rgba(0, 0, 255, 0.527);
+  background-color: var(--primary_color);
+
   width: fit-content;
+  color: white;
+  letter-spacing: 1px;
   outline: none;
-  color: blue;
   display: flex;
+
   height: 45px;
   align-items: center;
   padding: 0 10px;
   border-radius: 4px;
   gap: 10px;
 }
-.banner_bottom_button_option_button :hover {
+.banner_bottom_button_option_button:hover {
+  background-color: var(--primary_dark_color);
 }
 .watch_button {
-  background-color: blue;
+  background-color: var(--primary_color);
   height: 100%;
   color: white;
   display: flex;
@@ -169,6 +180,6 @@
   transform: skewX(350deg);
   gap: 10px;
 }
-.watch_button svg {
-  font-size: 15px !important;
+.watch_button:hover {
+  background-color: var(--primary_dark_color);
 }

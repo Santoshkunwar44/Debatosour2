@@ -21,7 +21,7 @@ const Banner = () => {
         <div className="bottom_text">
           <h1 className="main_text_banner">
             a virtual debate for all <img className="quodium" src="/images/qodium.png" alt="quodium" />      </h1>
-          <p className="secondary_main_text">Debatasour lets a users to create a online debate and manages the audience  to watch the debate & provide  feedback to the debators. </p>
+          <p className="secondary_main_banner_text">Debatasour lets a users to create a online debate and manages the audience  to watch the debate & provide  feedback to the debators. </p>
 
         </div>
       </div>
@@ -41,7 +41,7 @@ const Banner = () => {
           <button className="prepare_for_debate_btn">
             <MdModelTraining />
             <p>
-              Prepare for Debate
+              Prepare For Debate
             </p>
           </button>
         </Link>

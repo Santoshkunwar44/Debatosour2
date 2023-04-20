@@ -1,29 +1,22 @@
-import { Avatar, AvatarGroup } from "@chakra-ui/react"
-import { MdOutlineViewInAr } from "react-icons/md"
+import { Avatar, AvatarGroup, useToast } from "@chakra-ui/react"
+import { MdDeleteOutline, MdOutlineViewInAr } from "react-icons/md"
 import { AiOutlineUsergroupAdd } from "react-icons/ai"
 import React, { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import moment from "moment"
 import { useSelector } from "react-redux"
 import { format } from "timeago.js"
 import "./DebateCard.css"
+import { deleteDebateApi } from "../../../utils/Api"
 
 const DebateCard = ({ debate, isLive }) => {
 
 
-  const [debateCardState, setDebateCardState] = useState(
-    {
-      timeLeft: {
-        hour: null,
-        minute: null,
-        second: null,
-      }
-    }
-  )
+  const location = useLocation().pathname.split("/")[1]
   const [isParticipant, setIsParticipant] = useState(null)
   const { data } = useSelector((state) => state.user)
   const [participants, setParticipants] = useState([]);
-
+  const toast = useToast()
   useEffect(() => {
 
     let isParticipant = debate.teams.some(team => team.members.some(member => member._id === data?._id))
@@ -51,7 +44,33 @@ const DebateCard = ({ debate, isLive }) => {
   }, [debate])
 
 
+  const handleDeleteDebate = async () => {
+    if (!debate?._id) return;
+    try {
+      const res = await deleteDebateApi(debate._id)
+      if (res.status === 200) {
+        toast({
+          description: "Debate deleted successfully",
+          status: 'success',
+          duration: 5000,
+          position: "top",
+          isClosable: true,
+        })
+      } else {
+        throw Error()
+      }
+    } catch (error) {
+      console.log(error)
+      toast({
+        description: "Something went wrong",
+        status: 'error',
+        duration: 5000,
+        position: "top",
+        isClosable: true,
+      })
 
+    }
+  }
 
   // Return a cleanup function to clear the interval when the component unmounts
 
@@ -123,6 +142,16 @@ const DebateCard = ({ debate, isLive }) => {
           {/* <span className="started_time">Started 3 hours ago</span>    */}
         </div>
         <div className="debate_button_box">
+          {
+            ((data?._id === debate?.admin?._id) && location === "profile") && <button onClick={handleDeleteDebate} className="delete_debate_btn">
+              <MdDeleteOutline />
+              <p>
+                Delete
+              </p>
+
+            </button>
+          }
+
           <Link to={`/debate_room/${debate?._id}?audience=${true}`}>
             <button> <MdOutlineViewInAr /> <p> {isLive ? "Watch" : "View Debate"} </p> </button>
           </Link>

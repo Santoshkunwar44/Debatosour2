@@ -100,13 +100,13 @@ const Login = () => {
         </div>
         <div className='form_wrapper'>
 
-          <div className='input_item'>
+          <div className='auth_input_item'>
 
             <label>Email</label>
             <input className="input_element" type="email" placeholder='Enter  your email address' value={loginData.data.email} onChange={(e) => handleInputChange("email", e.target.value)} />
 
           </div>
-          <div className='input_item'>
+          <div className='auth_input_item'>
 
             <label>Password</label>
             <input className="input_element" type="password" placeholder='Enter  your  password' value={loginData.data.password} onChange={(e) => handleInputChange("password", e.target.value)} />

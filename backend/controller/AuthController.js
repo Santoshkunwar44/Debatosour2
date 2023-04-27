@@ -48,7 +48,7 @@ class AuthController {
                     ...userExist._doc,
                     lastLoggedIn
                 }
-                req.session.save()
+               
                 res.status(200).json({ message: { ...userExist._doc, lastLoggedIn }, success: true })
             } else {
                 res.status(403).json({ message: "invalid credentails", success: false })

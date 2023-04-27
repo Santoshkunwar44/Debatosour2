@@ -58,7 +58,7 @@ app.use(session({
         secure: true,
         maxAge: 31556952000,
         httpOnly: true,
-        samesite:"none"
+        sameSite:"none"
     },
 }))
 // middlewares

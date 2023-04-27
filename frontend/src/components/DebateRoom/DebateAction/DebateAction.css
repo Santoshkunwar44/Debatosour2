@@ -1,14 +1,40 @@
 .DebateActionWrapper {
-  width: 40%;
   height: 50px;
   border-radius: 3px;
   display: flex;
   justify-content: center;
   backdrop-filter: blur(20px);
-  margin: auto;
   gap: 2rem;
   background: var(--primary_secondary_gradient_bg);
   align-items: center;
+  padding: 0 3rem;
+}
+.debateActionContainer{
+  width: 100%;
+  gap: 2rem;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.copy_link_button{
+  display: flex;
+  align-items: center;
+  background:var(--dark_gradient_bg);
+  height: 45px;
+gap: 10px;
+  border-radius: 3px;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: rgba(0, 0, 0, 0.747);
+  padding:  0 1rem;
+  outline: none;
+
+transition: all .3s;
+}
+.copy_link_button:hover , .copy_link_button:active{
+  scale: 1.03;
+  background:var(--secondary_gradient_bg) !important;
 }
 .DebateActionWrapper svg {
   font-size: 1.52rem;

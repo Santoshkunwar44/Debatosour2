@@ -67,7 +67,6 @@ const TeamForm = ({ team, index, handleTeamName, setDebateForm, debateForm }) =>
     }))
   }
 
-  console.log(participantsSearchInput)
 
   return (
     <div className='teamFormWrapper' pinkBg={index === 1 ? true : false}>
@@ -81,7 +80,7 @@ const TeamForm = ({ team, index, handleTeamName, setDebateForm, debateForm }) =>
           <input type="text" placeholder='Add member...' className='addMember_input' onChange={(e) => setParticipantsSearchInput(e.target.value)} value={participantsSearchInput} />
           {
 
-            participantsSearchInput.length > 0 && <GrClose onClick={() => setParticipantsSearchInput("")} />
+            participantsSearchInput.length > 0 && <GrClose className={"searchUserSvgClose"} onClick={() => setParticipantsSearchInput("")} />
           }
         </div>
       </div>

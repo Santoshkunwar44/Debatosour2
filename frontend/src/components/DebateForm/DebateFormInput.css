@@ -141,11 +141,11 @@ h2 {
 .active_duration {
   scale: 1;
   opacity: 1;
-  background-color: var(--primary_color);
+  background-color: var(--primary_color) !important;
   border: none;
   color: white;
 }
-.active_duration :hover {
+.active_duration:hover {
   background-color: rgb(56 64 239);
 }
 .starting_time_item {

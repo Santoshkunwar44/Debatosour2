@@ -12,18 +12,18 @@ import { Link } from "react-router-dom"
 
 const UserProfile = ({ children, userId }) => {
     return (
-        <Popover placement={"right-end"}>
+        <Popover placement={"right-end"} >
             <PopoverTrigger>
 
                 <span>{children}</span>
 
             </PopoverTrigger>
-            <Portal>
-                <PopoverContent>
+            <Portal > 
+                <PopoverContent  >
                     <PopoverArrow />
                     {/* <PopoverHeader>Santosh kuwnwar</PopoverHeader> */}
                     <PopoverCloseButton />
-                    <PopoverBody>
+                    <PopoverBody >
                         <Link to={`/profile/${userId}`}>
                             <Button className='profile_popover_button' width={"full"} colorScheme='blue'>View Profile</Button>
                         </Link>

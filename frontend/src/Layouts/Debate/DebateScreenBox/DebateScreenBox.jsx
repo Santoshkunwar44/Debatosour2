@@ -4,15 +4,16 @@ import "./DebateScreenBox.css"
 import { useEffect, useState } from 'react';
 import NotStartedView from '../DebatorView/NotStartedView/NotStartedView';
 import NoneJoined from '../NoneJoined/NoneJoined';
+import DebateScreenSkeleton from "../../Skeleton/DebateScreenBox/DebateScreenSkeleton"
 
-const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive }) => {
+const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive  ,isNotWatch,isUserParticipant}) => {
   const { activeDebate, activeParticipants } = useSelector((state) => state.debate);
 
 
   const [teams, setTeams] = useState([])
+  useEffect(()=>{
 
-
-
+  },[teams])
   useEffect(() => {
 
     if (activeDebate) {
@@ -66,6 +67,8 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive }) => {
       setTeams(TeamArray)
     }
   }, [activeDebate, roomMembers])
+
+
   return (
 
     <div className="DebateScreenBoxWrapper">
@@ -81,14 +84,15 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive }) => {
               </div>
               <div className="left_team">
                 {
+                  isLive ?    teams[0] &&    teams[0]?.members?.length > 0 ? teams[0]?.members?.map((mem) => (
 
-                  isLive ?
+                    <DebatorView activeSpeakers={activeSpeakers} debator={mem} key={mem.id} />
 
-                    teams[0] && teams[0].members.map((mem) => (
-
-                      <DebatorView activeSpeakers={activeSpeakers} debator={mem} key={mem.id} />
-
-                    )) : <NotStartedView team={activeDebate?.teams[0]?.members} />
+                  ))  :  <NoneJoined team={teams[0]} /> :""
+                }
+                {
+               !isLive &&
+                 <NotStartedView team={activeDebate?.teams[0]?.members} />
                 }
 
               </div>
@@ -100,16 +104,19 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive }) => {
               </div>
               <div className="right_team">
                 {
-                  isLive ? teams[1] && teams[1].members.length > 0 ? teams[1]?.members.map((member) => (
+                  isLive ? teams[1]   &&     teams[1]?.members?.length > 0 ? teams[1]?.members?.map((member) => (
                     <DebatorView pink={true} activeSpeakers={activeSpeakers} debator={member} key={member._id} />
-                  )) : <NoneJoined team={teams[1]} /> : <NotStartedView pink={true} team={activeDebate?.teams[1]?.members} />
+                  )) : <NoneJoined team={teams[1]} />  :""
+                }
+                {
+                  !isLive && <NotStartedView pink={true} team={activeDebate?.teams[1]?.members} />
                 }
               </div>
             </div>
           </>
 
           :
-          <p>loading..</p>
+          <DebateScreenSkeleton/>
       }
 
 

@@ -36,3 +36,20 @@
   font-size: 12px;
   color: rgba(128, 128, 128, 0.705);
 }
+.search_user_input{
+  display: flex;
+  position: relative;
+  align-items: center;
+
+}
+.searchUserSvgClose {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  right: 8px;
+  font-size: 13px;
+  cursor: pointer;
+
+
+}

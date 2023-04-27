@@ -15,11 +15,12 @@ import CurrentDebates from "./pages/CurrentDebates/CurrentDebates";
 import CreateDebate from "./pages/CreateDebate/CreateDebate";
 import "./App.css"
 import Profile from "./pages/profile/Profile";
+import  Watchnow from "./pages/WatchNow/Watchnow";
 
 function App() {
   const { data } = useSelector((state) => state.user)
   const { isLoading, refresh } = useSelector((state) => state.other)
-
+  const { roomLoading} = useSelector((state) => state.debate);
 
 
   const dispatch = useDispatch()
@@ -48,15 +49,17 @@ function App() {
 
   }
 
+
   return (
     <>
       <div className="App">
 
 
         {
-          isLoading && <Loader />
-
-
+          isLoading ? <Loader /> :""
+        }
+        {
+          roomLoading ? <Loader/> :""
         }
         <Routes>
           <Route path="" element={<Home />} />
@@ -67,6 +70,7 @@ function App() {
           <Route path="/login" element={data ? <Navigate to={"/"} /> : <Login />} />
           <Route path="/signup" element={data ? <Navigate to={"/"} /> : <Signup />} />
           <Route path="/debate_room/:debateId" element={<DebateRoom />} />
+          <Route path="/watch" element={<Watchnow />} />
 
         </Routes>
       </div>

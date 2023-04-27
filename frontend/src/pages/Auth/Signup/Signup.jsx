@@ -77,6 +77,14 @@ const Signup = () => {
       }
     } catch (error) {
       console.log(error)
+      toast({
+        title: 'Register Failed.',
+        description: "Something went wrong",
+        status: 'error',
+        duration: 5000,
+        position: "top",
+        isClosable: true,
+      })
     }
 
   }

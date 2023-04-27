@@ -5,6 +5,7 @@ const mongoose = require("mongoose")
 const User = {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+
     required: true
 }
 
@@ -28,7 +29,8 @@ const Team = {
     lose: {
         type: String,
         default: 0
-    }
+    },
+
 
 
 }
@@ -36,6 +38,7 @@ const Team = {
 const MongooseSchema = mongoose.Schema({
     topic: {
         type: String,
+        unique:true,
         required: [true, "Debate title 'title' is required"],
         min: [5, "Title should be at least 5 characters long"],
         max: [100, "Title should be at most 100 characters long"]
@@ -67,6 +70,7 @@ const MongooseSchema = mongoose.Schema({
     teams: [
         Team,
     ],
+    joinedParticipants:[ User  ],
     type: {
         type: String,
         required: [true, 'debate type is required']

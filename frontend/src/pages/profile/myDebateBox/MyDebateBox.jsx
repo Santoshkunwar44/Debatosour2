@@ -6,7 +6,7 @@ import DebateCardSkeleton from '../../../Layouts/Skeleton/DebateSkeleton/DebateC
 import NoLiveDebate from '../../../Layouts/Debate/NoLiveDebate/NoLiveDebate'
 import { useParams } from 'react-router-dom'
 
-const MyDebateBox = () => {
+const MyDebateBox = ({own}) => {
 
     const [debatesArr, setDebatesArr] = useState(null);
     const { profileId } = useParams()
@@ -35,7 +35,7 @@ const MyDebateBox = () => {
 
                 debatesArr ? debatesArr.length > 0 ? debatesArr.map((debate) => (
                     <DebateCard debate={debate} />
-                )) : <NoLiveDebate text={"You have no upcoming debates"} buttonText={"createNow"} btnLink="/create" /> : <DebateCardSkeleton />
+                )) : <NoLiveDebate  show_btn={own} text={`No upcoming debates`} buttonText={"createNow"} btnLink="/create" /> : <DebateCardSkeleton />
 
             }
         </div>

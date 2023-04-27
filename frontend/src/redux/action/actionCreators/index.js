@@ -26,6 +26,7 @@ export const AddToastRef = (toastRef) => {
     }
 }
 export const setIsLoading = (isLoading) => {
+    console.log("loading action",isLoading)
     return (dispatch) => {
         if (isLoading) {
 
@@ -108,6 +109,14 @@ export const SetRefreshNow = () => {
     return (dispatch) => {
         dispatch({
             type: ActionTypes.SET_REFRESH
+        })
+    }
+}
+export const SetRoomLoading = (payload) => {
+    return (dispatch) => {
+        dispatch({
+            type: ActionTypes.SET_ROOM_LOADING,
+            payload
         })
     }
 }

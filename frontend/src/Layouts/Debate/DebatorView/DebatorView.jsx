@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { BsFillMicFill, BsFillMicMuteFill } from 'react-icons/bs'
 import "./DebatorView.css"
+import UserProfile from "../../popovers/viewprofile/UserProfile"
 
 const DebatorView = ({ debator, activeSpeakers, pink }) => {
 
@@ -24,8 +25,9 @@ const DebatorView = ({ debator, activeSpeakers, pink }) => {
 
 
   return (
-    <div className={`debatorViewWrapper ${pink ? "pink" : "blue"} ${isSpeaking ? "isSpeaking" : ""} `}>
+      <UserProfile userId={debator?.id}>
 
+    <div className={`debatorViewWrapper ${pink ? "pink" : "blue"} ${isSpeaking ? "isSpeaking" : ""} `}>
       <img referrerPolicy="no-referrer" className='debator_img' src={debator.avatar} alt="userImg" />
       <p className='debator_name' > {debator.username} </p >
       <div className='action_button_box'>
@@ -35,6 +37,7 @@ const DebatorView = ({ debator, activeSpeakers, pink }) => {
 
       </div>
     </div>
+        </UserProfile>
   )
 }
 

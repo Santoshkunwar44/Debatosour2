@@ -26,6 +26,7 @@
     "html-duration-picker": "^2.4.0",
     "moment": "^2.29.4",
     "react": "^18.2.0",
+    "react-copy-to-clipboard": "^5.1.0",
     "react-datepicker": "^4.10.0",
     "react-dom": "^18.2.0",
     "react-duration-picker": "^1.1.1",

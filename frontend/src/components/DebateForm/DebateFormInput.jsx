@@ -126,7 +126,6 @@ const DebateFormInput = () => {
     }
 
     const isValid = handleFormValidate(thePayload)
-    console.log(isValid)
     let teamMebersCount = thePayload.teams.reduce((acc, item) => {
 
       let theLen = item.members.length

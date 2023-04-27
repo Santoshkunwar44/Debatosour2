@@ -51,7 +51,7 @@ const Profile = () => {
                             <p> <b>Note :</b> The Debate  which is already ended are deleted from our database.So it is not shown anymore. </p>
                         </div>
                     </div>
-                    <MyDebateBox />
+                    <MyDebateBox own={profileId === data?._id } />
                 </div>
 
 

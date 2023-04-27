@@ -95,7 +95,7 @@ const DebateCard = ({ debate, isLive }) => {
           <div className="debate_details_left">
 
             <div className="info_key">
-              <p>Debate Type</p>  <p className="info_value">  British Parliamentary </p>
+              <p>Debate Type</p>  <p className="info_value"> {debate.type}</p>
               {/* British Parliamentary */}
               {/* ,WSDC, Public forum, Lincoln–Douglas  */}
             </div>

@@ -22,8 +22,9 @@ export const getDebateOfUserApi = (userId) => axiosInstance.get(`/debate?admin=$
 export const getAgoraTokenApi = ({ channelName, role, tokentype, uid, expiry }) => axiosInstance.get(`/auth/rte/${channelName}/${role}/${tokentype}/${uid}/?expiry=${expiry}`)
 export const deleteDebateApi = (debateId) => axiosInstance.delete(`/debate/${debateId}`)
 export const getUsersDebateCountApi = (userId) => axiosInstance.get(`/debate/counts/${userId}`)
-
-
+export const joinParticipantApi =(debateId,data)=>axiosInstance.post(`/debate/joinParticipant/${debateId}`,data)
+export const removeParticipantApi =(debateId,data)=>axiosInstance.post(`/debate/removeParticipant/${debateId}`,data)
+export const getSingleDebateApi =(debateId) =>axiosInstance.get(`/debate/singleDebate/${debateId}`)
 // chat bot api
 
 export const getBotMessageApi = (data) => axiosInstance.post("/chatbot", data);

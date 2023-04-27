@@ -137,6 +137,9 @@
   display: flex;
   gap: 10px;
 }
+.debate_link_box input{
+  font-size: 13px !important; 
+}
 .BannerWrapper input {
   height: 100%;
   flex: 1;
@@ -182,4 +185,7 @@
 }
 .watch_button:hover {
   background-color: var(--primary_dark_color);
+}
+.disable_watch_button_banner{
+  opacity: 0.8;
 }

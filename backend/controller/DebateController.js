@@ -1,4 +1,5 @@
 const DebateModel = require("../models/DebateModel");
+const ObjectId = require('mongoose').Types.ObjectId;
 
 class DebateController {
     async createDebate(req, res) {
@@ -27,16 +28,22 @@ class DebateController {
                         { endTime: { $gt: new Date() } }
                     ]
 
-                }).populate(["admin", "teams.members"])
+                }).populate(["admin", "teams.members","joinedParticipants"])
             } else if (req.query.upcoming) {
                 fetchedDebate = await DebateModel.find({
                     startTime: { $gt: new Date() }
-                }).populate(['admin', "teams.members"]).sort({ "startTime": 1 })
+                }).populate(['admin', "teams.members","joinedParticipants"]).sort({ "startTime": 1 })
 
             } else {
                 fetchedDebate = await DebateModel.find({
                     ...searchQuery,
-                }).populate(['admin', "teams.members"]).sort({ "startTime": 1 })
+                    $and:[
+                        {
+                            endTime:{$gt:new Date()},
+                             
+                        }
+                    ]
+                }).populate(['admin', "teams.members","joinedParticipants"]).sort({ "startTime": 1 })
 
             }
             res.status(200).json({ message: fetchedDebate, success: true })
@@ -97,6 +104,72 @@ class DebateController {
             console.log(error)
             res.status(500).json({ message: error, success: false })
 
+        }
+    }
+    async  joinedParticipant(req,res){
+        const {debateId} = req.params;
+        const {participantId} = req.body;
+        try {
+            if(!debateId || !participantId){
+                throw Error("fill all the fields");
+            }
+
+          const  debate = await DebateModel.findById(debateId);
+          console.log(debate.joinedParticipants)
+          if(debate.joinedParticipants.includes(participantId)){
+                    throw Error("User is already joined")
+          }      
+          await  DebateModel.findByIdAndUpdate(debateId,{
+                $push:{
+                    joinedParticipants:participantId
+                }
+            })
+            res.status(200).json({message:"successfully added the participant",success:true})
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({message:"failed to add the participant",success:false})
+            
+        }
+    }
+    async  removeParticipant(req,res){
+        const {debateId} = req.params;
+        const {participantId} = req.body;
+        try {
+            if(!debateId || !participantId){
+                throw Error("fill all the fields");
+            }
+          await  DebateModel.findByIdAndUpdate(debateId,{
+                $pull:{
+                    joinedParticipants:participantId
+                }
+            })
+            res.status(200).json({message:"successfully removed the participant",success:true})
+        } catch (error) {
+            res.status(500).json({message:"failed to remove the participant",success:false})
+            
+        }
+    }
+
+    async getSingleDebate(req,res){
+        try {
+                const {debateId} = req.params
+                let isEnded = false
+                if(!ObjectId.isValid(debateId)){
+                  return res.status(401).json({message:"Invalid link",success:false})
+
+                }
+                if(!debateId)throw Error("invalid credentails");
+                const singleDebate = await DebateModel.findById(debateId).populate(['admin', "teams.members","joinedParticipants"]);
+                console.log(singleDebate)
+                if(Date.now()   >= singleDebate?.endTime ){
+                isEnded = true;
+                }
+                return res.status(200).json({message:{debate:singleDebate,isEnded},success:true})
+            } catch (error) {
+                console.log(error)
+              
+            return res.status(500).json({message:error.message,success:false})
+            
         }
     }
 }

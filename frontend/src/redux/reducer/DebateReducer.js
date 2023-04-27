@@ -7,6 +7,7 @@ const INITIAL_DEBATE_STATE={
     isLive:null ,
     activeParticipants:[],
     streamRef:null,
+    roomLoading:false,
 }
 
 const DebateReducer=(state=INITIAL_DEBATE_STATE,action)=>{   
@@ -34,6 +35,9 @@ const DebateReducer=(state=INITIAL_DEBATE_STATE,action)=>{
             return {...state,activeParticipants:action.payload}
          case ActionTypes.ADD_STREAM_REF:
             return {...state,streamRef:action.payload}
+        
+        case  ActionTypes.SET_ROOM_LOADING:
+            return {...state,roomLoading:action.payload}
         
         default:
             return state;

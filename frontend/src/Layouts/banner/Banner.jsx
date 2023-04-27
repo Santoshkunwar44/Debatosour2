@@ -1,17 +1,54 @@
 import { MdOutlineAdd, MdModelTraining } from "react-icons/md";
 import { HiOutlineViewfinderCircle } from "react-icons/hi2";
 import { Link } from "react-router-dom";
-import "./Banner.css"
+import {useState ,useEffect} from "react";
+import {useNavigate} from "react-router-dom"
+import { useToast } from '@chakra-ui/react';
+import "./Banner.css";
 const Banner = () => {
 
+ const [debateLink, setdebateLink] = useState("")
+ const [ validLink,setValidLink] =useState(false  )
+ const navigate = useNavigate()
+ const toast = useToast()
 
+
+  useEffect(() => {
+
+   let id =   debateLink?.split("?")[1]?.split("=")[1]
+  if(id){
+    setValidLink(true)
+  }else{
+    setValidLink(false)
+  }
+
+  }, [debateLink])
+  
+
+const handleWatch =()=>{
+if(!validLink){
+  toast({
+    title:"",
+    description: "Invalid Debate Link",
+    status: 'error',
+    duration: 5000,
+    position: "top",
+    isClosable: true,
+  })
+  return ;
+}
+  if(debateLink){
+   let debateId = debateLink.split("=")[1]
+    navigate(`/watch?debateId=${debateId}`)
+  }
+}
   return (
     <div className="BannerWrapper">
       <div className="banner_bg_image">
 
         <img className="cartoon_speech" src="/images/cartoon_speech.png" alt="dinasourImg" />
-        {/* <img  className="speaker_img" src="/images/speech.png" alt="speaker" /> */}
-        <img className="hello_dinasour" src="/images/dinasour_hello.png" alt="debateImage" />
+ 
+        {/* <img className="hello_dinasour" src="/images/dinasour_hello.png" alt="debateImage" /> */}
 
 
       </div>
@@ -50,10 +87,10 @@ const Banner = () => {
       </div>
       <div className="debate_link_box">
 
-        <input type="text" placeholder="Enter or paste link of debate" />
-        <Link to={"/debate_room/34"}>
-          <button className="watch_button">  <HiOutlineViewfinderCircle className="watch_icon" /> WATCH</button>
-        </Link>
+        <input type="text" value={debateLink} onChange={(e)=>setdebateLink(e.target.value)} placeholder="Enter or paste link of debate"  />
+
+          <button onClick={handleWatch} className={`watch_button ${!validLink && "disable_watch_button_banner" }`}>  <HiOutlineViewfinderCircle className="watch_icon" /> WATCH</button>
+
 
       </div>
     </div>

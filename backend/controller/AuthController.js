@@ -21,7 +21,7 @@ class AuthController {
 
             }
 
-            return res.json({ message: savedUser, success: true })
+            return res.status(200).json({ message: savedUser, success: true })
         } catch (error) {
             return res.status(500).json({ message: error.message, success: false })
         }

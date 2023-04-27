@@ -28,7 +28,6 @@ const Login = () => {
       ...prev, data: { ...prev.data, [name]: value }
     }))
   }
-  console.log(process.env.REACT_APP_BACKEND_URL)
 
 
   const handleLogin = async () => {

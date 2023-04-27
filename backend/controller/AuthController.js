@@ -20,7 +20,7 @@ class AuthController {
                 ...savedUser._doc
 
             }
-            console.log(req.session)
+
             return res.json({ message: savedUser, success: true })
         } catch (error) {
             return res.status(500).json({ message: error.message, success: false })

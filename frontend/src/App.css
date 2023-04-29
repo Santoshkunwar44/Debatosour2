@@ -9,6 +9,7 @@
 
 :root {
   --dark_primary_text_color: rgb(14, 11, 61);
+  --dark_primary_text_color_hover:rgba(14, 11, 61, 0.774);
   --light_primary_text_color: #625959;
   --dark_gradient_bg: linear-gradient(
     45deg,
@@ -29,7 +30,7 @@
     ),
     #f709af05;
   --primary_secondary_gradient_bg: linear-gradient(
-    45deg,
+    70deg,
     #f709af1a,
     rgba(64, 70, 221, 0.12)
   );

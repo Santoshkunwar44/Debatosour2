@@ -6,6 +6,7 @@ import TeamForm from './TeamForm/TeamForm'
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from 'react-router-dom'
+import DebateInformation from "./DebateInformation.jsx"
 import './DebateFormInput.css'
 
 
@@ -18,7 +19,8 @@ const DebateFormInput = () => {
   })
   const [durationType, setDurationType] = useState("Set Duration");
   const [instantDebateTimes, setInstantDebateTimes] = useState("1Minute")
-  const [startTime, setStartTime] = useState(new Date())
+  const [startTime, setStartTime] = useState(new Date());
+  const [formLevel,setFormLevel] =useState(0);
   const [debateForm, setDebateForm] = useState({
     topic: "",
     type: "",
@@ -27,6 +29,7 @@ const DebateFormInput = () => {
     admin: data,
     duration: 0,
     endTime: 0,
+    team_format:"",
     teams: [
       {
         name: "",
@@ -38,8 +41,11 @@ const DebateFormInput = () => {
       },
     ]
   })
+
   const navigate = useNavigate()
   const toast = useToast()
+
+
 
   useEffect(() => {
     if (durationType === "Instant Debate") {
@@ -51,13 +57,54 @@ const DebateFormInput = () => {
 
     }
   }, [durationType])
-
+useEffect(()=>{
+  if(!data)return ;
+  setDebateForm((prev)=>({
+    ...prev, admin:data?._id
+  }))
+},[data])
   useEffect(() => {
     let durationInMs = 1000 * 60 * ((duration.hour * 60) + (duration.minute))
     setDebateForm((prev) => ({
       ...prev, duration: durationInMs
     }))
   }, [duration])
+  useEffect(()=>{
+
+
+    checkIsDebateInputCompleted()
+
+    if(debateForm.type==="Lincoln–Douglas"){
+
+        setDebateForm((prev)=>({
+          ...prev, 
+          team_format:"1"
+        }))
+
+    }else if(debateForm.type ==="British Parliamentary"){
+      if(debateForm.team_format === "1"){
+      setDebateForm((prev)=>({
+        ...prev, 
+        team_format:"2"
+      }))
+      }
+
+    }
+
+  },[debateForm]);
+
+  const checkIsDebateInputCompleted=()=>{
+    let missing= false ;
+    for(let key in debateForm){
+      if(!debateForm[key] && key !=="teams" && key !=="endTime" ){
+         missing = true;
+         console.log("missing",key)
+      }
+    }
+    if(!missing){
+      setFormLevel(1)
+    }
+  }
   const handleTeamName = (event, teamIndex) => {
     setDebateForm((prev) => ({
       ...prev, teams: prev.teams.map((team, index) => {
@@ -333,6 +380,17 @@ const DebateFormInput = () => {
 
             </select>
           </div>
+          <div className='input_item'>
+            <label className="form_label">Team format</label>
+            <select value={debateForm.team_format}  name='team_format' onChange={handleInputChange}>
+              <option value=""  disabled selected>team format</option>
+              <option value="2">2 vs 2 </option>
+              <option disabled={debateForm.type==="British Parliamentary"} value="1">1 vs 1</option>
+
+              <option value="4">4 vs 4</option>
+
+            </select>
+          </div>
 
 
         </div>
@@ -397,20 +455,29 @@ const DebateFormInput = () => {
           </div>
         </div>
       </div>
-      <div className='team_box_container'>
+
+            <DebateInformation debateType={debateForm.type}/>
+
+      <div className={`team_box_container ${formLevel !== 1 && "disable_team_box_container_form" } `}>
 
         <div className='lable_row'>
           <label className="header_text_with_bg">ADD TEAM MEMBERS</label>
           <div className='team_info_text'>
+        {
 
-            <span>Members must be registed in this site</span>
-            <span>Maximum 4 member in a team</span>
+         formLevel === 0 && <span className="red_info">Fill the above debate information to add teams</span>
+        } 
+            <span >Members must be registed in this site</span>
           </div>
         </div>
         <div className="team_wrapper_box">
 
           {
-            debateForm.teams.map((team, index) => <TeamForm debateForm={debateForm} setDebateForm={setDebateForm} handleTeamName={handleTeamName} team={team} index={index} key={index} />)}
+            debateForm.teams.map((team, index) => <TeamForm
+             debateForm={debateForm}
+              setDebateForm={setDebateForm} 
+              handleTeamName={handleTeamName}
+               team={team} index={index} key={index} />)}
         </div>
 
       </div>

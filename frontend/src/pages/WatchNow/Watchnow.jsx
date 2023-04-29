@@ -104,7 +104,7 @@ console.log(linkError)
 
       </div>
 
-      )) :<p className="watch_now_no_one_text">No one is in the room 🚫</p> : "loading"
+      )) : isLive && <p className="watch_now_no_one_text">No one is in the room 🚫</p> : "loading"
     }
     {
      linkError ?  <h1>INVALID LINK</h1> :""

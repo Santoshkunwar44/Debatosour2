@@ -264,12 +264,14 @@ h2 {
   font-weight: bold;
 }
 .team_info_text span {
-  font-size: 11px;
+  font-size: 10px;
   color: gray;
-  color: #673ab7;
+  font-weight: 300;
   letter-spacing: 0.71px;
 }
-
+.team_info_text .red_info{
+  color: rgba(255, 0, 0, 0.845);
+}
 .create_debate_btn {
   background-color: rgb(64, 70, 221);
   height: 40px;
@@ -295,4 +297,30 @@ h2 {
   padding: 10px;
   font-size: 12px;
   border-radius: 3px;
+}
+.debateInformationBox{
+  padding: 2rem 1rem;
+  border-radius: 10px;
+  background: var(--primary_secondary_gradient_bg) !important;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+.debateInformationBox b{
+  font-weight: bold;
+  
+  text-transform: uppercase;
+  margin-bottom: 0.51rem;
+  color: var(--primary_color);
+  letter-spacing: 0.81px;
+}
+.debateInformation_box_desc{
+  font-size: 12px ;
+  color: gray;
+  line-height: 25px;
+}
+.disable_team_box_container_form{
+  opacity: 1;
+  pointer-events: none;
+  backdrop-filter: blur(1px);
 }

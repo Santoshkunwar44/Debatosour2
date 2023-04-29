@@ -5,20 +5,15 @@ import { useEffect, useState } from 'react';
 import NotStartedView from '../DebatorView/NotStartedView/NotStartedView';
 import NoneJoined from '../NoneJoined/NoneJoined';
 import DebateScreenSkeleton from "../../Skeleton/DebateScreenBox/DebateScreenSkeleton"
+import {TbMicrophone2} from "react-icons/tb"
 
-const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive  ,isNotWatch,isUserParticipant}) => {
+const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive  ,isNotWatch,isUserParticipant ,activeMicControlTeam}) => {
   const { activeDebate, activeParticipants } = useSelector((state) => state.debate);
 
-
   const [teams, setTeams] = useState([])
-  useEffect(()=>{
-
-  },[teams])
+ 
   useEffect(() => {
-
     if (activeDebate) {
-
-
       let speakerTeams = roomMembers.filter(speaker => {
         return activeDebate.teams.some(team => {
           return team.members.some(member => {
@@ -80,11 +75,15 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive  ,isNotWatch,isUs
               <div className='screen_box_header'>
 
                 <h4 className='team_name teamOne'>{teams[0]?.name}</h4>
+              {
+                activeMicControlTeam?.name === teams[0]?.name && <div className="mic_control_wrapper">
+                    <TbMicrophone2 className={"team_mic_icon"}/></div>
+              } 
 
               </div>
               <div className="left_team">
                 {
-                  isLive ?    teams[0] &&    teams[0]?.members?.length > 0 ? teams[0]?.members?.map((mem) => (
+                  isLive ? teams[0] && teams[0]?.members?.length > 0 ? teams[0]?.members?.map((mem) => (
 
                     <DebatorView activeSpeakers={activeSpeakers} debator={mem} key={mem.id} />
 
@@ -100,6 +99,11 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive  ,isNotWatch,isUs
             <div className='box_wrappers pink_wrapper'>
 
               <div className='screen_box_header'>
+              {
+                activeMicControlTeam?.name === teams[1]?.name &&   
+                <div className="mic_control_wrapper"> <TbMicrophone2 className={"team_mic_icon"}/>
+                </div>
+              } 
                 <div className='team_name teamTwo'> {teams[1]?.name}</div>
               </div>
               <div className="right_team">

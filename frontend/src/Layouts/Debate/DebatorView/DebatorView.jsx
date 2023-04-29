@@ -30,12 +30,11 @@ const DebatorView = ({ debator, activeSpeakers, pink }) => {
     <div className={`debatorViewWrapper ${pink ? "pink" : "blue"} ${isSpeaking ? "isSpeaking" : ""} `}>
       <img referrerPolicy="no-referrer" className='debator_img' src={debator.avatar} alt="userImg" />
       <p className='debator_name' > {debator.username} </p >
-      <div className='action_button_box'>
+      {/* <div className='action_button_box'>
         {
           isSpeaking ? <BsFillMicFill /> : <BsFillMicMuteFill />
         }
-
-      </div>
+      </div> */}
     </div>
         </UserProfile>
   )

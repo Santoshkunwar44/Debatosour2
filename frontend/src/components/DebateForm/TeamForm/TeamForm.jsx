@@ -13,35 +13,13 @@ const TeamForm = ({ team, index, handleTeamName, setDebateForm, debateForm }) =>
 
 
   const toast = useToast()
+  const [participantsSearchInput, setParticipantsSearchInput] = useState("")
   const handleSelectParticipants = (user, teamIndex) => {
-
     // setDebateForm
-    let debateTeams = debateForm.teams;
-    let isFull = debateForm.teams[index].members.length >= 4;
-    if (isFull) {
-      toast({
-        description: "Only 4 members is allowed in a team",
-        status: 'error',
-        duration: 3000,
-        position: "top",
-        isClosable: true,
-      })
-      return;
-    }
-    const exist = debateTeams.filter(team => team.members.find(teamMember => teamMember._id === user._id))
+   
+    const valid = handleTeamParticipantsValidation(user,teamIndex)
 
-    if (exist.length > 0) {
-      toast({
-        description: "This user is already in a team",
-        status: 'error',
-        duration: 3000,
-        position: "top",
-        isClosable: true,
-      })
-      return;
-    }
-
-
+    if(!valid)return;
 
     setDebateForm((prev) => ({
 
@@ -57,7 +35,7 @@ const TeamForm = ({ team, index, handleTeamName, setDebateForm, debateForm }) =>
       })
     }))
   }
-  const [participantsSearchInput, setParticipantsSearchInput] = useState("")
+
   const removeSelectedParticipants = (user, teamIndex) => {
     let debateTeam = debateForm.teams;
     //  let filteredDebateTeam= debateTeam.map(team=>  team.members.filter(teamMember=>teamMember._id !== user._id))
@@ -65,6 +43,66 @@ const TeamForm = ({ team, index, handleTeamName, setDebateForm, debateForm }) =>
     setDebateForm((prev) => ({
       ...prev, teams: filteredTeam
     }))
+  }
+
+  const handleTeamParticipantsValidation=(user,index)=>{
+    let debateTeams = debateForm.teams;
+    let full =false;
+    let error = "";
+    if(debateForm.type==="Lincoln–Douglas"){
+        full=  debateForm.teams[index].members.length >= 1;
+      error="Lincoln-Douglas can have only one participant in a team"
+    }else if(debateForm.type === "British Parliamentary"){
+
+      console.log("british",parseInt(debateForm.team_format),debateForm.team_format)
+        full=  debateForm.teams[index].members.length >= parseInt(debateForm.team_format);
+
+        if(debateForm.team_format === "2"){
+          error = `participants limit exceeded change team format to 4 vs 4`
+        }else{
+
+          error=`Maximum partcipants exceeded`
+        }
+
+    }else{
+      full=  debateForm.teams[index].members.length >= 4;
+      error="Team can have only 4 participants"
+    }
+
+    if (full) {
+
+      toast({
+        description: error,
+        status: 'error',
+        duration: 3000,
+        position: "top",
+        isClosable: true,
+      })
+      return false;
+      
+    }
+
+    // if the user already exist
+   if(isUserInTeam(user))return false
+
+
+    return true
+  }
+
+  const isUserInTeam=(user)=>{
+    let debateTeams = debateForm.teams;
+    const exist = debateTeams.filter(team => team.members.find(teamMember => teamMember._id === user._id))
+    if (exist.length > 0) {
+      toast({
+        description: "This user is already in a team",
+        status: 'error',
+        duration: 3000,
+        position: "top",
+        isClosable: true,
+      })
+      return true
+    }
+    return false
   }
 
 

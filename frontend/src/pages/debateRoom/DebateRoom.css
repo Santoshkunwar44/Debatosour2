@@ -14,7 +14,7 @@
 }
 .Debate_room_main_text {
   font-weight: bold;
-  font-size: 2rem;
+  font-size: 21px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -24,6 +24,7 @@
 .main_text_one {
   color: var(--primary_color);
   position: relative;
+  font-size: 21px;
 }
 .main_text_one::after {
   content: "";
@@ -34,13 +35,13 @@
   position: absolute;
   height: 4px;
   border-radius: 10px;
-  background: linear-gradient(
+  /* background: linear-gradient(
     45deg,
     rgba(174, 174, 174, 0.11),
     rgba(174, 174, 174, 0.21),
     rgb(64 70 221 / 52%),
     rgb(64 70 221 / 62%)
-  );
+  ); */
 }
 .round_text {
   color: var(--dark_primary_text_color);

@@ -15,7 +15,7 @@ const UserProfile = ({ children, userId }) => {
         <Popover placement={"right-end"} >
             <PopoverTrigger>
 
-                <span>{children}</span>
+                <span style={{flex:1}}>{children}</span>
 
             </PopoverTrigger>
             <Portal > 

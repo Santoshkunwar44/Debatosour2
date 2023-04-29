@@ -53,6 +53,12 @@
 }
 .screen_box_header {
   height: 50px;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.screen_box_header .team_mic_icon{
+  font-size: 1.2rem !important;
 }
 .teamOne {
   color: var(--primary_color);
@@ -82,4 +88,17 @@
   text-align: center;
   letter-spacing: 1px;
   color: rgba(128, 128, 128, 0.795);
+}
+.mic_control_wrapper{
+  background: var(--dark_primary_text_color);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+
+  
+}
+.mic_control_wrapper svg{
+  color: white !important;
 }

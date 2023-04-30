@@ -93,6 +93,7 @@ useEffect(()=>{
 
   },[debateForm]);
 
+  
   const checkIsDebateInputCompleted=()=>{
     let missing= false ;
     for(let key in debateForm){
@@ -349,6 +350,12 @@ useEffect(()=>{
 
 
   }
+  const filterPassedTime = (time) => {
+    const currentDate = new Date();
+    const selectedDate = new Date(time);
+
+    return currentDate.getTime() < selectedDate.getTime();
+  };
 
   return (
     <div className='DebateFormWrapper'>
@@ -404,8 +411,10 @@ useEffect(()=>{
                 <DatePicker
                   selected={startTime}
                   onChange={(date) => handleStartDate(date)}
-                  showTimeSelect
+                  showTimeInput
 
+                  timeInputLabel="Time:"
+                  filterTime={filterPassedTime}
                   dateFormat="yyyy/MM/dd , h:mm aa"
                 />
 

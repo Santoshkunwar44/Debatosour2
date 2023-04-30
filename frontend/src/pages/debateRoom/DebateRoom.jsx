@@ -118,10 +118,14 @@ const DebateRoom = () => {
 
   useEffect(()=>{
 
-    if(isLive &&  activeSpeakers.length > 0){
+    if(isLive &&   !UrlSearchParams.get("audience") && activeSpeakers.length > 0){
       SetRoomLoading(false)
     }
     if(!isLive && activeDebate){
+      SetRoomLoading(false)
+    }
+
+    if(isLive && UrlSearchParams.get("audience") &&  activeDebate){
       SetRoomLoading(false)
     }
 
@@ -500,6 +504,11 @@ const showToast=(message,type)=>{
 }
 const passMicHandler=async()=>{
     if(checkIfUserCanPassMic()){
+
+      if(!micMuted){
+     await   handleMicTogggle()
+      }
+
      await passMicToNextTeam()
     }else{
       toast({
@@ -566,9 +575,9 @@ const handleGetMicControl=()=>{
           handleGetMicControl={handleGetMicControl}
           /> 
     
-        {
+        {/* {
           isLive && WatchType === "AUDIENCE" ? <button className="leave_btn" onClick={handleLeaveRoom}>LEAVE</button> : ""
-        }
+        } */}
         {/* <DebateInfo /> */}
         <div className='debate_bottom_container'>
           <Participants />

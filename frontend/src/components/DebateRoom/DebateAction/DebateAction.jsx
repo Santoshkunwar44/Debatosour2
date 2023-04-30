@@ -145,7 +145,8 @@ setCanAccessMicControl(nextTeam[0].members?.length===0)
       {
         
         
-        micMuted ? <BsFillMicMuteFill onClick={handleMicToggle} /> : <BsFillMicFill className="activeMic" onClick={handleMicToggle} />
+        micMuted ? <BsFillMicMuteFill onClick={handleMicToggle} /> :
+         <BsFillMicFill className="activeMic" onClick={handleMicToggle} />
       }
       <button className="leaveBtn" onClick={handleLeaveRoom}>
         <TiArrowBackOutline/>
@@ -156,6 +157,14 @@ setCanAccessMicControl(nextTeam[0].members?.length===0)
     </>
     :""
         }
+      {
+ 
+ (  isLive && WatchType !== "PARTICIPANT")&&
+        <button className="leaveBtn leave_for_watch_type" onClick={handleLeaveRoom}>
+        <TiArrowBackOutline/>
+        LEAVE
+      </button>
+        } 
     <CopyToClipboard text={`${process.env.REACT_APP_FRONTEND_URL}/watch?debateId=${roomId}`} onCopy={handleCopyLink}>
       <button   className="copy_link_button">
         <HiOutlineClipboardDocument/> 

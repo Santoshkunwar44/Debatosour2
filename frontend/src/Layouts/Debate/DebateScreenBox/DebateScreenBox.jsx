@@ -76,7 +76,7 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive  ,isNotWatch,isUs
 
                 <h4 className='team_name teamOne'>{teams[0]?.name}</h4>
               {
-                activeMicControlTeam?.name === teams[0]?.name && <div className="mic_control_wrapper">
+             ( isLive &&   activeMicControlTeam?.name === teams[0]?.name) && <div className="mic_control_wrapper">
                     <TbMicrophone2 className={"team_mic_icon"}/></div>
               } 
 
@@ -100,7 +100,7 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive  ,isNotWatch,isUs
 
               <div className='screen_box_header'>
               {
-                activeMicControlTeam?.name === teams[1]?.name &&   
+               ( isLive && activeMicControlTeam?.name === teams[1]?.name) &&   
                 <div className="mic_control_wrapper"> <TbMicrophone2 className={"team_mic_icon"}/>
                 </div>
               } 

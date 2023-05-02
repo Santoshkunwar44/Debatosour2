@@ -20,6 +20,8 @@ const DebateAction = ({
    WatchType,
    handleGetMicControl,
    activeMicControlTeam,
+   debateState,
+   handleStartDebate,
   roomMembers}) => {
 
   const { activeDebate } = useSelector((state) => state.debate);
@@ -121,16 +123,24 @@ setCanAccessMicControl(nextTeam[0].members?.length===0)
     <>
       <div className={"debateActionContainer"}>
 
+
         {
             isUserParticipant === null ? ".." : (isUserParticipant && isLive && WatchType === "PARTICIPANT")  ?
             <>
-            {
+             {
 
-          ( !isMicWithMe && canAccessMicControl) &&    <button className="pass_mic_button" onClick={handleGetMicControl}>
+            !debateState.isStarted  &&  <button className="pass_mic_button" onClick={handleStartDebate}>
+              <TbMicroscope/>
+              START DEBATE
+            </button> 
+              }
+            
+
+       {  (  !isMicWithMe && canAccessMicControl) &&    <button className="pass_mic_button" onClick={handleGetMicControl}>
           <TbMicroscope/>
          GET MIC CONTROL
-        </button>       
-            }
+        </button>   
+}
 
           {
             isMicWithMe ?  <button className="pass_mic_button" onClick={passMicHandler}>
@@ -138,10 +148,7 @@ setCanAccessMicControl(nextTeam[0].members?.length===0)
            PASS MIC
           </button>:""
           } 
- 
     <div className="DebateActionWrapper">
-     
-    
       {
         
         

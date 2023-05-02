@@ -9,6 +9,7 @@ import { getAgoraTokenApi, getDebateByIdApi  ,joinParticipantApi,removeParticipa
 import { bindActionCreators } from "redux"
 import { v4 as uuid } from "uuid"
 import { actionCreators } from "../../redux/store"
+import {getMyTeam} from "../../utils/services"
 import { useDispatch } from "react-redux"
 import { useSelector } from "react-redux"
 import AgoraRTM from 'agora-rtm-sdk'
@@ -43,7 +44,13 @@ const DebateRoom = () => {
   const navigate = useNavigate()
   const [rtmChannel, setRtmChannel] = useState();
   const [activeSpeakers, setActiveSpeakers] = useState([])
-  const toast = useToast()
+  const toast = useToast();
+  const [debateState,setDebateState] = useState({
+    round_shot:0,
+    speakTime:0,
+    speakTeam:"",
+    isStarted:false,
+  })
 
 
   useLayoutEffect(() => {
@@ -141,6 +148,33 @@ const DebateRoom = () => {
 
 
 
+  const startDebate=()=>{
+
+    if(activeDebateRef.current.type==="British Parliamentary"){
+      const myTeam = getMyTeam(activeDebateRef.current.teams,data?._id)
+      if(!myTeam)return;
+      let debateRoundsPayload = {
+        round_shot:1,
+        speakTeam:myTeam.name,
+        speakTime:activeDebateRef.current.speakTime,
+        isStarted:true
+      }
+      setDebateState(debateRoundsPayload);
+   
+      updateChannelDebateRounds(debateRoundsPayload)
+
+    }
+  }
+  const updateChannelDebateRounds=async(payload)=>{
+    if(!Rtm_client || !rtmChannelRef.current)return
+    await   Rtm_client.addOrUpdateChannelAttributes(rtmChannelRef.current.channelId,{
+      debateRounds: JSON.stringify(payload)});
+      let messagePayload={
+        ...payload,
+        type:"debate_rounds"
+      }
+   await   createChannelMessage(messagePayload)
+  }
   const initChannelAttribute=async()=>{
 
 
@@ -164,7 +198,6 @@ const DebateRoom = () => {
 
 
   const getTeamDataByName=(teamName)=>{
-console.log("activeDebate",activeDebateRef.current)
 if(!activeDebateRef.current)return;
   return   activeDebateRef.current.teams.find(team=>team.name === teamName)
 
@@ -191,6 +224,11 @@ if(!activeDebateRef.current)return;
 
 
   }
+
+
+
+ 
+
 
   const updateChannleAttributeee=async(team,both)=>{
     if(!team || !rtmChannel || !Rtm_client || !activeDebateRef.current)return;
@@ -344,11 +382,15 @@ if(!activeDebateRef.current)return;
   }
 const handleChannelMessage =(message,memberId)=>{
   const data = JSON.parse(message.text)
+  console.log("channel message",data)
   if(data.type==="pass_mic"){
 
     setActiveMicControlTeam(getTeamDataByName(data.teamName))
     showToast(`Mic control  passed to ${data.teamName}`,"success")
 
+  }else if(data.type==="debate_rounds"){
+    delete data.type
+    setDebateState(data)
   }
 }
   const handleMicTogggle = async() => {
@@ -444,7 +486,6 @@ const handleChannelMessage =(message,memberId)=>{
 
 const removeMeAsSpeaker=async()=>{
  let speakerId =  await getRoomSpeaker()
-console.log("unmountng",speakerId,Rtm_client,rtmChannelRef.current)
  if(speakerId && Rtm_client && rtmChannelRef.current){
   if(speakerId.toString() === rtcUid.toString()){
     console.log("ia am removeing me final")
@@ -486,7 +527,6 @@ const getChannelAttributeFunc=async()=>{
 
 const checkIfUserCanPassMic=()=>{
   if(!activeMicControlTeam)return;
-  console.log("checking",activeMicControlTeam.members.some(user=>user._id===data?._id))
 return  activeMicControlTeam.members.some(user=>user._id===data?._id)
 
   
@@ -547,11 +587,12 @@ const handleGetMicControl=()=>{
           <h1 className='Debate_room_main_text'>
             <img width={"40px"} src="/images/error_dino.png" alt="dinosour" />
             <h1 className='main_text_one'>  {isLive ? "ENJOY" : "YET NOT STARTED"}</h1>   {isLive ? "DEBATE" : ""} </h1>
-          <div className='round_text' onClick={getChannelAttributeFunc}>
+          <div className='round_text' >
             ROUND 0/{activeDebate?.noOfRounds}
           </div>
         </div>
         <DebateScreenBox 
+        debateState={debateState}
          isLive={isLive}
          isUserParticipant={isUserParticipant}
          isNotWatch={WatchType !=="AUDIENCE"}
@@ -573,6 +614,8 @@ const handleGetMicControl=()=>{
             roomMembers={RoomMembers}
           activeMicControlTeam={activeMicControlTeam}
           handleGetMicControl={handleGetMicControl}
+          debateState={debateState}
+          handleStartDebate={startDebate}
           /> 
     
         {/* {

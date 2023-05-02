@@ -21,6 +21,9 @@ const DebateFormInput = () => {
   const [instantDebateTimes, setInstantDebateTimes] = useState("1Minute")
   const [startTime, setStartTime] = useState(new Date());
   const [formLevel,setFormLevel] =useState(0);
+  const navigate = useNavigate()
+  const toast = useToast()
+
   const [debateForm, setDebateForm] = useState({
     topic: "",
     type: "",
@@ -30,6 +33,7 @@ const DebateFormInput = () => {
     duration: 0,
     endTime: 0,
     team_format:"",
+    speakTime:0,
     teams: [
       {
         name: "",
@@ -42,8 +46,6 @@ const DebateFormInput = () => {
     ]
   })
 
-  const navigate = useNavigate()
-  const toast = useToast()
 
 
 
@@ -75,7 +77,7 @@ useEffect(()=>{
     checkIsDebateInputCompleted()
 
     if(debateForm.type==="Lincoln–Douglas"){
-
+        if(debateForm.type==="Lincoln–Douglas" && debateForm.team_format==="1" )return;
         setDebateForm((prev)=>({
           ...prev, 
           team_format:"1"
@@ -131,7 +133,7 @@ useEffect(()=>{
     if (name === "participantsCount" && parseInt(value) > 8) {
       return;
     }
-    if (name === "participantsCount" || name === "noOfRounds") {
+    if (name === "participantsCount" || name === "noOfRounds"|| name === "speakTime") {
       value = parseInt(value)
     }
     setDebateForm(prev => ({
@@ -353,7 +355,6 @@ useEffect(()=>{
   const filterPassedTime = (time) => {
     const currentDate = new Date();
     const selectedDate = new Date(time);
-
     return currentDate.getTime() < selectedDate.getTime();
   };
 
@@ -371,10 +372,10 @@ useEffect(()=>{
             <label className="form_label" >Topic name</label>
             <input type="text" placeholder='Topic for debate' name='topic' onChange={handleInputChange} />
           </div>
-          <div className='input_item'>
+          {/* <div className='input_item'>
             <label className="form_label">No of rounds</label>
             <input name='noOfRounds' value={debateForm.noOfRounds} max={10} type="number" placeholder='Number of rounds' onChange={handleInputChange} />
-          </div>
+          </div> */}
           <div className='input_item'>
             <label className="form_label">Debate Type</label>
             <select id="" name='type' onChange={handleInputChange}>
@@ -465,7 +466,7 @@ useEffect(()=>{
         </div>
       </div>
 
-            <DebateInformation debateType={debateForm.type}/>
+            <DebateInformation  handleInputChange={handleInputChange} debateForm={debateForm} debateType={debateForm.type}/>
 
       <div className={`team_box_container ${formLevel !== 1 && "disable_team_box_container_form" } `}>
 

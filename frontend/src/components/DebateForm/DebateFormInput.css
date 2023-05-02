@@ -324,3 +324,9 @@ h2 {
   pointer-events: none;
   backdrop-filter: blur(1px);
 }
+.additional_inputs{
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}

@@ -1,16 +1,22 @@
 import { useSelector } from 'react-redux'
 import DebatorView from '../DebatorView/DebatorView'
 import "./DebateScreenBox.css"
-import { useEffect, useState } from 'react';
+import { useEffect, useState  ,useRef} from 'react';
 import NotStartedView from '../DebatorView/NotStartedView/NotStartedView';
 import NoneJoined from '../NoneJoined/NoneJoined';
 import DebateScreenSkeleton from "../../Skeleton/DebateScreenBox/DebateScreenSkeleton"
 import {TbMicrophone2} from "react-icons/tb"
 
-const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive  ,isNotWatch,isUserParticipant ,activeMicControlTeam}) => {
+const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive ,debateState ,isNotWatch,isUserParticipant ,activeMicControlTeam}) => {
   const { activeDebate, activeParticipants } = useSelector((state) => state.debate);
 
   const [teams, setTeams] = useState([])
+  const [ countDown,setCountDown] =useState({
+    min:null,
+    sec:null
+
+  });
+  const intervalRef =useRef()
  
   useEffect(() => {
     if (activeDebate) {
@@ -63,10 +69,47 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive  ,isNotWatch,isUs
     }
   }, [activeDebate, roomMembers])
 
+  useEffect(()=>{
+
+    handleCountDown()
+
+
+  },[debateState.isStarted])
+
+  const handleCountDown=()=>{
+    let end = Date.now() + debateState.speakTime*60*1000;
+  intervalRef.current =   setInterval(() => {
+      let now = Date.now();
+      if(now <end){
+        let diff = end - now;
+        let min = Math.floor(diff/(1000*60));
+        let sec = Math.floor((diff/1000)%60);
+        setCountDown({
+          min,
+          sec
+        })
+
+
+      }else{
+        clearInterval(intervalRef.current)
+        // end this round and pass mic to next team and update the channel
+      }
+
+    }, 1000);
+  }
 
   return (
 
     <div className="DebateScreenBoxWrapper">
+      {
+        debateState.isStarted && <>
+
+          <h1>
+            {`Speak Time left ${countDown.min ? `${countDown.min} min : ${countDown.sec} sec`:""}`}
+          </h1>
+        
+        </>
+      }
       {
         (activeDebate && activeParticipants) ?
 

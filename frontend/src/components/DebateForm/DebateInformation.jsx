@@ -1,6 +1,6 @@
 import {useState ,useEffect} from "react"
 
-const DebateInformation = ({debateType}) => {
+const DebateInformation = ({debateType,debateForm,handleInputChange}) => {
 
 
     const [ debateInfo,setDebateInfo] =useState(null)
@@ -9,28 +9,79 @@ const DebateInformation = ({debateType}) => {
     
               const deb =   DebateTypeArr.find(deb=>deb.type===debateType)
               setDebateInfo(deb)
-
-    
      
     }, [debateType  ])
     
+    // const DebateTypeInputsMapping={
+    //     british_parliamentry:<ParliamentaryInputs debateForm={debateForm} handleInputChange={handleInputChange}/>
+    // }
 
+    const DebateTypeInputsMapping = new Map([
+        ["British Parliamentary",<ParliamentaryInputs  debateForm={debateForm} handleInputChange={handleInputChange}/>],
+        ["Lincoln–Douglas",<LincolnInputs debateForm={debateForm} handleInputChange={handleInputChange}  />],
+
+    ])
+
+ 
   return (
     <>
     {
      debateInfo  ?      
-        <div className={"debateInformationBox"}>
+        <div  className={"debateInformationBox"}>
         
         <b>You choosed {debateInfo.type} type</b>
         <p className="debateInformation_box_desc">{debateInfo.desc}</p>
-        
+     {
+
+       DebateTypeInputsMapping.get(debateType)
+     }  
         </div> :""
     }
+  
     </>
         )
 }
 
-export default DebateInformation
+export default DebateInformation;
+
+
+const ParliamentaryInputs=({debateForm,handleInputChange})=>{
+    return (
+
+
+        <div className="additional_inputs">
+             <div className='input_item'>
+            <label className="form_label">No of rounds</label>
+            <input name='noOfRounds' value={debateForm.noOfRounds} max={10} type="number" placeholder='Number of rounds' onChange={handleInputChange} />
+          </div> 
+          <div className={"input_item"}>
+          <label className="form_label">Speak time : min</label>
+            <input name='speakTime' type="number" placeholder='speak time' onChange={handleInputChange} />
+          </div>
+        </div>
+
+
+    )
+}
+const LincolnInputs=({debateForm,handleInputChange})=>{
+    return (
+
+
+        <div className="additional_inputs">
+             {/* <div className='input_item'>
+            <label className="form_label">No of rounds</label>
+            <input name='noOfRounds' value={debateForm.noOfRounds} max={10} type="number" placeholder='Number of rounds' onChange={handleInputChange} />
+          </div>  */}
+          <div className="input_item">
+          <label className="form_label">Speak time</label>
+            <input name='roundTime' type="number" placeholder='speak time' onChange={handleInputChange} />
+          </div>
+        </div>
+
+
+    )
+}
+
 
 const DebateTypeArr = [
     {   
@@ -49,6 +100,6 @@ const DebateTypeArr = [
         ]
     },{
         type:"British Parliamentary",
-        desc:"This debate is for arguing in favour or against the motion  . There are two teams one team is of Government  and another is opposition of government. Each team can have 2/4 member . ",
+        desc:"This debate is for arguing in favour or against the motion  . There are two teams one team is of Government  and another is opposition of government. Each team can have 2/4 member . Both the team will get a limited time (you can choose the time)  to speak   for 2 rounds . ",
     }
 ]

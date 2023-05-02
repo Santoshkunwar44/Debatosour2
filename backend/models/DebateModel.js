@@ -70,6 +70,7 @@ const MongooseSchema = mongoose.Schema({
     teams: [
         Team,
     ],
+    speakTime:Number,
     joinedParticipants:[ User  ],
     type: {
         type: String,

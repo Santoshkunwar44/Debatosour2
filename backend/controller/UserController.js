@@ -72,7 +72,7 @@ class UserController {
                 } : {}
 
             } else {
-                keyword = { _id: userId }
+                keyword = { _id:  userId   }
             }
             const fetchedUser = await UserModel.find(keyword)
             res.status(200).json({ message: fetchedUser, success: true })

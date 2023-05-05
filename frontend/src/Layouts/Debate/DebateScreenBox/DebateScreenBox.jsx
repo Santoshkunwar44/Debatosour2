@@ -6,8 +6,9 @@ import NotStartedView from '../DebatorView/NotStartedView/NotStartedView';
 import NoneJoined from '../NoneJoined/NoneJoined';
 import DebateScreenSkeleton from "../../Skeleton/DebateScreenBox/DebateScreenSkeleton"
 import {TbMicrophone2} from "react-icons/tb"
+import SpeakTimeLeft from '../SpeakTimeLeft/SpeakTimeLeft';
 
-const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive ,debateState ,isNotWatch,isUserParticipant ,activeMicControlTeam}) => {
+const DebateScreenBox = ({ roomMembers, handleCloseDebate, activeSpeakers, isLive ,debateState ,isNotWatch,isUserParticipant ,activeMicControlTeam ,handleFinishSpeakTime}) => {
   const { activeDebate, activeParticipants } = useSelector((state) => state.debate);
 
   const [teams, setTeams] = useState([])
@@ -70,28 +71,35 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive ,debateState ,isN
   }, [activeDebate, roomMembers])
 
   useEffect(()=>{
-
-    handleCountDown()
-
-
-  },[debateState.isStarted])
+    if(!debateState.hasFinished && debateState.isStarted  ){
+      handleCountDown()
+    }else if(debateState.hasFinished){
+      handleCloseDebate()
+    }
+  },[debateState])
 
   const handleCountDown=()=>{
-    let end = Date.now() + debateState.speakTime*60*1000;
-  intervalRef.current =   setInterval(() => {
-      let now = Date.now();
-      if(now <end){
+    let end = Date.now() + debateState.speakTime * 60 * 1000;
+    intervalRef.current =   setInterval(() => {
+
+       let now = Date.now();
+        if(now < end){
+
         let diff = end - now;
         let min = Math.floor(diff/(1000*60));
         let sec = Math.floor((diff/1000)%60);
+
         setCountDown({
           min,
-          sec
+          sec   
         })
 
 
       }else{
+        console.log("finish", debateState, now < end);
         clearInterval(intervalRef.current)
+
+        handleFinishSpeakTime()
         // end this round and pass mic to next team and update the channel
       }
 
@@ -99,17 +107,10 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive ,debateState ,isN
   }
 
   return (
-
+<>
+      <SpeakTimeLeft debateState={debateState} countDown={countDown}/>
     <div className="DebateScreenBoxWrapper">
-      {
-        debateState.isStarted && <>
-
-          <h1>
-            {`Speak Time left ${countDown.min ? `${countDown.min} min : ${countDown.sec} sec`:""}`}
-          </h1>
-        
-        </>
-      }
+   
       {
         (activeDebate && activeParticipants) ?
 
@@ -127,11 +128,11 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive ,debateState ,isN
               <div className="left_team">
                 {
                   isLive ? teams[0] && teams[0]?.members?.length > 0 ? teams[0]?.members?.map((mem) => (
-
+                    
                     <DebatorView activeSpeakers={activeSpeakers} debator={mem} key={mem.id} />
-
-                  ))  :  <NoneJoined team={teams[0]} /> :""
-                }
+                    
+                    ))  :  <NoneJoined team={teams[0]} /> :""
+                  }
                 {
                !isLive &&
                  <NotStartedView team={activeDebate?.teams[0]?.members} />
@@ -143,7 +144,7 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive ,debateState ,isN
 
               <div className='screen_box_header'>
               {
-               ( isLive && activeMicControlTeam?.name === teams[1]?.name) &&   
+                ( isLive && activeMicControlTeam?.name === teams[1]?.name) &&   
                 <div className="mic_control_wrapper"> <TbMicrophone2 className={"team_mic_icon"}/>
                 </div>
               } 
@@ -153,8 +154,8 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive ,debateState ,isN
                 {
                   isLive ? teams[1]   &&     teams[1]?.members?.length > 0 ? teams[1]?.members?.map((member) => (
                     <DebatorView pink={true} activeSpeakers={activeSpeakers} debator={member} key={member._id} />
-                  )) : <NoneJoined team={teams[1]} />  :""
-                }
+                    )) : <NoneJoined team={teams[1]} />  :""
+                  }
                 {
                   !isLive && <NotStartedView pink={true} team={activeDebate?.teams[1]?.members} />
                 }
@@ -171,11 +172,8 @@ const DebateScreenBox = ({ roomMembers, activeSpeakers, isLive ,debateState ,isN
 
 
     </div>
+</>
   )
 }
 
 export default DebateScreenBox
-
-    // activeDebate? activeDebate.participants.map((debator, index) => (
-          //   <DebatorView isSpeaking={(index === 0 || index === 1) ? true : false} key={debator._id} debator={debator} />
-          // )) : <p>loading..</p>

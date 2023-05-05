@@ -135,25 +135,25 @@ setCanAccessMicControl(nextTeam[0].members?.length===0)
             </button> 
               }
             
-
+{/* 
        {  (  !isMicWithMe && canAccessMicControl) &&    <button className="pass_mic_button" onClick={handleGetMicControl}>
           <TbMicroscope/>
          GET MIC CONTROL
         </button>   
-}
+} */}
 
-          {
+          {/* {
             isMicWithMe ?  <button className="pass_mic_button" onClick={passMicHandler}>
             <TbMicroscope/>
            PASS MIC
           </button>:""
-          } 
+          }  */}
     <div className="DebateActionWrapper">
       {
         
         
-        micMuted ? <BsFillMicMuteFill onClick={handleMicToggle} /> :
-         <BsFillMicFill className="activeMic" onClick={handleMicToggle} />
+    debateState.isStarted ?    (micMuted ? <BsFillMicMuteFill onClick={handleMicToggle} /> :
+         <BsFillMicFill className="activeMic" onClick={handleMicToggle} />) :""
       }
       <button className="leaveBtn" onClick={handleLeaveRoom}>
         <TiArrowBackOutline/>

@@ -1,0 +1,9 @@
+.speak_time_left_box{
+    position: absolute;
+    left: 0 ;
+
+}
+.speak_time_right{
+    right: 0 !important;
+
+}

@@ -9,7 +9,7 @@ import { getAgoraTokenApi, getDebateByIdApi  ,joinParticipantApi,removeParticipa
 import { bindActionCreators } from "redux"
 import { v4 as uuid } from "uuid"
 import { actionCreators } from "../../redux/store"
-import {getMyTeam} from "../../utils/services"
+import {getMyTeam ,getNextSpeakTeam} from "../../utils/services"
 import { useDispatch } from "react-redux"
 import { useSelector } from "react-redux"
 import AgoraRTM from 'agora-rtm-sdk'
@@ -32,12 +32,11 @@ const DebateRoom = () => {
   const rtmChannelRef = useRef()
   const { AddActiveDebate, SetRoomIsLiveOrNot, SetIsUserParticipant, setIsLoading  ,SetRoomLoading} = bindActionCreators(actionCreators, dispatch)
   const [ activeMicControlTeam,setActiveMicControlTeam] =useState(null)
-
   const [audioTracks, setAudioTracks] = useState({
     localAudioTracks: null,
     remoteAudioTracks: {}
   })
-
+  const roundShotsCount = useRef(0)
   const activeDebateRef = useRef()
   const [RoomMembers, setRoomMembers] = useState([])
   const [micMuted, setMicMuted] = useState(true)
@@ -50,6 +49,7 @@ const DebateRoom = () => {
     speakTime:0,
     speakTeam:"",
     isStarted:false,
+    hasFinished:false,
   })
 
 
@@ -138,113 +138,134 @@ const DebateRoom = () => {
 
   },[isLive,activeSpeakers ])
   
-  useEffect(()=>{
 
-    if(!activeDebate || !rtmChannelRef.current || !Rtm_client)return ;
-    initChannelAttribute()
-    
-
-  },[activeDebate,rtmChannelRef.current ,Rtm_client]);
-
-
-
-  const startDebate=()=>{
+  const startDebate=async()=>{
 
     if(activeDebateRef.current.type==="British Parliamentary"){
       const myTeam = getMyTeam(activeDebateRef.current.teams,data?._id)
+      roundShotsCount.current = 1;
       if(!myTeam)return;
-      let debateRoundsPayload = {
-        round_shot:1,
-        speakTeam:myTeam.name,
-        speakTime:activeDebateRef.current.speakTime,
-        isStarted:true
-      }
-      setDebateState(debateRoundsPayload);
-   
-      updateChannelDebateRounds(debateRoundsPayload)
+     await handleDebateInitChange(myTeam,1)
+  }
+}
 
+
+  const handleDebateInitChange=async(team,nextround)=>{
+      const {speakTime ,noOfRounds} = activeDebateRef.current;
+
+    let debateRoundsPayload = {
+      round_shot:nextround,
+      speakTeam:team.name,
+      speakTime,
+      isStarted:true,
+      noOfRounds:noOfRounds *2,
+      hasFinished:false
     }
+
+    console.log("payload",debateRoundsPayload)
+
+    setDebateState(debateRoundsPayload);
+    setActiveMicControlTeam(team);
+
+
+   await updateChannelDebateRounds(debateRoundsPayload ,true);
+   await setTheSpeakerTeamToChannel(team,false)
+
+    let rounds={
+        ...debateRoundsPayload
+    }
+    let speakers={
+      teamName: team.name
+    }
+    let messagePayload = {
+      speakers,
+      rounds,
+      type:"round_change"
+    }
+    await   createChannelMessage(messagePayload)
   }
-  const updateChannelDebateRounds=async(payload)=>{
-    if(!Rtm_client || !rtmChannelRef.current)return
-    await   Rtm_client.addOrUpdateChannelAttributes(rtmChannelRef.current.channelId,{
-      debateRounds: JSON.stringify(payload)});
-      let messagePayload={
-        ...payload,
-        type:"debate_rounds"
+
+  const handleFinishSpeakTime=async()=>{
+    let debateShot = debateState.round_shot;
+    let totalShot = activeDebateRef.current.noOfRounds * 2;
+   let attributes =   await getChannelAttributeFunc()
+   let nextRoundShot = ++debateShot;
+   let {startTeam} = attributes;
+   roundShotsCount.current = nextRoundShot;
+    if(nextRoundShot > totalShot){
+      handleCloseDebate()
+    }else{
+      if(activeDebateRef.current.type==="British Parliamentary"){
+        const nextSpeakerTeam = getTeamDataByName( getNextSpeakTeam(activeDebateRef.current.teams,startTeam.value,nextRoundShot))
+        console.log("next team",nextSpeakerTeam)
+        handleDebateInitChange(nextSpeakerTeam,nextRoundShot)
       }
-   await   createChannelMessage(messagePayload)
+    }
+  
+
   }
-  const initChannelAttribute=async()=>{
 
+  const updateChannelDebateRounds=async(payload,initial)=>{
+    if(!Rtm_client || !rtmChannelRef.current)return;
 
-    
+    if(initial){
 
-    const channelAttr =  await Rtm_client.getChannelAttributes(rtmChannelRef.current.channelId);
-     const {speakersData} = channelAttr;
-     
-     if(speakersData?.value){
+      await   Rtm_client.addOrUpdateChannelAttributes(rtmChannelRef.current.channelId,{
+        debateRounds: JSON.stringify(payload) , startTeam:payload.speakTeam});
+        
+    }else{
 
-      let data = JSON.parse(speakersData.value);
-      setActiveMicControlTeam(getTeamDataByName(data.teamName));
-
-     }else{
-
-       const {teams:[firstTeam]} = activeDebate
-       updateChannleAttributeee(firstTeam,false)
+      await Rtm_client.addOrUpdateChannelAttributes(rtmChannelRef.current.channelId,{
+        debateRounds: JSON.stringify(payload)});
       }
+  
 
   }
-
-
+  const handleCloseDebate=async()=>{
+    let payload = {
+      isStarted:false,
+      noOfRounds:0,
+      speakTime:0,
+      speakTeam:"",
+      round_shot:0,
+      hasFinished:true
+    }
+    setDebateState(payload)
+    setActiveMicControlTeam(null)
+    await updateChannelDebateRounds(payload);
+     await  setTheSpeakerTeamToChannel(null , null, true )
+  }
   const getTeamDataByName=(teamName)=>{
 if(!activeDebateRef.current)return;
   return   activeDebateRef.current.teams.find(team=>team.name === teamName)
 
   }
 
-  const passMicToNextTeam=async()=>{
-
-    if(!activeDebate || !activeMicControlTeam )return;
-
-
- 
-
-   const {teams} =activeDebate;
-   const theTeam =    teams.find(team=>team.name !== activeMicControlTeam.name);
-   
-   let payload={
-     type:"pass_mic",
-     teamName:theTeam.name
-    }
-    createChannelMessage(payload)
-    updateChannleAttributeee(theTeam,false)
-
-
-
-
-  }
-
-
-
- 
-
-
-  const updateChannleAttributeee=async(team,both)=>{
+  const setTheSpeakerTeamToChannel=async(team,both,removeSpeakersFromChannel)=>{
     if(!team || !rtmChannel || !Rtm_client || !activeDebateRef.current)return;
-    const speakersIds = team.members.map(mem=>mem._id)
-    const speakersDataPayload={
-      speakersIds,
-      debateType:activeDebateRef.current.type,
-      teamName:team.name,
-      both
-    }
+    let speakersDataPayload ;
+      if(removeSpeakersFromChannel){
+        speakersDataPayload={
+          speakersIds:[],
+          debateType:"",
+          teamName:"",
+          both:false 
+        }
+
+      }else{
+        const speakersIds = team.members.map(mem=>mem._id)
+         speakersDataPayload={
+          speakersIds,
+          debateType:activeDebateRef.current.type,
+          teamName:team.name,
+          both
+        }
+      }
+
        await   Rtm_client.addOrUpdateChannelAttributes(rtmChannel.channelId,{
       speakersData:JSON.stringify(speakersDataPayload)
     })    
-    setActiveMicControlTeam(getTeamDataByName(team.name));
   }
-
   const initRTC = async (token) => {
     // Rtc_client.on("user-joined", handleUserJoined)
     Rtc_client.on("user-published", handleUserPublished)
@@ -322,7 +343,23 @@ if(!activeDebateRef.current)return;
   }
   const createChannelMessage=async(message)=>{
     if(!rtmChannelRef.current)return;
+    
    await rtmChannelRef.current.sendMessage({ text:JSON.stringify(message) })
+  }
+  const handleChannelMessage =(message)=>{
+    const data = JSON.parse(message.text)
+    console.log("channel message",data,roundShotsCount.current)
+    if(data.type==="round_change"){
+
+      const {rounds,speakers} = data
+    
+      if(roundShotsCount.current === rounds.round_shot )return;
+      setActiveMicControlTeam(getTeamDataByName(speakers.teamName))
+      setDebateState(rounds)
+      
+    }
+
+
   }
   let initVolumeIndicator = async () => {
 
@@ -380,28 +417,16 @@ if(!activeDebateRef.current)return;
   const handleMemberLeft = (MemberId) => {
     setRoomMembers(mem => mem.filter(m => m.userId !== MemberId))
   }
-const handleChannelMessage =(message,memberId)=>{
-  const data = JSON.parse(message.text)
-  console.log("channel message",data)
-  if(data.type==="pass_mic"){
 
-    setActiveMicControlTeam(getTeamDataByName(data.teamName))
-    showToast(`Mic control  passed to ${data.teamName}`,"success")
-
-  }else if(data.type==="debate_rounds"){
-    delete data.type
-    setDebateState(data)
-  }
-}
   const handleMicTogggle = async() => {
 
-    if(!checkIfUserCanPassMic()){
-        showToast("Mic control is with next team","error")
-        return;
-    };
 
    
     if(micMuted){
+      if(!checkIfUserCanUnMute()){
+        showToast("Mic control is with next team","error")
+        return;
+    };
       if(!await getRoomSpeaker()){
         updateChannelAttribute(false)
         audioTracks.localAudioTracks.setMuted(false)
@@ -411,7 +436,6 @@ const handleChannelMessage =(message,memberId)=>{
       }
     }else{
       updateChannelAttribute(true)
-    
       audioTracks.localAudioTracks.setMuted(true)
       setMicMuted(true)
     }
@@ -464,12 +488,10 @@ const handleChannelMessage =(message,memberId)=>{
     await rtmChannel?.leave();
     await Rtm_client?.logout();
   }
-
   const handleLeaveRoom = () => {
     closeTracks()
     navigate(-1)
   }
-
   const getRoomSpeaker=async()=>{
 
 
@@ -484,6 +506,8 @@ const handleChannelMessage =(message,memberId)=>{
     }
   }
 
+
+// imp
 const removeMeAsSpeaker=async()=>{
  let speakerId =  await getRoomSpeaker()
  if(speakerId && Rtm_client && rtmChannelRef.current){
@@ -520,16 +544,15 @@ const getChannelAttributeFunc=async()=>{
 
  const attr =  await Rtm_client.getChannelAttributes(rtmChannelRef.current.channelId);
 
+ 
 
   return attr
 
 }
 
-const checkIfUserCanPassMic=()=>{
+const checkIfUserCanUnMute=()=>{
   if(!activeMicControlTeam)return;
 return  activeMicControlTeam.members.some(user=>user._id===data?._id)
-
-  
 }
 const showToast=(message,type)=>{
   toast({
@@ -542,42 +565,6 @@ const showToast=(message,type)=>{
   })
 
 }
-const passMicHandler=async()=>{
-    if(checkIfUserCanPassMic()){
-
-      if(!micMuted){
-     await   handleMicTogggle()
-      }
-
-     await passMicToNextTeam()
-    }else{
-      toast({
-        title: '',
-        description: "Another Team has mic control  ",
-        status: 'error',
-        duration: 5000,
-        position: "top",
-        isClosable: true,
-      })
-    }
-
-
-}
-const handleGetMicControl=()=>{
-
-
-  if(!activeDebateRef.current || !data)return;
-  let myTeam =  activeDebateRef.current.teams.find(team=>team.members.find(mem=>mem._id === data._id));
-  if(!myTeam)return;
-   
-  let payload={
-    type:"pass_mic",
-    teamName:myTeam.name
-   }
-   createChannelMessage(payload)
-  updateChannleAttributeee(myTeam,false)
-}
-
 
   return (
     <>
@@ -587,7 +574,7 @@ const handleGetMicControl=()=>{
           <h1 className='Debate_room_main_text'>
             <img width={"40px"} src="/images/error_dino.png" alt="dinosour" />
             <h1 className='main_text_one'>  {isLive ? "ENJOY" : "YET NOT STARTED"}</h1>   {isLive ? "DEBATE" : ""} </h1>
-          <div className='round_text' >
+          <div className='round_text' onClick={getChannelAttributeFunc} >
             ROUND 0/{activeDebate?.noOfRounds}
           </div>
         </div>
@@ -599,6 +586,8 @@ const handleGetMicControl=()=>{
          activeSpeakers={activeSpeakers} 
          roomMembers={RoomMembers}
          activeMicControlTeam={activeMicControlTeam}
+         handleCloseDebate={handleCloseDebate}
+         handleFinishSpeakTime={handleFinishSpeakTime}
          />
 
           <DebateAction
@@ -610,10 +599,10 @@ const handleGetMicControl=()=>{
             handleLeaveRoom={handleLeaveRoom}
             micMuted={micMuted}
             setMicMuted={setMicMuted}
-            passMicHandler={passMicHandler}
+            // passMicHandler={passMicHandler}
             roomMembers={RoomMembers}
           activeMicControlTeam={activeMicControlTeam}
-          handleGetMicControl={handleGetMicControl}
+          // handleGetMicControl={handleGetMicControl}
           debateState={debateState}
           handleStartDebate={startDebate}
           /> 

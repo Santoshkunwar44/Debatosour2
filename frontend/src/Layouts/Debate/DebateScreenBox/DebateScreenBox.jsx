@@ -8,9 +8,9 @@ import DebateScreenSkeleton from "../../Skeleton/DebateScreenBox/DebateScreenSke
 import {TbMicrophone2} from "react-icons/tb"
 import SpeakTimeLeft from '../SpeakTimeLeft/SpeakTimeLeft';
 
-const DebateScreenBox = ({ roomMembers, handleCloseDebate, activeSpeakers, isLive ,debateState ,isNotWatch,isUserParticipant ,activeMicControlTeam ,handleFinishSpeakTime}) => {
+const DebateScreenBox = ({ roomMembers, startTeam, handleCloseDebate, activeSpeakers, isLive ,debateState ,isNotWatch,isUserParticipant ,activeMicControlTeam ,handleFinishSpeakTime}) => {
   const { activeDebate, activeParticipants } = useSelector((state) => state.debate);
-
+  const intervalArrRef = useRef([])
   const [teams, setTeams] = useState([])
   const [ countDown,setCountDown] =useState({
     min:null,
@@ -71,15 +71,15 @@ const DebateScreenBox = ({ roomMembers, handleCloseDebate, activeSpeakers, isLiv
   }, [activeDebate, roomMembers])
 
   useEffect(()=>{
-    if(!debateState.hasFinished && debateState.isStarted  ){
+    if(!debateState.hasFinished && debateState.isStarted &&  intervalArrRef.current.length < 1){
       handleCountDown()
-    }else if(debateState.hasFinished){
+    }else if(debateState.hasFinished ){
       handleCloseDebate()
     }
-  },[debateState])
+  },[debateState,intervalArrRef])
 
   const handleCountDown=()=>{
-    let end = Date.now() + debateState.speakTime * 60 * 1000;
+    let end = debateState.startedAt + debateState.speakTime * 60 * 1000;
     intervalRef.current =   setInterval(() => {
 
        let now = Date.now();
@@ -96,19 +96,21 @@ const DebateScreenBox = ({ roomMembers, handleCloseDebate, activeSpeakers, isLiv
 
 
       }else{
-        console.log("finish", debateState, now < end);
         clearInterval(intervalRef.current)
-
+        intervalArrRef.current = []
         handleFinishSpeakTime()
         // end this round and pass mic to next team and update the channel
       }
 
     }, 1000);
+    intervalArrRef.current = [intervalRef.current]
   }
 
   return (
 <>
-      <SpeakTimeLeft debateState={debateState} countDown={countDown}/>
+      <SpeakTimeLeft
+       startTeam={startTeam}
+       debateState={debateState} countDown={countDown}/>
     <div className="DebateScreenBoxWrapper">
    
       {
@@ -120,7 +122,7 @@ const DebateScreenBox = ({ roomMembers, handleCloseDebate, activeSpeakers, isLiv
 
                 <h4 className='team_name teamOne'>{teams[0]?.name}</h4>
               {
-             ( isLive &&   activeMicControlTeam?.name === teams[0]?.name) && <div className="mic_control_wrapper">
+             ( (isLive &&   activeMicControlTeam?.name === teams[0]?.name) || (activeMicControlTeam==="both" && isLive) ) && <div className="mic_control_wrapper">
                     <TbMicrophone2 className={"team_mic_icon"}/></div>
               } 
 
@@ -144,7 +146,7 @@ const DebateScreenBox = ({ roomMembers, handleCloseDebate, activeSpeakers, isLiv
 
               <div className='screen_box_header'>
               {
-                ( isLive && activeMicControlTeam?.name === teams[1]?.name) &&   
+               ( ( isLive && activeMicControlTeam?.name === teams[1]?.name) ||  (activeMicControlTeam==="both" && isLive)) &&   
                 <div className="mic_control_wrapper"> <TbMicrophone2 className={"team_mic_icon"}/>
                 </div>
               } 

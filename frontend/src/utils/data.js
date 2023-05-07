@@ -105,3 +105,43 @@ export const AvatarsImg = [
     "https://firebasestorage.googleapis.com/v0/b/vrumies-1f269.appspot.com/o/avatar11.png?alt=media&token=d825b3ec-64cd-4c31-8369-1f540abcd841",
     "https://firebasestorage.googleapis.com/v0/b/vrumies-1f269.appspot.com/o/avatar12.png?alt=media&token=084eb506-e7d8-40fc-85cc-56fad2932246"
 ]
+export const TimeFormatMappingMethod= (teamsNameArr,format)=>{
+
+    
+    let timeMaps =   new Map([
+        ["Lincoln–Douglas",[
+            { team : teamsNameArr[0], time :6 },
+            { team:"both", time :3 },
+            { team: teamsNameArr[1], time : 6 },
+            { team: "both" , time: 3 },
+            { team:  teamsNameArr[0], time : 4 },
+            { team:  teamsNameArr[1], time: 6 },
+            { team:  teamsNameArr[0], time:3 },
+        ]],
+        [
+            "British Parliamentary",[
+                { team : teamsNameArr[0], time :4 },
+                { team: teamsNameArr[1], time : 4 },
+                { team : teamsNameArr[0], time :4 },
+                { team: teamsNameArr[1], time : 4 },
+           
+            ]
+        ],
+        [
+            "Public forum",[
+                { team : teamsNameArr[0], time :4 },
+                { team: teamsNameArr[1], time : 4 },
+                { team : teamsNameArr[0], time :4 },
+                { team: teamsNameArr[1], time : 4 },
+           
+            ]
+        ],
+    ])
+    
+    
+    
+    return timeMaps.get(format)
+    
+} 
+
+

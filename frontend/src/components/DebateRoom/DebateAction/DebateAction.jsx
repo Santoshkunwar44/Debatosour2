@@ -9,6 +9,7 @@ import { useToast } from '@chakra-ui/react';
 import {TbMicroscope} from "react-icons/tb";
 import {TiArrowBackOutline} from "react-icons/ti";
 import {useSelector} from "react-redux"
+import { getMyTeam } from "../../../utils/services";
 const DebateAction = ({ 
   handleMicToggle,
    micMuted, 
@@ -28,9 +29,8 @@ const DebateAction = ({
   const {data} = useSelector((state)=>state.user)
   const toast = useToast()
   const [teams, setTeams] = useState([]);
-  const [canAccessMicControl,setCanAccessMicControl] =useState(false);
-  const [isMicWithMe,setIsMicWithMe] = useState(false)
- 
+  const [ canStartDebate,setCanStartDebate] =useState(false)
+    
   useEffect(() => {
     if (activeDebate) {
       let speakerTeams = roomMembers.filter(speaker => {
@@ -82,27 +82,18 @@ const DebateAction = ({
     }
   }, [activeDebate, roomMembers])
 
-  useEffect(()=>{
 
-
-if(teams.length !== 0 && data){
-let nextTeam = teams.filter(team=>team.members.every(mem=>mem.id !== data._id));
-
-setCanAccessMicControl(nextTeam[0].members?.length===0)
-
-}
-  },[teams,data])
 
 
   useEffect(()=>{
- 
-    if(activeMicControlTeam?.members && data){
+    if(!data || !activeDebate)return;
+   let teamName =  getMyTeam(activeDebate.teams,data._id)?.name;
+   let startTeamName = activeDebate.timeFormat[0].team; 
+   console.log("my",startTeamName)
+   setCanStartDebate(teamName === startTeamName)
 
-      setIsMicWithMe(activeMicControlTeam.members.find(mem=>mem._id === data?._id));
-    }
-
-  },[activeMicControlTeam,data])
-
+    
+  },[data,activeDebate])
   const handleCopyLink=()=>{
 
     toast({
@@ -119,6 +110,7 @@ setCanAccessMicControl(nextTeam[0].members?.length===0)
 
 
 
+
   return (
     <>
       <div className={"debateActionContainer"}>
@@ -129,7 +121,7 @@ setCanAccessMicControl(nextTeam[0].members?.length===0)
             <>
              {
 
-            !debateState.isStarted  &&  <button className="pass_mic_button" onClick={handleStartDebate}>
+           ( !debateState.isStarted && canStartDebate )  &&  <button className="pass_mic_button" onClick={handleStartDebate}>
               <TbMicroscope/>
               START DEBATE
             </button> 
@@ -150,8 +142,6 @@ setCanAccessMicControl(nextTeam[0].members?.length===0)
           }  */}
     <div className="DebateActionWrapper">
       {
-        
-        
     debateState.isStarted ?    (micMuted ? <BsFillMicMuteFill onClick={handleMicToggle} /> :
          <BsFillMicFill className="activeMic" onClick={handleMicToggle} />) :""
       }

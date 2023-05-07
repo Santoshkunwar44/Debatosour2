@@ -47,12 +47,7 @@ const MongooseSchema = mongoose.Schema({
         type: Number,
         required: ["Number of Participants 'participantsCount'  is required"]
     },
-    noOfRounds: {
-        type: Number,
-        max: [5, "no of Rounds 'noOfRounds' should be less than 10"],
-        required: ["Number of rounds 'noOfRounds'   is required"]
-    },
-
+   
     admin: User,
     startTime: {
         type: Number, // milliseconds
@@ -70,8 +65,8 @@ const MongooseSchema = mongoose.Schema({
     teams: [
         Team,
     ],
-    speakTime:Number,
-    joinedParticipants:[ User  ],
+    timeFormat:Object,
+    joinedParticipants:[ User],
     type: {
         type: String,
         required: [true, 'debate type is required']

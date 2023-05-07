@@ -8,6 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate } from 'react-router-dom'
 import DebateInformation from "./DebateInformation.jsx"
 import './DebateFormInput.css'
+import DebateFormat from './DebateFormat/DebateFormat'
 
 
 
@@ -28,12 +29,11 @@ const DebateFormInput = () => {
     topic: "",
     type: "",
     startTime: 0,
-    noOfRounds: 1,
     admin: data,
     duration: 0,
     endTime: 0,
     team_format:"",
-    speakTime:0,
+    timeFormat:{},
     teams: [
       {
         name: "",
@@ -72,10 +72,7 @@ useEffect(()=>{
     }))
   }, [duration])
   useEffect(()=>{
-
-
     checkIsDebateInputCompleted()
-
     if(debateForm.type==="Lincoln–Douglas"){
         if(debateForm.type==="Lincoln–Douglas" && debateForm.team_format==="1" )return;
         setDebateForm((prev)=>({
@@ -84,15 +81,19 @@ useEffect(()=>{
         }))
 
     }else if(debateForm.type ==="British Parliamentary"){
-      if(debateForm.team_format === "1"){
+      if(debateForm.team_format === "1" ){
+        setDebateForm((prev)=>({
+          ...prev, 
+          team_format:"1"
+        }))
+      }
+    }
+    else if(debateForm.type === "Public forum"  && debateForm.team_format !=="2"){
       setDebateForm((prev)=>({
         ...prev, 
         team_format:"2"
       }))
-      }
-
     }
-
   },[debateForm]);
 
   
@@ -127,13 +128,11 @@ useEffect(()=>{
 
     let name = event.target.name
     let value = event.target.value
-    if (name === "noOfRounds" && (parseInt(value) > 5 || parseInt(value) < 1)) {
-      return;
-    };
+   
     if (name === "participantsCount" && parseInt(value) > 8) {
       return;
     }
-    if (name === "participantsCount" || name === "noOfRounds"|| name === "speakTime") {
+    if (name === "participantsCount" || name === "speakTime") {
       value = parseInt(value)
     }
     setDebateForm(prev => ({
@@ -491,6 +490,10 @@ useEffect(()=>{
         </div>
 
       </div>
+      {
+
+       <DebateFormat setDebateForm={setDebateForm} debateForm={debateForm} teams={debateForm.teams}/>
+      }
       <button type='submit' className='create_debate_btn' disabled={!data} onClick={handleCreateDebate}>
         CREATE DEBATE
       </button>

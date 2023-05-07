@@ -1,9 +1,70 @@
 .speak_time_left_box{
+        height: fit-content;
+    background: var(--dark_gradient_bg);
+    border-radius: 5px;
+    padding: 1rem ;
+    position: relative;
+}
+.speak_time_debate_state{
     position: absolute;
-    left: 0 ;
+    right: 10px;
+    color: white;
+    font-size: 12px ;
+    border-radius: 4px;
+    background: var(--dark_primary_text_color);
+    height: 30px;
+
+    padding: 0 10px;
+    padding-top: 5px;
+
+    font-size: 12px;
+    letter-spacing: 0.80px;
+}
+
+.speakTime_item,.speakTime_title{
+    gap: 5px;
+    font-size: 14px;
+
+    font-weight: 700;
+    letter-spacing: 1px;
+
 
 }
+.speakTime_item td{
+    padding: 0 1rem;
+    height: 30px;
+
+}
+
+.speakTime_item{
+
+    margin-bottom: 10px;
+}
+.speakTime_title{
+    display: flex;
+    align-items: center;
+}
+.speakTime_title svg{
+    color: var(--dark_primary_text_color);
+    font-size: 1rem;
+}
+
+.speakTime_item>p{
+    line-height: 30px;
+}
+.speakTime_title p:nth-of-type(1){
+    color: var(--dark_primary_text_color);
+}
+.speak_time_value{
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: capitalize;
+}
+
 .speak_time_right{
     right: 0 !important;
+
+}
+.speak_time_key{
 
 }

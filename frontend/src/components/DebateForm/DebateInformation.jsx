@@ -16,11 +16,6 @@ const DebateInformation = ({debateType,debateForm,handleInputChange}) => {
     //     british_parliamentry:<ParliamentaryInputs debateForm={debateForm} handleInputChange={handleInputChange}/>
     // }
 
-    const DebateTypeInputsMapping = new Map([
-        ["British Parliamentary",<ParliamentaryInputs  debateForm={debateForm} handleInputChange={handleInputChange}/>],
-        ["Lincoln–Douglas",<LincolnInputs debateForm={debateForm} handleInputChange={handleInputChange}  />],
-
-    ])
 
  
   return (
@@ -31,10 +26,7 @@ const DebateInformation = ({debateType,debateForm,handleInputChange}) => {
         
         <b>You choosed {debateInfo.type} type</b>
         <p className="debateInformation_box_desc">{debateInfo.desc}</p>
-     {
-
-       DebateTypeInputsMapping.get(debateType)
-     }  
+    
         </div> :""
     }
   
@@ -74,7 +66,7 @@ const LincolnInputs=({debateForm,handleInputChange})=>{
           </div>  */}
           <div className="input_item">
           <label className="form_label">Speak time</label>
-            <input name='roundTime' type="number" placeholder='speak time' onChange={handleInputChange} />
+            <input  name='speakTime' type="number" placeholder='speak time' onChange={handleInputChange} />
           </div>
         </div>
 

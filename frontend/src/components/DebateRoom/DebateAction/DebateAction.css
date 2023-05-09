@@ -92,8 +92,11 @@ transition: all .3s;
   background:var(--dark_primary_text_color_hover) !important;
   scale: 1.01;
 }
+.resumeIcon{
+  color: white !important;
+}
 .pass_mic_button svg{
-
+  fill: white !important;
   font-size: 1.2rem !important;
 }
 .leave_for_watch_type{

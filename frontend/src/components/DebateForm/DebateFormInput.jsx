@@ -31,7 +31,6 @@ const DebateFormInput = () => {
     startTime: 0,
     admin: data,
     duration: 0,
-    endTime: 0,
     team_format:"",
     timeFormat:{},
     teams: [
@@ -387,17 +386,7 @@ useEffect(()=>{
 
             </select>
           </div>
-          <div className='input_item'>
-            <label className="form_label">Team format</label>
-            <select value={debateForm.team_format}  name='team_format' onChange={handleInputChange}>
-              <option value=""  disabled selected>team format</option>
-              <option value="2">2 vs 2 </option>
-              <option disabled={debateForm.type==="British Parliamentary"} value="1">1 vs 1</option>
-
-              <option value="4">4 vs 4</option>
-
-            </select>
-          </div>
+  
 
 
         </div>
@@ -423,41 +412,38 @@ useEffect(()=>{
             </div>
           </div>
           <div className='input_item'>
+            <label className="form_label">Team format</label>
+            <select value={debateForm.team_format}  name='team_format' className='team_format' onChange={handleInputChange}>
+              <option value=""  disabled selected>team format</option>
+              <option value="2">2 vs 2 </option>
+              <option disabled={debateForm.type==="British Parliamentary"} value="1">1 vs 1</option>
+
+              <option value="4">4 vs 4</option>
+
+            </select>
+          </div>
+          {/* <div className='input_item'>
 
             <label className='form_label' >Starting time </label>
             <div className='duration_type'>
-              <button className={`${durationType === "Set Duration" && "active_duration"} duration_toggle_button`} onClick={() => setDurationType("Set Duration")}>Set Duration </button>
+            
               <button onClick={() => setDurationType("Instant Debate")} className={`${durationType === "Instant Debate" && "active_duration"} duration_toggle_button`}>Instant Debate </button>
 
             </div>
-          </div>
+          </div> */}
 
 
 
           <div className='starting_time_item input_item'>
-            <p className="form_label">Duration </p>
 
             {
-              durationType === "Instant Debate" ? <div className='instant_box'>
+              durationType === "Instant Debate" && <div className='instant_box'>
                 <button className={`${instantDebateTimes === "1Minute" && "active_duration"}`} onClick={() => handleInstatDebateChange("1Minute")}>1 Minutes </button>
                 <button className={`${instantDebateTimes === "2Minute" && "active_duration"}`} onClick={() => handleInstatDebateChange("2Minute")}>2 Minutes  </button>
                 <button className={`${instantDebateTimes === "3Minute" && "active_duration"}`} onClick={() => handleInstatDebateChange("3Minute")}>3 Minutes  </button>
 
-              </div> :
-                <div className='time_box_row'>
-
-                  <div className='time_box'>
-                    <input name='hour' type="number" min={"1"} max="24" value={duration.hour} onChange={(e) => handleDates(e, "duration")} />
-                    <div className='time_place'>hr</div>
-                  </div>
-                  <div className='time_box'>
-
-                    <input required={true} name='minute' type="number" min={"0"} value={duration.minute} onChange={(e) => handleDates(e, "duration")} />
-                    <div className='time_place'>
-                      min
-                    </div>
-                  </div>
-                </div>
+              </div> 
+              
             }
 
 

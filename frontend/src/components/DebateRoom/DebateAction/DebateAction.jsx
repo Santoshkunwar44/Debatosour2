@@ -1,9 +1,9 @@
 import {useState ,useEffect} from "react"
 
 import { BsFillMicFill, BsFillMicMuteFill } from "react-icons/bs"
-import { HiSpeakerWave } from "react-icons/hi2"
 import {HiOutlineClipboardDocument} from "react-icons/hi2";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
+import {RxResume} from "react-icons/rx"
 import "./DebateAction.css"
 import { useToast } from '@chakra-ui/react';
 import {TbMicroscope} from "react-icons/tb";
@@ -17,10 +17,8 @@ const DebateAction = ({
    ,roomId  
    ,isUserParticipant 
    , isLive,
-   passMicHandler,
    WatchType,
-   handleGetMicControl,
-   activeMicControlTeam,
+   handleResumeDebate,
    debateState,
    handleStartDebate,
   roomMembers}) => {
@@ -127,12 +125,12 @@ const DebateAction = ({
             </button> 
               }
             
-{/* 
-       {  (  !isMicWithMe && canAccessMicControl) &&    <button className="pass_mic_button" onClick={handleGetMicControl}>
-          <TbMicroscope/>
-         GET MIC CONTROL
+
+       {  (  debateState?.isPaused && isLive) &&    <button className="pass_mic_button" onClick={handleResumeDebate}>
+          <RxResume className="resumeIcon"/>
+        RESUME DEBATE
         </button>   
-} */}
+}
 
           {/* {
             isMicWithMe ?  <button className="pass_mic_button" onClick={passMicHandler}>

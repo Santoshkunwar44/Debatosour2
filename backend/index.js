@@ -12,7 +12,6 @@ require("dotenv").config()
 
 
 
-
 app.use(cors({
     origin: [
         process.env.FRONTEND_URL
@@ -31,6 +30,7 @@ app.set('trust proxy', 1) // trust first proxy
 const configuration = new Configuration({
     apiKey: process.env.OPEN_AI_API
 });
+
 const openAi = new OpenAIApi(configuration)
 
 app.use(cookieParser())
@@ -47,7 +47,6 @@ const store = MongoStore.create({
 })
 
 
-
 app.use(session({
     name: "debatosour.sid",
     secret: "helloworld",
@@ -55,26 +54,30 @@ app.use(session({
     saveUninitialized: true,
     store,
     cookie: {
-        secure: false,
+        secure: true,
         maxAge: 31556952000,
         httpOnly: true,
+        sameSite:"none"
     },
 }))
 // middlewares
 app.use(passport.initialize())
-app.use(passport.session())
+app.use(passport.session());
+
+
 app.post("/api/chatbot", async (req, res) => {
     try {
         const prompt = req.body.prompt
         console.log(prompt)
         const response = await openAi.createCompletion({
             model: "text-davinci-003",
-            prompt: `${prompt}`,
+            prompt: `hello how are  you ?`,
             temperature: 0,
-            max_tokens: 3000,
+            max_tokens: 64,
             top_p: 1,
-            frequency_penalty: 0.5,
-            presence_penalty: 0
+            frequency_penalty: 0.0,
+            presence_penalty: 0,
+            stop:["\n"]
 
         })
         return res.status(200).json({ message: response.data.choices[0].text, success: true })

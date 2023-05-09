@@ -4,6 +4,7 @@
     border-radius: 5px;
     padding: 1rem ;
     position: relative;
+    min-height: 60px;
 }
 .speak_time_debate_state{
     position: absolute;
@@ -13,10 +14,8 @@
     border-radius: 4px;
     background: var(--dark_primary_text_color);
     height: 30px;
-
     padding: 0 10px;
     padding-top: 5px;
-
     font-size: 12px;
     letter-spacing: 0.80px;
 }

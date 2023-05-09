@@ -13,11 +13,14 @@
   justify-content: space-between;
 }
 .Debate_room_main_text {
+  text-transform: uppercase;
   font-weight: bold;
-  font-size: 21px;
+  font-size: 26px;
   display: flex;
   align-items: center;
   gap: 10px;
+  letter-spacing: 1px;
+
   position: relative;
   width: fit-content;
 }

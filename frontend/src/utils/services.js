@@ -44,3 +44,35 @@ export const getTimeFromMs=(timeInMs)=>{
     return {day,hour ,min,sec}
    
 }
+
+export const getTheVotedTeam=(teams,userId)=>{
+
+    const theTeam =  teams.find(team=>team.vote?.find(user=>user===userId))
+    if(theTeam){
+        return theTeam.name;
+    }else{
+        return false
+    }
+}
+
+export const getNamesofTeam=(teams)=>{
+
+    return   teams?.map(team=>team.name)
+  
+
+}
+
+export const changeVote=(teams,type,userId ,teamsName )=>{
+    return teams.map(team=>{
+        if(team.name === teamsName){
+            if(type==="pull"){
+
+                return {...team,vote:team.vote.filter(mem=>mem !== userId)}
+            }else{
+                    return {...team,vote:[...team.vote  , userId]  }
+            } 
+        }else{
+            return team;
+        }
+    })
+}

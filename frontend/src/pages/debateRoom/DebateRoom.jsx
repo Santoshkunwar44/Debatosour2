@@ -1,22 +1,22 @@
 import { useEffect, useLayoutEffect, useState, useRef } from "react"
 import DebateScreenBox from "../../Layouts/Debate/DebateScreenBox/DebateScreenBox"
-import { others, useToast } from '@chakra-ui/react';
+import {  useToast } from '@chakra-ui/react';
 import Participants from "../../Layouts/Debate/Participants/Participants"
 import Navbar from "../../Layouts/Navbar/Navbar"
 import LiveChat from "../../components/DebateRoom/LiveChat/LiveChat"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { deleteDebateApi, getAgoraTokenApi, getDebateByIdApi, joinParticipantApi, removeParticipantApi } from "../../utils/Api"
 import { bindActionCreators } from "redux"
-import { v4 as uuid } from "uuid"
 import { actionCreators } from "../../redux/store"
-import { getMyTeam, getNextSpeakTeam, getTimeCountDown, getTimeFromMs } from "../../utils/services"
+import {  getTimeFromMs } from "../../utils/services"
 import { useDispatch } from "react-redux"
 import { useSelector } from "react-redux"
-import AgoraRTM, { RtmChannel, RtmClient } from 'agora-rtm-sdk'
+import AgoraRTM from 'agora-rtm-sdk'
 import AgoraRTC from 'agora-rtc-sdk-ng'
 import DebateAction from "../../components/DebateRoom/DebateAction/DebateAction"
 import "./DebateRoom.css"
 import DebateFinishModal from "../../Layouts/modal/DebateFinishedModal/DebateFinishModal";
+import DebateInfo from "../../Layouts/Debate/DebateInfo/DebateInfo";
 const APPID = "3b884a948c2e48848703ed80ad78b4c5";
 
 
@@ -24,7 +24,7 @@ const Rtm_client = AgoraRTM.createInstance(APPID);
 const Rtc_client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
 const rtcUid = Math.floor(Math.random() * 2032)
 const DebateRoom = () => {
-  const { activeDebate, isLive, isUserParticipant, roomLoading } = useSelector((state) => state.debate);
+  const {  activeDebate, isLive, isUserParticipant, roomLoading } = useSelector((state) => state.debate);
   const { data } = useSelector(state => state.user)
   const otherState = useSelector(state => state.other)
   const [UrlSearchParams, setUrlSearchParams] = useSearchParams();
@@ -68,7 +68,7 @@ const DebateRoom = () => {
     sec:0,
   })
 
-
+  
 
   useLayoutEffect(() => {
 
@@ -117,14 +117,14 @@ const DebateRoom = () => {
 
 
     let now = new Date().getTime();
-    if (now < activeDebate?.startTime) {
+    if (now < activeDebateRef.current?.startTime) {
       SetRoomIsLiveOrNot(false)
     } else {
       SetRoomIsLiveOrNot(true
       )
     }
 
-  }, [activeDebate, data])
+  }, [activeDebateRef.current, data])
 
   useEffect(()=>{
     if(!isLive && activeDebateRef.current){
@@ -152,9 +152,9 @@ const DebateRoom = () => {
   },[isLive ,activeDebateRef.current])
 
   useEffect(() => {
-    if (!activeDebate) return;
+    if (!activeDebateRef.current) return;
     if (data) {
-      let isParticipant = activeDebate?.teams.some(team => team.members.some(member => member._id === data?._id))
+      let isParticipant = activeDebateRef.current?.teams.some(team => team.members.some(member => member._id === data?._id))
       if (isParticipant) {
         SetIsUserParticipant(true)
       } else {
@@ -163,7 +163,7 @@ const DebateRoom = () => {
     } else {
       SetIsUserParticipant(false)
     }
-  }, [data, activeDebate])
+  }, [data, activeDebateRef.current?.teams])
 
   useEffect(() => {
 
@@ -173,15 +173,15 @@ const DebateRoom = () => {
     if (isLive && !UrlSearchParams.get("audience") && activeSpeakers.length > 0) {
       SetRoomLoading(false)
     }
-    if (!isLive && activeDebate) {
+    if (!isLive && activeDebateRef.current) {
       SetRoomLoading(false)
     }
 
-    if (isLive && UrlSearchParams.get("audience") && activeDebate) {
+    if (isLive && UrlSearchParams.get("audience") && activeDebateRef.current) {
       SetRoomLoading(false)
     }
 
-  }, [isLive, activeSpeakers])
+  }, [isLive, activeSpeakers ,activeDebateRef.current ])
 
 
   useEffect(() => {
@@ -375,6 +375,7 @@ const DebateRoom = () => {
     }
     const channel = Rtm_client.createChannel(debateId);
     rtmChannelRef.current = channel;
+    console.log("inside rtm");
     setRtmChannelAction(rtmChannelRef)
     setRtmChannel(channel)
 
@@ -400,7 +401,9 @@ const initChannelMessageEvent=()=>{
       const res = await getDebateByIdApi(debateId)
       if (res.status !== 200) throw Error(res.data.message)
       activeDebateRef.current = res.data.message[0];
-      AddActiveDebate(res.data.message[0]);
+
+      AddActiveDebate(activeDebateRef);
+
     } catch (error) {
       console.log(error)
     }
@@ -460,6 +463,10 @@ const initChannelMessageEvent=()=>{
         ...prev,data 
       ]))
 
+    }else if(data.type==="live_vote"){
+      delete data.type ;
+      activeDebate.current = data;
+      AddActiveDebate(activeDebate)
     }
   }
   const removIntervalFunc=()=>{
@@ -781,6 +788,7 @@ const initChannelMessageEvent=()=>{
           debateState?.hasFinished && <DebateFinishModal handleCloseDebate={handleLeaveRoom} />
         }
      
+     <DebateInfo/>
 
         <div className='debate_bottom_container'>
           <Participants />

@@ -38,3 +38,11 @@ export const findChatApi =(debateId)=>axiosInstance.get(`/chat/find?debate=${deb
 export const chatBotApi=(prompt)=>axiosInstance.post("/chat/chatbot",{
     prompt
 });
+
+
+
+// vote and unvote
+
+export const voteTeamApi =(data)=>axiosInstance.post("/debate/vote",data)
+export const unVoteTeamApi =(data)=>axiosInstance.post("/debate/unVote",data)
+export const voteAndUnvoteTeamApi =(data)=>axiosInstance.post("/debate/voteAndUnvote",data)

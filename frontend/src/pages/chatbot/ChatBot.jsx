@@ -24,13 +24,17 @@ const ChatBot = () => {
      const timer = setInterval(() => {
       const nextText = text[i]  
 
+      
       setChatBotMsgArr((prev)=>{
+        
+        console.log(prev,i)
 
-
-        console.log("the prev ",prev ,prev.findIndex((msg)=>msg._id === _id) === -1)
+        // console.log("the prev ",prev ,prev.findIndex((msg)=>msg._id === _id) === -1)
 
 
         if(prev.findIndex((msg)=>msg._id === _id) === -1){
+
+          console.log("new one",prev)
           return [...prev, {
             ...message,
             text:nextText
@@ -54,10 +58,12 @@ const ChatBot = () => {
 
       })
 
+      i++;
+
       if(i === text.length){
         clearInterval(timer )
       }
-    }, 100);
+    }, 70);
       
 
 
@@ -82,23 +88,20 @@ const ChatBot = () => {
     try {
       setLoading(true)
       cb()  ;
-      const res = await chatBotApi(prompt);
-      if(res.status===200){
-        const {message} = res.data;
-       let text = message.split('\n').filter(ans => ans !== '');
-        let resmsg = {
-          own:false,
-          text,
-          owner:"bot",
-          _id:Date.now()
+        const ress = await chatBotApi(prompt);
+        if(ress.status===200){
+          const {message} = ress.data
+          let resmsg = {
+            own:false,
+            text:message,
+            owner:"bot",
+            _id:Date.now()+100
+          }
+          setLoading(false)
+          writeMessage(resmsg)
         }
-        setLoading(false)
-        writeMessage(resmsg)
-      
     
-      }else{
-        throw Error("something went wrong")
-      }
+ 
     } catch (error) {
       setLoading(false)
     }

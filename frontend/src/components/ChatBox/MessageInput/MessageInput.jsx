@@ -26,7 +26,6 @@ const MessageInput = ({ isLiveChat, handleSendMessage }) => {
     
   }
   const handleInputChange = (event) => {
-    console.log(event)
     setVoiceText(event.target.value);
 
   }

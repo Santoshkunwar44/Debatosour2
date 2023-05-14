@@ -1,6 +1,5 @@
 
-import { useEffect, useState } from "react"
-import { FiMoreVertical } from "react-icons/fi"
+import { useState } from "react"
 import { HiOutlineSpeakerWave } from "react-icons/hi2";
 import { useSpeechSynthesis } from "react-speech-kit";
 import moment from  "moment"
@@ -19,7 +18,7 @@ const MessageText = ({ message, own ,chatBot }) => {
     speak({ text: typee })
   }
 
-console.log(message)
+
 
 
 
@@ -30,7 +29,7 @@ console.log(message)
    
    {
 
-   own ? <img className="user_image" referrerPolicy="no-referrer" src={ message?.owner?.avatar} alt="userImg" /> : "🤖"
+   message?.owner ==="bot" ? "🤖" : <img className="user_image" referrerPolicy="no-referrer" src={ message?.owner?.avatar} alt="userImg" /> 
 
     }
 
@@ -48,12 +47,8 @@ console.log(message)
 </>
             } 
         <p className={`message_text_content ${own ? "my_text_content" : ""}`}>
-          { !own? 
-              message.text.map(ans=>(
-                <div>{ans}</div>
-              ))
-
-            : message?.text}
+        
+            { message?.text}
         </p>
 
       </div>

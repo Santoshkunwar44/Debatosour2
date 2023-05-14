@@ -146,3 +146,17 @@ export const  setMessageArrAction=(payload)=>{
         })
     }
 }
+
+export const setVotedTeamAction=(payload)=>(dispatch)=>{
+    dispatch({
+        type:ActionTypes.SET_VOTED_TEAM,
+        payload
+    })
+}
+export const set_update_vote=(payload)=>(dispatch)=>{
+    console.log("SETTING",payload)
+    dispatch({
+        type:ActionTypes.SET_CHANGE_VOTE,
+        payload
+    })
+}

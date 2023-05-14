@@ -34,15 +34,15 @@ const DebateAction = ({
   const [ isMicWithUs,setIsMicWithUs] =useState(false)
     
   useEffect(() => {
-    if (activeDebate) {
+    if (activeDebate?.current) {
       let speakerTeams = roomMembers.filter(speaker => {
-        return activeDebate.teams.some(team => {
+        return activeDebate?.current.teams.some(team => {
           return team.members.some(member => {
             return member._id === speaker.id;
           });
         });
       }).map(speaker => {
-        let team = activeDebate.teams.find(team => {
+        let team = activeDebate?.current.teams.find(team => {
           return team.members.some(member => {
             return member._id === speaker.id;
           });
@@ -62,11 +62,11 @@ const DebateAction = ({
 
       const TeamArray = [
         {
-          name: activeDebate.teams[0].name,
+          name: activeDebate?.current?.teams[0].name,
           members: []
         },
         {
-          name: activeDebate.teams[1].name,
+          name: activeDebate?.current.teams[1].name,
           members: []
         }
       ]
@@ -82,7 +82,7 @@ const DebateAction = ({
       console.log("final", TeamArray)
       setTeams(TeamArray)
     }
-  }, [activeDebate, roomMembers])
+  }, [activeDebate?.current, roomMembers])
 
   useEffect(()=>{
     console.log("miccontrol",micControlTeam)
@@ -96,14 +96,14 @@ const DebateAction = ({
 
 
   useEffect(()=>{
-    if(!data || !activeDebate)return;
-   let teamName =  getMyTeam(activeDebate.teams,data._id)?.name;
-   let startTeamName = activeDebate.timeFormat[0].team; 
+    if(!data || !activeDebate?.current)return;
+   let teamName =  getMyTeam(activeDebate?.current.teams,data._id)?.name;
+   let startTeamName = activeDebate?.current.timeFormat[0].team; 
    console.log("my",startTeamName)
    setCanStartDebate(teamName === startTeamName)
 
     
-  },[data,activeDebate])
+  },[data,activeDebate?.current])
   const handleCopyLink=()=>{
 
     toast({

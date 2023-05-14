@@ -10,8 +10,8 @@ const Participants = () => {
   const [participants, setParticipants] = useState(null);
 
   useEffect(() => {
-    if (!activeDebate) return;
-    let result = activeDebate.teams.reduce((acc, team) => {
+    if (!activeDebate?.current) return;
+    let result = activeDebate?.current?.teams?.reduce((acc, team) => {
       team.members.forEach((person) => {
         acc.push(person)
       })
@@ -20,7 +20,7 @@ const Participants = () => {
     setParticipants(result)
 
 
-  }, [activeDebate])
+  }, [activeDebate?.current])
 
 
   return (

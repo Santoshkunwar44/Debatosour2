@@ -1,6 +1,6 @@
 .MessageInputWrapper {
   width: 80%;
-  height: 60px;
+  height: 55px;
   padding: 0 0.5rem;
   border-radius: 10px;
   margin: auto;
@@ -29,7 +29,7 @@
   padding: 10px;
 }
 
-.voiceText :hover {
+.voiceText:hover {
   color: white;
   scale: 1.1;
   background: var(--primary_color_dark);

@@ -37,13 +37,12 @@ class ChatController{
             model: "text-davinci-003",
             prompt,
             temperature: 0.5,
-            max_tokens: 1024,
+            max_tokens:512,
             top_p: 1,
             frequency_penalty: 0.0,
             presence_penalty: 0,
 
         })
-        console.log(response.data)
         return res.status(200).json({ message: response.data?.choices[0].text, uid:Date.now() , success: true })
     } catch (error) {
         console.log(error)

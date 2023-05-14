@@ -1,4 +1,5 @@
 const DebateModel = require("../models/DebateModel");
+const { hasVoted } = require("../services/UtilityMethods");
 const ObjectId = require('mongoose').Types.ObjectId;
 
 class DebateController {
@@ -170,6 +171,92 @@ class DebateController {
               
             return res.status(500).json({message:error.message,success:false})
             
+        }
+    }
+
+
+    async voteTeam(req,res){
+        const {debate ,team , user } = req.body;
+        try {
+            if(!debate || !team || !user  ){
+                throw Error("invalid credentails")
+            }
+      
+         
+                const updated = await DebateModel.findByIdAndUpdate(debate,{
+                    $push:{
+                        "teams.$[element].vote":user
+                    }
+                },{
+                    arrayFilters:[
+                        { "element.name":team }
+                    ],
+                    returnOriginal:false,
+                    returnDocument:true
+                 }).populate(["admin", "teams.members","joinedParticipants"])
+                res.status(200).json({message:updated,success:true})
+
+
+        } catch (error) {
+            console.log(error)
+            res.json(500).json({message:error.message,success:false})
+        }
+    }
+
+
+    async unVoteTeam(req,res){
+        const {debate ,team , user} = req.body;
+        try {
+            
+            
+        const unVoted =    await DebateModel.findByIdAndUpdate(debate,{
+            $pull:{
+                "teams.$[element].vote":user
+            }
+        },{
+            arrayFilters:[
+                { "element.name":team }
+            ],
+            returnOriginal:false ,
+            returnDocument:true
+
+        }).populate(["admin", "teams.members","joinedParticipants"])
+        res.status(200).json({message:unVoted,success:true})
+    } catch (error) {
+        res.status(500).json({message:error.message,success:false})
+    }
+}
+
+
+    async voteAndUnVote(req,res){
+        try {
+            const {voteTeam,unVoteTeam,user,debate} = req.body
+            await DebateModel.findByIdAndUpdate(debate,{
+                $push:{
+                    "teams.$[element].vote":user
+                }
+            },{
+                arrayFilters:[
+                    { "element.name":voteTeam }
+                ],
+                returnOriginal:false
+            })
+          const updated =   await DebateModel.findByIdAndUpdate(debate,{
+                $pull:{
+                    "teams.$[element].vote":user
+                }
+            },{
+                arrayFilters:[
+                    { "element.name":unVoteTeam }
+                ],
+                returnOriginal:false,
+                returnDocument:true
+            }).populate(["admin", "teams.members","joinedParticipants"])
+
+                return res.status(200).json({message:updated,success:true})
+
+        } catch (error) {
+                return res.status(500).json({message:error.message,success:false})
         }
     }
 }

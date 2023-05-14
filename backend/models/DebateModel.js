@@ -5,8 +5,6 @@ const mongoose = require("mongoose")
 const User = {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-
-    required: true
 }
 
 
@@ -14,8 +12,8 @@ const Team = {
 
     members: [User],
     vote: {
-        type: Number,
-        default: 0
+     type:[User],
+    default:[]
     },
     name: {
         type: String,
@@ -70,6 +68,7 @@ const MongooseSchema = mongoose.Schema({
     type: {
         type: String,
         required: [true, 'debate type is required']
-    }
+    },
+  
 },{timestamps:true})
 module.exports = mongoose.model("Debate", MongooseSchema)

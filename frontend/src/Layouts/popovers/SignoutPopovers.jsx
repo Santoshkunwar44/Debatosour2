@@ -15,6 +15,7 @@ import { bindActionCreators } from 'redux'
 import { actionCreators } from '../../redux/store'
 
 import { logoutApi } from '../../utils/Api'
+import { removeLoggedInUserData } from '../../utils/services'
 
 
 
@@ -31,6 +32,7 @@ const SignOutPopover = ({ children }) => {
             const res = await logoutApi();
             if (res.status === 200) {
                 RemoveLoggedInUser()
+                removeLoggedInUserData();
                 toast({
                     title: '',
                     description: "You Logged out successfully",

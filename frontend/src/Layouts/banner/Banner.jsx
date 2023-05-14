@@ -5,14 +5,14 @@ import {useState ,useEffect} from "react";
 import {useNavigate} from "react-router-dom"
 import { useToast } from '@chakra-ui/react';
 import "./Banner.css";
+import { getLoggedInUserData } from "../../utils/services";
 const Banner = () => {
 
  const [debateLink, setdebateLink] = useState("")
  const [ validLink,setValidLink] =useState(false  )
  const navigate = useNavigate()
  const toast = useToast()
-
-
+ const currentUser = getLoggedInUserData();
   useEffect(() => {
 
    let id =   debateLink?.split("?")[1]?.split("=")[1]
@@ -65,14 +65,14 @@ if(!validLink){
       <div className="banne_bottom_option_box">
 
 
-        <Link to={"/create"}>
+      {currentUser?.subStatus && <Link to={"/create"}>
           <button className="banner_bottom_button_option_button">
             <MdOutlineAdd />
             <p>
               Create Debate
             </p>
           </button>
-        </Link>
+        </Link>}
 
         <Link to="/chatbot">
           <button className="prepare_for_debate_btn">

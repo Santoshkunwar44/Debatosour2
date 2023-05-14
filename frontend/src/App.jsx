@@ -16,6 +16,7 @@ import CreateDebate from "./pages/CreateDebate/CreateDebate";
 import "./App.css"
 import Profile from "./pages/profile/Profile";
 import  Watchnow from "./pages/WatchNow/Watchnow";
+import  Subscription from "./pages/Subscription/Subscription";
 
 function App() {
   const { data } = useSelector((state) => state.user)
@@ -71,6 +72,7 @@ function App() {
           <Route path="/signup" element={data ? <Navigate to={"/"} /> : <Signup />} />
           <Route path="/debate_room/:debateId" element={<DebateRoom />} />
           <Route path="/watch" element={<Watchnow />} />
+          <Route path="/subscription" element={<Subscription />} />
 
         </Routes>
       </div>

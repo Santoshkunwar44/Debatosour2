@@ -6,6 +6,7 @@ import { bindActionCreators } from "redux"
 import { actionCreators } from '../../../redux/store';
 import { useToast } from '@chakra-ui/react';
 import "../Auth.css"
+import { setLoggedInUserData } from '../../../utils/services';
 
 
 const Login = () => {
@@ -38,9 +39,13 @@ const Login = () => {
     try {
 
       const res = await LoginUserApi(loginData.data);
-
       if (res.status === 200) {
         AddLoggedInUser(res.data.message)
+        setLoggedInUserData({
+          email: res.data.message.email,
+          subStatus: res.data.message.subscription.status,
+          stripeCustomerId: res.data.message?.stripeCustomerId ? res.data.message?.stripeCustomerId : null
+        })
         // navigate("/")
         navigate(-1);
         toast({

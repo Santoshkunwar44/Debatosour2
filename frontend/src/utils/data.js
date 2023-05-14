@@ -143,5 +143,10 @@ export const TimeFormatMappingMethod= (teamsNameArr,format)=>{
     return timeMaps.get(format)
     
 } 
+export const debateFormat=new Map([
+    ["British Parliamentary",[2,4]],
+    ["Public forum",[2]],
+    ["Lincoln–Douglas",[1]],
+])
 
 

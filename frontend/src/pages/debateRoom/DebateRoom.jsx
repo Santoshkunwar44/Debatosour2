@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState, useRef } from "react"
 import DebateScreenBox from "../../Layouts/Debate/DebateScreenBox/DebateScreenBox"
-import { useToast } from '@chakra-ui/react';
+import { others, useToast } from '@chakra-ui/react';
 import Participants from "../../Layouts/Debate/Participants/Participants"
 import Navbar from "../../Layouts/Navbar/Navbar"
 import LiveChat from "../../components/DebateRoom/LiveChat/LiveChat"
@@ -9,10 +9,10 @@ import { deleteDebateApi, getAgoraTokenApi, getDebateByIdApi, joinParticipantApi
 import { bindActionCreators } from "redux"
 import { v4 as uuid } from "uuid"
 import { actionCreators } from "../../redux/store"
-import { getMyTeam, getNextSpeakTeam } from "../../utils/services"
+import { getMyTeam, getNextSpeakTeam, getTimeCountDown, getTimeFromMs } from "../../utils/services"
 import { useDispatch } from "react-redux"
 import { useSelector } from "react-redux"
-import AgoraRTM, { RtmClient } from 'agora-rtm-sdk'
+import AgoraRTM, { RtmChannel, RtmClient } from 'agora-rtm-sdk'
 import AgoraRTC from 'agora-rtc-sdk-ng'
 import DebateAction from "../../components/DebateRoom/DebateAction/DebateAction"
 import "./DebateRoom.css"
@@ -26,12 +26,13 @@ const rtcUid = Math.floor(Math.random() * 2032)
 const DebateRoom = () => {
   const { activeDebate, isLive, isUserParticipant, roomLoading } = useSelector((state) => state.debate);
   const { data } = useSelector(state => state.user)
+  const otherState = useSelector(state => state.other)
   const [UrlSearchParams, setUrlSearchParams] = useSearchParams();
   const [WatchType, setWatchType] = useState()
   const { debateId } = useParams()
   const dispatch = useDispatch()
   const rtmChannelRef = useRef()
-  const { AddActiveDebate, SetRoomIsLiveOrNot, SetIsUserParticipant, setIsLoading, SetRoomLoading } = bindActionCreators(actionCreators, dispatch)
+  const { AddActiveDebate, SetRoomIsLiveOrNot, SetIsUserParticipant, setRtmChannelAction, setIsLoading, SetRoomLoading } = bindActionCreators(actionCreators, dispatch)
   const [activeMicControlTeam, setActiveMicControlTeam] = useState(null)
   const [audioTracks, setAudioTracks] = useState({
     localAudioTracks: null,
@@ -39,7 +40,8 @@ const DebateRoom = () => {
   })
   const roundShotsCount = useRef(0)
   const activeDebateRef = useRef()
-  const [RoomMembers, setRoomMembers] = useState([])
+  const [RoomMembers, setRoomMembers] = useState([]);
+  const {setMessage} = useSelector(state=>state.chat)
   const [micMuted, setMicMuted] = useState(true)
   const navigate = useNavigate()
   const [rtmChannel, setRtmChannel] = useState();
@@ -59,6 +61,13 @@ const DebateRoom = () => {
     remainingTime: 0,
 
   })
+  const [ handleRemaining,setHandleRemaining] = useState({
+    day:0,
+    hour:0,
+    min:0,
+    sec:0,
+  })
+
 
 
   useLayoutEffect(() => {
@@ -117,6 +126,30 @@ const DebateRoom = () => {
 
   }, [activeDebate, data])
 
+  useEffect(()=>{
+    if(!isLive && activeDebateRef.current){
+      const {startTime} = activeDebateRef.current;
+      let intervalId ;
+       intervalId =  setInterval(() => {
+
+        const diff = startTime - Date.now();
+        if(diff > 0){
+
+          const {day,hour,min,sec} = getTimeFromMs(diff)
+          setHandleRemaining({
+            hour,
+            day,
+            min,
+            sec
+          })
+        }else{
+          clearInterval(intervalId)
+          SetRoomIsLiveOrNot(true)
+        }
+
+      }, 1000);
+    }
+  },[isLive ,activeDebateRef.current])
 
   useEffect(() => {
     if (!activeDebate) return;
@@ -133,6 +166,9 @@ const DebateRoom = () => {
   }, [data, activeDebate])
 
   useEffect(() => {
+
+
+    if(!roomLoading)return;
 
     if (isLive && !UrlSearchParams.get("audience") && activeSpeakers.length > 0) {
       SetRoomLoading(false)
@@ -162,7 +198,6 @@ const DebateRoom = () => {
   const setInitialDebateState = async () => {
     const attr = await getChannelAttributeFunc();
     let { speakersData, debateRounds } = attr;
-    console.log("channel", debateRounds, speakersData)
     if (speakersData) {
       speakersData = JSON.parse(speakersData?.value);
       const activeSpeakerTeam = speakersData;
@@ -188,7 +223,7 @@ const DebateRoom = () => {
     roundShotsCount.current = 1;
     await handleDebateInitChange(1)
   }
-  const handleDebateInitChange = async (nextround) => {
+  const handleDebateInitChange = async (nextround,isMicPassed) => {
 
     if (!activeDebateRef.current) return;
 
@@ -207,8 +242,9 @@ const DebateRoom = () => {
       startedAt: Date.now(),
       isPaused: false,
       both: teamName === "both",
+      isMicPassed:isMicPassed ?? false
     }
-    console.log("payload", debateRoundsPayload);
+
     setDebateState(debateRoundsPayload);
     setActiveMicControlTeam(team ?? "both");
     await updateChannelDebateRounds(debateRoundsPayload);
@@ -228,31 +264,23 @@ const DebateRoom = () => {
     await createChannelMessage(messagePayload)
   }
 
-  const handleFinishSpeakTime = async () => {
+  const handleFinishSpeakTime = async (isMicPassed) => {
+    
     const { timeFormat, teams } = activeDebateRef.current
     let debateShot = debateState.round_shot;
-    let totalShot = activeDebateRef.current.timeFormat.length
+    let totalShot = timeFormat?.length
     let nextRoundShot = ++debateShot;
     roundShotsCount.current = nextRoundShot;
-    let nextSpeakTeam = timeFormat[nextRoundShot - 1]?.team
-    const myTeamName = getMyTeam(teams, data?._id)?.name;
-    console.log("myteam", myTeamName, micMuted, nextSpeakTeam)
-    if ((nextSpeakTeam !== myTeamName) && !micMuted && nextSpeakTeam !== "both") {
-      console.log("myteamtooggle")
-      await handleMicTogggle()
-    }
-
+ 
     if (nextRoundShot > totalShot) {
       handleCloseDebate()
     } else {
-      handleDebateInitChange(nextRoundShot)
+      handleDebateInitChange(nextRoundShot,isMicPassed)
     }
   }
 
   const updateChannelDebateRounds = async (payload) => {
-    console.log("hello",payload)
     if (!Rtm_client || !rtmChannelRef.current || !activeDebateRef.current) return;
-    console.log("hello2",payload)
     await Rtm_client.addOrUpdateChannelAttributes(rtmChannelRef.current.channelId, {
       debateRounds: JSON.stringify(payload)
     });
@@ -347,8 +375,9 @@ const DebateRoom = () => {
     }
     const channel = Rtm_client.createChannel(debateId);
     rtmChannelRef.current = channel;
+    setRtmChannelAction(rtmChannelRef)
     setRtmChannel(channel)
-    channel.on("ChannelMessage", handleChannelMessage)
+
     channel.on("MemberJoined", handleMemberJoined)
     channel.on("MemberLeft", handleMemberLeft);
     await channel.join()
@@ -356,6 +385,15 @@ const DebateRoom = () => {
     getChannelMembers(channel);
 
   }
+  useEffect(()=>{
+    initChannelMessageEvent();
+  },[otherState,rtmChannel ])
+
+const initChannelMessageEvent=()=>{
+  if(!rtmChannel)return;
+  rtmChannel.on("ChannelMessage", handleChannelMessage)
+}
+
   const fetchDebateById = async () => {
     if (!debateId) return;
     try {
@@ -399,8 +437,11 @@ const DebateRoom = () => {
   }
   const handleChannelMessage = (message) => {
     const data = JSON.parse(message.text);
-    console.log(data, "message")
+    console.log('received message',data,setMessage)
     if (data.type === "round_change") {
+      if(roundShotsCount.current !==1 && data?.rounds?.isMicPassed){
+        removIntervalFunc()
+      }
 
       const { rounds, speakers } = data
       if (roundShotsCount.current >= rounds.round_shot) return;
@@ -413,9 +454,19 @@ const DebateRoom = () => {
     } else if (data.type === "resume_debate") {
 
       setDebateState(data)
+    }else if(data.type==="live_chat"){
+      delete data.type
+      setMessage(prev=>([
+        ...prev,data 
+      ]))
+
     }
-
-
+  }
+  const removIntervalFunc=()=>{
+    const {removeInterval  } = otherState;
+    if(!removeInterval)return;
+        clearInterval(removeInterval?.intervalRef?.current);
+        removeInterval.intervalArrRef.current=[];
   }
   let initVolumeIndicator = async () => {
 
@@ -542,8 +593,6 @@ const DebateRoom = () => {
     closeTracks()
     navigate(-1)
   }
-
-
   // :returns false if no speaker || returns speakerId if there speaker
   const getRoomSpeaker = async () => {
 
@@ -608,7 +657,6 @@ const DebateRoom = () => {
       return true;
     }
 
-    console.log("speaker", await getRoomSpeaker())
 
     if (await getRoomSpeaker()) {
       showToast("Someone else is speaking", "error");
@@ -671,25 +719,32 @@ const DebateRoom = () => {
 
 
   }
-  const showRemaining = () => {
 
-    console.log("remaining", timeRemainingRef)
-  }
+  const {day,sec,hour,min} = handleRemaining;
 
   return (
     <>
       <Navbar />
       <div className='DebateRoomWrapper' >
         <div className='debate_room_top_header'>
-          <h1 className='Debate_room_main_text' onClick={showRemaining}>
+          <div className="debate_room_top_header_left">
             <img width={"40px"} src="/images/error_dino.png" alt="dinosour" />
-            <h1 className='main_text_one' > </h1> {activeDebateRef.current?.topic}  </h1>
-          {/* {
+            <div>
+          <h1 className='Debate_room_main_text' >
+            {activeDebateRef.current?.topic}  </h1>
+                
+              </div>
 
-        debateState.isStarted &&  <div className='round_text' onClick={getChannelAttributeFunc} >
-            ROUND {Math.ceil(debateState.round_shot /2) }/{activeDebate?.noOfRounds}
-          </div>
-          } */}
+            </div>
+          {/* { !isLive  &&   <div className="debate_room_top_header_right">
+
+            <h1 className="main_timing_text"> {`STARTS IN ${getTimeCountDown(null,day,hour,hour,sec)} `}</h1>
+            </div>}
+            { (debateState.isStarted && !debateState.isPaused) &&   <div>
+
+            <h1 className="main_timing_text"> {`ROUND FINISH IN ${getTimeCountDown(timeRemainingRef.current)} `} </h1>
+            </div>} */}
+      
         </div>
         <DebateScreenBox
           debateState={debateState}
@@ -719,17 +774,19 @@ const DebateRoom = () => {
           debateState={debateState}
           handleStartDebate={startDebate}
           handleResumeDebate={handleResumeDebate}
+          micControlTeam={activeMicControlTeam}
+          finishHandle={handleFinishSpeakTime}
         />
         {
           debateState?.hasFinished && <DebateFinishModal handleCloseDebate={handleLeaveRoom} />
         }
-        {/* {
-          isLive && WatchType === "AUDIENCE" ? <button className="leave_btn" onClick={handleLeaveRoom}>LEAVE</button> : ""
-        } */}
+     
 
         <div className='debate_bottom_container'>
           <Participants />
-          <LiveChat />
+          <LiveChat 
+          
+          />
         </div>
       </div>
 

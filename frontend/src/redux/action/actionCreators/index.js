@@ -120,3 +120,29 @@ export const SetRoomLoading = (payload) => {
         })
     }
 }
+export const setRemoveIntervalFunc=(payload)=>{
+    console.log("settinginit",payload)
+    return (dispatch)=>{
+        dispatch({
+            type:ActionTypes.SET_REMOVE_INTERVAL_FUNC,
+            payload
+        })
+    }
+}
+export const setRtmChannelAction=(payload)=>{
+    return (dispatch)=>{
+        dispatch({
+            type:ActionTypes.SET_RTM_CHANNEL,
+            payload
+        })
+    }
+}
+
+export const  setMessageArrAction=(payload)=>{
+    return (dispatch)=>{
+        dispatch({
+            type:ActionTypes.SET_MESSAGE_ARR,
+            payload
+        })
+    }
+}

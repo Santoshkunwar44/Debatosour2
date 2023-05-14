@@ -21,13 +21,17 @@ const DebateAction = ({
    handleResumeDebate,
    debateState,
    handleStartDebate,
+   micControlTeam,
+   finishHandle,
   roomMembers}) => {
 
   const { activeDebate } = useSelector((state) => state.debate);
   const {data} = useSelector((state)=>state.user)
+  const {removeInterval} = useSelector(state=>state.other)
   const toast = useToast()
   const [teams, setTeams] = useState([]);
-  const [ canStartDebate,setCanStartDebate] =useState(false)
+  const [ canStartDebate,setCanStartDebate] =useState(false);
+  const [ isMicWithUs,setIsMicWithUs] =useState(false)
     
   useEffect(() => {
     if (activeDebate) {
@@ -80,6 +84,14 @@ const DebateAction = ({
     }
   }, [activeDebate, roomMembers])
 
+  useEffect(()=>{
+    console.log("miccontrol",micControlTeam)
+      if(micControlTeam && data){
+        const isMyTeam=   micControlTeam?.members?.find(mem => mem?._id === data?._id);
+        console.log("miccontrol",isMyTeam)
+        setIsMicWithUs(isMyTeam ?? false)
+      }
+  },[micControlTeam,data])
 
 
 
@@ -104,8 +116,14 @@ const DebateAction = ({
     })
   }
 
-
-
+  const passTurnToNextTeam=()=>{
+    if(removeInterval){
+     clearInterval(removeInterval.intervalRef?.current);
+     removeInterval.intervalArrRef.current=[];
+      finishHandle(true)
+    }
+  }
+ 
 
 
 
@@ -124,20 +142,18 @@ const DebateAction = ({
               START DEBATE
             </button> 
               }
-            
-
-       {  (  debateState?.isPaused && isLive) &&    <button className="pass_mic_button" onClick={handleResumeDebate}>
+           {  (  debateState?.isPaused && isLive) &&    <button className="pass_mic_button" onClick={handleResumeDebate}>
           <RxResume className="resumeIcon"/>
         RESUME DEBATE
         </button>   
 }
 
-          {/* {
-            isMicWithMe ?  <button className="pass_mic_button" onClick={passMicHandler}>
+          {
+            ( !debateState.isPaused && isMicWithUs) ?  <button className="pass_mic_button" onClick={passTurnToNextTeam}>
             <TbMicroscope/>
-           PASS MIC
+           PASS TURN  TO NEXT TEAM 
           </button>:""
-          }  */}
+          } 
     <div className="DebateActionWrapper">
       {
     debateState.isStarted ?    (micMuted ? <BsFillMicMuteFill onClick={handleMicToggle} /> :

@@ -71,5 +71,5 @@ const MongooseSchema = mongoose.Schema({
         type: String,
         required: [true, 'debate type is required']
     }
-})
+},{timestamps:true})
 module.exports = mongoose.model("Debate", MongooseSchema)

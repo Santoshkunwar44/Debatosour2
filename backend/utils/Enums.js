@@ -1,6 +1,5 @@
 const Enums = {
     USER_JOINED: "user joined",
-
     JOIN_ROOM: "join room",
     GET_USER: "get user",
     SENDING_SIGNAL: "sending signal",

@@ -8,6 +8,7 @@ const INITIAL_DEBATE_STATE={
     activeParticipants:[],
     streamRef:null,
     roomLoading:false,
+    
 }
 
 const DebateReducer=(state=INITIAL_DEBATE_STATE,action)=>{   

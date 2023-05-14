@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import DebateInformation from "./DebateInformation.jsx"
 import './DebateFormInput.css'
 import DebateFormat from './DebateFormat/DebateFormat'
+import { debateFormat } from '../../utils/data'
 
 
 
@@ -72,36 +73,15 @@ useEffect(()=>{
   }, [duration])
   useEffect(()=>{
     checkIsDebateInputCompleted()
-    if(debateForm.type==="Lincoln–Douglas"){
-        if(debateForm.type==="Lincoln–Douglas" && debateForm.team_format==="1" )return;
-        setDebateForm((prev)=>({
-          ...prev, 
-          team_format:"1"
-        }))
-
-    }else if(debateForm.type ==="British Parliamentary"){
-      if(debateForm.team_format === "1" ){
-        setDebateForm((prev)=>({
-          ...prev, 
-          team_format:"1"
-        }))
-      }
-    }
-    else if(debateForm.type === "Public forum"  && debateForm.team_format !=="2"){
-      setDebateForm((prev)=>({
-        ...prev, 
-        team_format:"2"
-      }))
-    }
   },[debateForm]);
 
   
   const checkIsDebateInputCompleted=()=>{
     let missing= false ;
     for(let key in debateForm){
-      if(!debateForm[key] && key !=="teams" && key !=="endTime" ){
+      if(!debateForm[key] && key !=="teams" ){
+        console.log("missing",key)
          missing = true;
-         console.log("missing",key)
       }
     }
     if(!missing){
@@ -355,7 +335,22 @@ useEffect(()=>{
     const selectedDate = new Date(time);
     return currentDate.getTime() < selectedDate.getTime();
   };
-
+  const returnTeamFormatOptions=()=>{
+let formatArr = debateFormat.get(debateForm.type);
+if(formatArr){
+  let formatVal = formatArr[0].toString();
+  if(debateForm.team_format!==formatVal){
+    setDebateForm(prev=>({
+      ...prev, team_format:formatArr[0].toString(   )
+    }))
+  }
+  return  formatArr.map((format)=>(
+    <option value={format.toString()} name={debateForm.type} >{`${format} vs ${format}`}</option>
+  ))
+}else{
+  return <option value={""} disabled>select team format</option>
+}
+  }
   return (
     <div className='DebateFormWrapper'>
       <div className="create_debate_header">
@@ -414,11 +409,9 @@ useEffect(()=>{
           <div className='input_item'>
             <label className="form_label">Team format</label>
             <select value={debateForm.team_format}  name='team_format' className='team_format' onChange={handleInputChange}>
-              <option value=""  disabled selected>team format</option>
-              <option value="2">2 vs 2 </option>
-              <option disabled={debateForm.type==="British Parliamentary"} value="1">1 vs 1</option>
-
-              <option value="4">4 vs 4</option>
+              {
+                returnTeamFormatOptions()
+              }
 
             </select>
           </div>

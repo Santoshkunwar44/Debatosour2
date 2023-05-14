@@ -57,6 +57,18 @@
   width: 100%;
   justify-content: space-between;
 }
+.speakTime_left_box_time_show{
+  display: flex;
+
+  justify-content: flex-end;
+  gap: 1rem;
+  align-items: center;
+}
+.speakTime_left_box_time_show h4{
+  font-size: 17px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
 .screen_box_header .team_mic_icon{
   font-size: 1.2rem !important;
 }

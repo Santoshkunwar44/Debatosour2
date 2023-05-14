@@ -1,6 +1,6 @@
 import { axiosInstance } from "./axios";
 
-
+//USER ENDPOINTS
 
 export const RegisterUserApi = (data) => axiosInstance.post("/auth/register", data)
 export const LoginUserApi = (data) => axiosInstance.post("/auth/login", data)
@@ -25,8 +25,16 @@ export const getUsersDebateCountApi = (userId) => axiosInstance.get(`/debate/cou
 export const joinParticipantApi =(debateId,data)=>axiosInstance.post(`/debate/joinParticipant/${debateId}`,data)
 export const removeParticipantApi =(debateId,data)=>axiosInstance.post(`/debate/removeParticipant/${debateId}`,data)
 export const getSingleDebateApi =(debateId) =>axiosInstance.get(`/debate/singleDebate/${debateId}`)
-// chat bot api
 
+// chat bot api
 export const getBotMessageApi = (data) => axiosInstance.post("/chatbot", data);
 export const updateUserapi = (userId, data) => axiosInstance.put(`/user/${userId}`, data)
 
+
+
+// live chat api
+export const createChatApi =(data)=>axiosInstance.post("/chat/create",data)
+export const findChatApi =(debateId)=>axiosInstance.get(`/chat/find?debate=${debateId}`)
+export const chatBotApi=(prompt)=>axiosInstance.post("/chat/chatbot",{
+    prompt
+});

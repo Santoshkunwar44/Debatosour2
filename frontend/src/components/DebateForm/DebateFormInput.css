@@ -137,7 +137,7 @@ h2 {
 }
 .team_format{
   opacity: 0.7;
-  pointer-events: none;
+  /* pointer-events: none; */
 }
 .DebateFormWrapper button :hover {
   background-color: var(--primary_color);

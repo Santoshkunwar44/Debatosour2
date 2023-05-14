@@ -1,20 +1,28 @@
 import "./speakTimeLeft.css"
 import {RiTimerFlashFill} from "react-icons/ri"
+import {AiOutlineFieldNumber} from "react-icons/ai"
+import {FiType} from "react-icons/fi"
 import {TiGroup} from "react-icons/ti"
+import { useSelector } from "react-redux"
 const SpeakTimeLeft = ({debateState,countDown ,startTeam}) => {
 
+  const {activeDebate} = useSelector(state=>state.debate)
   
   return (
          <>
          {
    <div className='speak_time_left_box' >
-      <div className="speak_time_info">
+    <div className="speakTime_left_box_time_show">
+ 
         <div className="speak_time_debate_state">
           {
          debateState?.isPaused ? "Paused" :   debateState?.isStarted ? "Ongoing":
          debateState?.hasFinished ? "Completed":"Not Started"  
           }
         </div>
+      </div>
+      <div className="speak_time_info">
+
         <table>
           <thead style={{display:"none"}}>
             <th>hell</th>
@@ -22,6 +30,7 @@ const SpeakTimeLeft = ({debateState,countDown ,startTeam}) => {
           </thead>
 
       <tbody>
+    
             {
               (!debateState?.isStarted && !debateState?.hasFinished) &&      <tr className="speakTime_item">
               <td className="speakTime_title">
@@ -31,11 +40,41 @@ const SpeakTimeLeft = ({debateState,countDown ,startTeam}) => {
               <td className="speak_time_value">{startTeam}</td>
             </tr>
             }
+            <tr className="speakTime_item" >
+            <td className="speakTime_title">
+
+            <FiType/>
+            <p className="speak_time_key">Debate Type  </p>
+            </td>
+            
+            <td className="speak_time_value">{activeDebate?.type}</td>
+          </tr>
+            <tr className="speakTime_item" >
+            <td className="speakTime_title">
+
+            <AiOutlineFieldNumber/>
+            <p className="speak_time_key">Total Speak Count  </p>
+            </td>
+            
+            <td className="speak_time_value">{activeDebate?.timeFormat?.length}</td>
+          </tr>
+          {
+           ( debateState?.isStarted || debateState?.isPaused ) &&
+            <tr className="speakTime_item" >
+            <td className="speakTime_title">
+
+            <RiTimerFlashFill/>
+            <p className="speak_time_key">Active Speak Count   </p>
+            </td>
+            
+            <td className="speak_time_value">{debateState?.round_shot}</td>
+          </tr>
+          }
       {
 
 (debateState?.isStarted || debateState?.isPaused) &&    <tr className="speakTime_item">
             <td className="speakTime_title">
-            <TiGroup/>
+            <TiGroup />
             <p className="speak_time_key">Speech Team </p>
             </td> 
             <td className="speak_time_value">{debateState?.speakTeam}</td>

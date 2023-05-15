@@ -1,5 +1,6 @@
 const UserModel = require("../models/UserModel");
 const { isUserUpdated } = require("../services/AuthService");
+const { getUserSubscriptionStatus } = require("../services/UtilityMethods");
 const { stripe } = require("../utils/stripe");
 
 class UserController {
@@ -81,6 +82,9 @@ class UserController {
           apiKey: process.env.STRIPE_SECRET_KEY,
         }
       );
+      await UserModel.findOneAndUpdate({
+        email:req.body.email
+      })
       return res.json(session);
     } catch (error) {
       console.log("*error: ", error);
@@ -90,11 +94,12 @@ class UserController {
 
   async getLoggedInUser(req, res) {
     const sessionUser = req.session?.passport?.user || req.session.user;
-    console.log("session user",sessionUser)
 
     if (sessionUser) {
       let updatedUser = await isUserUpdated(sessionUser);
-        
+      const {stripeCustomerId} = updatedUser;
+      console.log( "the status", await getUserSubscriptionStatus(stripeCustomerId))
+      updatedUser.subscription =   await getUserSubscriptionStatus(stripeCustomerId)
       return res.status(200).json({ message: updatedUser, success: true });
     } else {
       return res

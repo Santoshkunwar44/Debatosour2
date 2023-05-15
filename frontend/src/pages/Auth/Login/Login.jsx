@@ -42,15 +42,9 @@ const Login = () => {
       
       if (res.status === 200 && res.data.message) {
 
-        const {stripeCustomerId ,subscription,...other} = res.data.message
+        const {message} = res.data
 
-        AddLoggedInUser({
-          ...other,
-          // how do  you get subscription obj since there's no 
-          // subscription filed for subscription in db
-          subStatus:subscription?.status,
-          stripeCustomerId:stripeCustomerId ?? null
-        });
+        AddLoggedInUser(message);
         
         navigate(-1);
         toast({

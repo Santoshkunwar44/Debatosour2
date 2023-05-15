@@ -4,18 +4,16 @@ const {
   hashPassword,
   compareHashPassword,
 } = require("../services/AuthService");
+const { getUserSubscriptionStatus } = require("../services/UtilityMethods");
 
 class AuthController {
   async register(req, res) {
-    const { email, password } = req.body;
+    const { email, password:thePassword } = req.body;
     try {
       const userExist = await UserModel.findOne({ email });
       if (userExist) {
         throw Error("This email is  already used");
       }
-      req.body.lastLoggedIn = Date.now();
-
-      req.body.password = await hashPassword(password);
       const customer = await stripe.customers.create(
         {
           email,
@@ -25,15 +23,16 @@ class AuthController {
         }
       );
 
-      req.body.stripeCustomerId = customer.id?.toString(); 
-
+      req.body.lastLoggedIn = Date.now();
+      req.body.password = await hashPassword(thePassword);
+      req.body.stripeCustomerId = customer.id 
       let savedUser = await UserModel.create(req.body);
+      savedUser._doc.subscription =  await getUserSubscriptionStatus(customer.id)
+      const {password,...other} =savedUser._doc
 
-      req.session.user = {
-        ...savedUser._doc,
-      };
+      req.session.user =other
 
-      return res.status(200).json({ message: savedUser._doc, success: true });
+      return res.status(200).json({ message: other, success: true });
     } catch (error) {
       return res.status(500).json({ message: error.message, success: false });
     }
@@ -46,7 +45,7 @@ class AuthController {
       if (!userExist) {
         return res.status(403).json({ message: "This email is not registerd" });
       }
-      const { password, _id } = userExist._doc;
+      const { password, _id ,stripeCustomerId } = userExist._doc;
       const isPasswordValid = await compareHashPassword(userPassword, password);
       const lastLoggedIn = Date.now();
       if (isPasswordValid) {
@@ -59,43 +58,13 @@ class AuthController {
             new: true,
           }
         );
+        
+     userExist._doc.subscription =   await  getUserSubscriptionStatus(stripeCustomerId)
+     userExist._doc.lastLoggedIn = lastLoggedIn
+      req.session.user = userExist._doc
+      console.log(userExist._doc)
 
-        const subscriptions = await stripe.subscriptions.list(
-          {
-            customer: userExist._doc?.stripeCustomerId
-              ? userExist._doc?.stripeCustomerId
-              : null,
-            status: "all",
-            expand: ["data.default_payment_method"],
-          },
-          {
-            apiKey: process.env.STRIPE_SECRET_KEY,
-          }
-        );
-        console.log("the subscription ",subscriptions)
-        if (!subscriptions.data.length) {
-          userExist._doc["subscription"] = {
-            status: false,
-          };
-        } else {
-          userExist._doc["subscription"] = {
-            plan: subscriptions.data[0].plan.nickname,
-            status: true,
-          };
-        }
-
-
-        console.log("user",userExist._doc)
-       
-
-          req.session.user = {
-          ...userExist._doc,
-          lastLoggedIn,
-        };
-
-        res.status(200).json({
-          message: { ...userExist._doc, lastLoggedIn },
-          success: true,
+        res.status(200).json({  message:userExist._doc, success: true
         });
       } else {
         res

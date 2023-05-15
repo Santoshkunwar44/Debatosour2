@@ -5,11 +5,13 @@ import DebateCard from '../../../components/DebateRoom/DebateCard/DebateCard'
 import DebateCardSkeleton from '../../../Layouts/Skeleton/DebateSkeleton/DebateCardSkeleton'
 import NoLiveDebate from '../../../Layouts/Debate/NoLiveDebate/NoLiveDebate'
 import { useParams } from 'react-router-dom'
+import { getLoggedInUserData } from '../../../utils/services'
 
 const MyDebateBox = ({own}) => {
 
     const [debatesArr, setDebatesArr] = useState(null);
     const { profileId } = useParams()
+    const currentUser = getLoggedInUserData();
 
     useEffect(() => {
         if (!profileId) return
@@ -35,7 +37,7 @@ const MyDebateBox = ({own}) => {
 
                 debatesArr ? debatesArr.length > 0 ? debatesArr.map((debate) => (
                     <DebateCard debate={debate} />
-                )) : <NoLiveDebate  show_btn={own} text={`No upcoming debates`} buttonText={"createNow"} btnLink="/create" /> : <DebateCardSkeleton />
+                )) : currentUser?.subStatus && <NoLiveDebate  show_btn={own} text={`No upcoming debates`} buttonText={"createNow"} btnLink="/create" /> : <DebateCardSkeleton />
 
             }
         </div>

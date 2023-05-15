@@ -6,6 +6,7 @@ import { bindActionCreators } from "redux"
 import { actionCreators } from '../../../redux/store';
 import { useToast } from '@chakra-ui/react';
 import "../Auth.css"
+import { setLoggedInUserData } from '../../../utils/services';
 
 
 const Login = () => {
@@ -38,10 +39,13 @@ const Login = () => {
     try {
 
       const res = await LoginUserApi(loginData.data);
+      
+      if (res.status === 200 && res.data.message) {
 
-      if (res.status === 200) {
-        AddLoggedInUser(res.data.message)
-        // navigate("/")
+        const {message} = res.data
+
+        AddLoggedInUser(message);
+        
         navigate(-1);
         toast({
           title: '',

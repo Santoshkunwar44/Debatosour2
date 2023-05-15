@@ -1,8 +1,6 @@
 import { ActionTypes } from "../action/actionTypes/ActionTypes";
 
 
-
-
 const INITIAL_USERSTATE = {
     data: null
 }

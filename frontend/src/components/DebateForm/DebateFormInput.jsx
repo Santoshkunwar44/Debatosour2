@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import DebateInformation from "./DebateInformation.jsx"
 import './DebateFormInput.css'
 import DebateFormat from './DebateFormat/DebateFormat'
+import { getLoggedInUserData } from '../../utils/services'
 import { debateFormat } from '../../utils/data'
 
 
@@ -25,7 +26,7 @@ const DebateFormInput = () => {
   const [formLevel,setFormLevel] =useState(0);
   const navigate = useNavigate()
   const toast = useToast()
-
+  const currentUser = getLoggedInUserData();
   const [debateForm, setDebateForm] = useState({
     topic: "",
     type: "",
@@ -473,9 +474,9 @@ if(formatArr){
 
        <DebateFormat setDebateForm={setDebateForm} debateForm={debateForm} teams={debateForm.teams}/>
       }
-      <button type='submit' className='create_debate_btn' disabled={!data} onClick={handleCreateDebate}>
-        CREATE DEBATE
-      </button>
+      {currentUser?.subStatus && <button type='submit' className='create_debate_btn' disabled={!data} onClick={handleCreateDebate}>
+        CREATE DEBATE!
+      </button>}
     </div>
   )
 }

@@ -17,7 +17,9 @@ import DebateAction from "../../components/DebateRoom/DebateAction/DebateAction"
 import "./DebateRoom.css"
 import DebateFinishModal from "../../Layouts/modal/DebateFinishedModal/DebateFinishModal";
 import DebateInfo from "../../Layouts/Debate/DebateInfo/DebateInfo";
-const APPID = "3b884a948c2e48848703ed80ad78b4c5";
+const APPID = process.env.REACT_APP_AGORA_APP_ID;
+
+
 
 
 const Rtm_client = AgoraRTM.createInstance(APPID);

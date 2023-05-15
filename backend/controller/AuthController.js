@@ -25,14 +25,15 @@ class AuthController {
         }
       );
 
-      req.body["stripeCustomerId"] = customer.id;
+      req.body.stripeCustomerId = customer.id?.toString(); 
+
       let savedUser = await UserModel.create(req.body);
-      savedUser["stripeCustomerId"] = customer.id;
+
       req.session.user = {
         ...savedUser._doc,
       };
 
-      return res.status(200).json({ message: savedUser, success: true });
+      return res.status(200).json({ message: savedUser._doc, success: true });
     } catch (error) {
       return res.status(500).json({ message: error.message, success: false });
     }
@@ -71,6 +72,7 @@ class AuthController {
             apiKey: process.env.STRIPE_SECRET_KEY,
           }
         );
+        console.log("the subscription ",subscriptions)
         if (!subscriptions.data.length) {
           userExist._doc["subscription"] = {
             status: false,
@@ -81,9 +83,12 @@ class AuthController {
             status: true,
           };
         }
-        // userExist._doc["subscriptions"] = subscriptions;
 
-        req.session.user = {
+
+        console.log("user",userExist._doc)
+       
+
+          req.session.user = {
           ...userExist._doc,
           lastLoggedIn,
         };
@@ -98,6 +103,7 @@ class AuthController {
           .json({ message: "invalid credentails", success: false });
       }
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: error.message, success: false });
     }
   }

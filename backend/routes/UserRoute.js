@@ -1,5 +1,4 @@
 const {
-  addUser,
   getLoggedInUser,
   searchUser,
   updateUser,

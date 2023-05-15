@@ -43,7 +43,7 @@ const Signup = () => {
         }
       }
     }
-
+    console.log(fieldsMissing)
     if (fieldsMissing) {
       return
     }

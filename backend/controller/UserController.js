@@ -1,5 +1,4 @@
 const UserModel = require("../models/UserModel");
-const { all } = require("../routes/UserRoute");
 const { isUserUpdated } = require("../services/AuthService");
 const { stripe } = require("../utils/stripe");
 
@@ -91,10 +90,11 @@ class UserController {
 
   async getLoggedInUser(req, res) {
     const sessionUser = req.session?.passport?.user || req.session.user;
+    console.log("session user",sessionUser)
 
     if (sessionUser) {
       let updatedUser = await isUserUpdated(sessionUser);
-      console.log(updatedUser);
+        
       return res.status(200).json({ message: updatedUser, success: true });
     } else {
       return res

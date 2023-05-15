@@ -1,13 +1,26 @@
 import React  ,{useEffect,useState} from 'react';
 import Navbar from '../../Layouts/Navbar/Navbar';
-import { getLoggedInUserApi, getPrices, setStripeSession } from '../../utils/Api';
-import { getLoggedInUserData } from '../../utils/services';
+import {  getPrices, setStripeSession } from '../../utils/Api';
 import "./Subscription.css";
+import { useSelector } from 'react-redux';
 
 
 
 const Subscription = () => {
-    const [prices, setPrices] = useState([])
+    const [prices, setPrices] = useState([]);
+    const {data :loggedInUserData} = useSelector(state=>state.user)
+
+// here we have loggedINuserDaata ;
+// you no need to store it in localstorage you can access anytime
+// from  redux using useSelector hook 
+// and i have already set the loggedInusers Data when he signin 
+  console.log(loggedInUserData)
+
+
+
+
+
+
     const fetchPrices = async () => {
         const {data: response, status  } = await getPrices();
         if (status !== 200) throw Error(response.message);
@@ -19,12 +32,11 @@ const Subscription = () => {
     },[])
 
     const createSession = async (priceId) => {
-        // const res = await getLoggedInUserApi();
-        const loggedInUser = getLoggedInUserData();
         const { data: response, status } = await setStripeSession({
             priceId: priceId,
-            email: loggedInUser.email,
-            redirectUrl: process.env.REACT_APP_FRONTEND_URL
+            email: loggedInUserData.email,
+            redirectUrl: process.env.REACT_APP_FRONTEND_URL,
+            
         });
         if (status !== 200) throw Error(response.message);
         window.location.href = response.url;
@@ -43,7 +55,6 @@ const Subscription = () => {
       <li>Live Chat on Debate</li>
       <li>Vote on Debate</li>
     </ul>
-    {/* <a href="#">Sign up</a> */}
   </div>
 
     {

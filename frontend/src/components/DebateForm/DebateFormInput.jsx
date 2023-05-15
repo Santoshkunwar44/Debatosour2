@@ -9,11 +9,8 @@ import { useNavigate } from 'react-router-dom'
 import DebateInformation from "./DebateInformation.jsx"
 import './DebateFormInput.css'
 import DebateFormat from './DebateFormat/DebateFormat'
-<<<<<<< HEAD
 import { getLoggedInUserData } from '../../utils/services'
-=======
 import { debateFormat } from '../../utils/data'
->>>>>>> 2d0f7b609f830d66188de02cc185de7ea1aa7e4c
 
 
 

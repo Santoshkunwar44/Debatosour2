@@ -9,7 +9,7 @@ const UserSchema = mongoose.Schema(
     lastName: {
       type: String,
       required: [true, "lastName is required"],
-    },
+    },    
     email: {
       type: String,
       required: [true, "email is required"],
@@ -17,7 +17,7 @@ const UserSchema = mongoose.Schema(
     password: {
       type: String,
     },
-    customerStripeId: {
+    stripeCustomerId: {
       type: String,
     },
     avatar: {

@@ -26,7 +26,9 @@ export const getLoggedInUserData = () => {
 };
 
 
-
+export const removeLoggedInUserData=()=>{
+  localStorage.removeItem("user")
+}
 
 
 export const getTimeCountDown=(timeInMs , day,hour,min,sec)=>{

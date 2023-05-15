@@ -39,14 +39,19 @@ const Login = () => {
     try {
 
       const res = await LoginUserApi(loginData.data);
-      if (res.status === 200) {
-        AddLoggedInUser(res.data.message)
-        setLoggedInUserData({
-          email: res.data.message.email,
-          subStatus: res.data.message.subscription.status,
-          stripeCustomerId: res.data.message?.stripeCustomerId ? res.data.message?.stripeCustomerId : null
-        })
-        // navigate("/")
+      
+      if (res.status === 200 && res.data.message) {
+
+        const {stripeCustomerId ,subscription,...other} = res.data.message
+
+        AddLoggedInUser({
+          ...other,
+          // how do  you get subscription obj since there's no 
+          // subscription filed for subscription in db
+          subStatus:subscription?.status,
+          stripeCustomerId:stripeCustomerId ?? null
+        });
+        
         navigate(-1);
         toast({
           title: '',

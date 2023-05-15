@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { BsFillMicFill, BsFillMicMuteFill } from 'react-icons/bs'
 import "./DebatorView.css"
 import UserProfile from "../../popovers/viewprofile/UserProfile"
 

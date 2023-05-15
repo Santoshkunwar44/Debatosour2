@@ -4,14 +4,12 @@ import { BsFillSendFill } from "react-icons/bs"
 import { MdKeyboardVoice } from 'react-icons/md';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 
-const MessageInput = ({ isLiveChat, handleSubmit }) => {
+const MessageInput = ({ isLiveChat, handleSendMessage }) => {
 
   const [voiceText, setVoiceText] = useState("");
   const {
     transcript,
     listening,
-    resetTranscript,
-    browserSupportsSpeechRecognition
   } = useSpeechRecognition();
 
 
@@ -20,8 +18,14 @@ const MessageInput = ({ isLiveChat, handleSubmit }) => {
 
   }, [transcript]);
 
-  const handleInputChange = (event) => {
 
+  const handleKeyDown=(e)=>{
+    if(e.key==="Enter"){
+      handleSendMessage(voiceText,removeInput)
+    }
+    
+  }
+  const handleInputChange = (event) => {
     setVoiceText(event.target.value);
 
   }
@@ -33,13 +37,29 @@ const MessageInput = ({ isLiveChat, handleSubmit }) => {
       SpeechRecognition.startListening({ continuous: true })
     }
   }
+  const removeInput=()=>setVoiceText("")
   return (
     <div className='MessageInputWrapper'  >
-      <MdKeyboardVoice className={`voiceText ${listening ? "active_speaking" : ""}`} onClick={handleListen} />
-      <input className='message_input' type="text" placeholder={` ${!isLiveChat ? "Ask anything to Debatasour chatbot..." : "Say something in live chat..."}`} onChange={handleInputChange} value={voiceText} />
-      <div className='sent_message_box'>
-        <BsFillSendFill />
 
+      <MdKeyboardVoice
+       className={`voiceText ${listening ? "active_speaking" : ""}`} 
+       onClick={handleListen} />
+
+      <input 
+
+    onKeyDown={handleKeyDown}
+      className='message_input' 
+      type="text" 
+      placeholder={` ${!isLiveChat ? "Ask anything to Debatasour chatbot..." : "Say something in live chat..."}`} onChange={handleInputChange}
+       value={voiceText}
+        />
+
+      <div
+      className='sent_message_box' 
+      onClick={()=>handleSendMessage(voiceText,removeInput)}
+      >
+
+        <BsFillSendFill />
       </div>
     </div>
   )

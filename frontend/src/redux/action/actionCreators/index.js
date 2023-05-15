@@ -120,3 +120,43 @@ export const SetRoomLoading = (payload) => {
         })
     }
 }
+export const setRemoveIntervalFunc=(payload)=>{
+    console.log("settinginit",payload)
+    return (dispatch)=>{
+        dispatch({
+            type:ActionTypes.SET_REMOVE_INTERVAL_FUNC,
+            payload
+        })
+    }
+}
+export const setRtmChannelAction=(payload)=>{
+    return (dispatch)=>{
+        dispatch({
+            type:ActionTypes.SET_RTM_CHANNEL,
+            payload
+        })
+    }
+}
+
+export const  setMessageArrAction=(payload)=>{
+    return (dispatch)=>{
+        dispatch({
+            type:ActionTypes.SET_MESSAGE_ARR,
+            payload
+        })
+    }
+}
+
+export const setVotedTeamAction=(payload)=>(dispatch)=>{
+    dispatch({
+        type:ActionTypes.SET_VOTED_TEAM,
+        payload
+    })
+}
+export const set_update_vote=(payload)=>(dispatch)=>{
+    console.log("SETTING",payload)
+    dispatch({
+        type:ActionTypes.SET_CHANGE_VOTE,
+        payload
+    })
+}

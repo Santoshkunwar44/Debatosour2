@@ -50,6 +50,23 @@ export const setStripeSession = (data) =>
 
 // chat bot api
 
+// chat bot api
 export const getBotMessageApi = (data) => axiosInstance.post("/chatbot", data);
-export const updateUserapi = (userId, data) =>
-  axiosInstance.put(`/user/${userId}`, data);
+export const updateUserapi = (userId, data) => axiosInstance.put(`/user/${userId}`, data)
+
+
+
+// live chat api
+export const createChatApi =(data)=>axiosInstance.post("/chat/create",data)
+export const findChatApi =(debateId)=>axiosInstance.get(`/chat/find?debate=${debateId}`)
+export const chatBotApi=(prompt)=>axiosInstance.post("/chat/chatbot",{
+    prompt
+});
+
+
+
+// vote and unvote
+
+export const voteTeamApi =(data)=>axiosInstance.post("/debate/vote",data)
+export const unVoteTeamApi =(data)=>axiosInstance.post("/debate/unVote",data)
+export const voteAndUnvoteTeamApi =(data)=>axiosInstance.post("/debate/voteAndUnvote",data)

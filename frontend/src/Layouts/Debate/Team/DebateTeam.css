@@ -38,10 +38,22 @@ pointer-events: ${(props)=>!props.isLive ? "none":""}; */
   border-radius: 3px;
   justify-content: center;
   gap: 5px;
+  color: var(--secondary_color);
+  border: 1px solid var(--secondary_color);
+  scale: 0.94;
+  transition: all .3s;
+
+}
+.voted{
+  scale: 1 !important;
+  color: white !important;
+  opacity: 1 !important;
   background: var(--secondary_color);
 }
+
 .vote_button:hover {
-  background: var(--secondary_color);
+  /* background: var(--secondary_color); */
+  scale: 1.04;
 }
 svg {
   font-size: 1.2rem;

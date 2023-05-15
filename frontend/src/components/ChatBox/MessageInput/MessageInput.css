@@ -1,6 +1,6 @@
 .MessageInputWrapper {
   width: 80%;
-  height: 60px;
+  height: 55px;
   padding: 0 0.5rem;
   border-radius: 10px;
   margin: auto;
@@ -29,7 +29,7 @@
   padding: 10px;
 }
 
-.voiceText :hover {
+.voiceText:hover {
   color: white;
   scale: 1.1;
   background: var(--primary_color_dark);
@@ -47,11 +47,12 @@
   border: none;
   outline: none;
   color: gray;
-  font-size: 14px;
+  font-size: 12px;
 }
 .message_input::placeholder {
   color: #aeaeae;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 100;
   letter-spacing: 0.9px;
 }
 .sent_message_box {
@@ -64,7 +65,7 @@
   cursor: pointer;
   border-radius: 8px;
 }
-.sent_message_box :hover {
+.sent_message_box:hover {
   background-color: rgb(26 33 201);
 }
 .sent_message_box svg {

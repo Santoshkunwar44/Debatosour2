@@ -24,6 +24,7 @@
   flex-direction: column;
   gap: 5px;
   position: relative;
+  max-width: 86%;
 }
 
 .message_text_content {
@@ -38,6 +39,7 @@
   color: #1e1e1e;
   border-radius: 4px;
   border-bottom-left-radius: 0px;
+  flex: 1;
 }
 .my_text_content {
   border-bottom-left-radius: 4px;

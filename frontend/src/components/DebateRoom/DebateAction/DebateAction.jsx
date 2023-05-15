@@ -21,24 +21,28 @@ const DebateAction = ({
    handleResumeDebate,
    debateState,
    handleStartDebate,
+   micControlTeam,
+   finishHandle,
   roomMembers}) => {
 
   const { activeDebate } = useSelector((state) => state.debate);
   const {data} = useSelector((state)=>state.user)
+  const {removeInterval} = useSelector(state=>state.other)
   const toast = useToast()
   const [teams, setTeams] = useState([]);
-  const [ canStartDebate,setCanStartDebate] =useState(false)
+  const [ canStartDebate,setCanStartDebate] =useState(false);
+  const [ isMicWithUs,setIsMicWithUs] =useState(false)
     
   useEffect(() => {
-    if (activeDebate) {
+    if (activeDebate?.current) {
       let speakerTeams = roomMembers.filter(speaker => {
-        return activeDebate.teams.some(team => {
+        return activeDebate?.current.teams.some(team => {
           return team.members.some(member => {
             return member._id === speaker.id;
           });
         });
       }).map(speaker => {
-        let team = activeDebate.teams.find(team => {
+        let team = activeDebate?.current.teams.find(team => {
           return team.members.some(member => {
             return member._id === speaker.id;
           });
@@ -58,11 +62,11 @@ const DebateAction = ({
 
       const TeamArray = [
         {
-          name: activeDebate.teams[0].name,
+          name: activeDebate?.current?.teams[0].name,
           members: []
         },
         {
-          name: activeDebate.teams[1].name,
+          name: activeDebate?.current.teams[1].name,
           members: []
         }
       ]
@@ -78,20 +82,28 @@ const DebateAction = ({
       console.log("final", TeamArray)
       setTeams(TeamArray)
     }
-  }, [activeDebate, roomMembers])
+  }, [activeDebate?.current, roomMembers])
 
+  useEffect(()=>{
+    console.log("miccontrol",micControlTeam)
+      if(micControlTeam && data){
+        const isMyTeam=   micControlTeam?.members?.find(mem => mem?._id === data?._id);
+        console.log("miccontrol",isMyTeam)
+        setIsMicWithUs(isMyTeam ?? false)
+      }
+  },[micControlTeam,data])
 
 
 
   useEffect(()=>{
-    if(!data || !activeDebate)return;
-   let teamName =  getMyTeam(activeDebate.teams,data._id)?.name;
-   let startTeamName = activeDebate.timeFormat[0].team; 
+    if(!data || !activeDebate?.current)return;
+   let teamName =  getMyTeam(activeDebate?.current.teams,data._id)?.name;
+   let startTeamName = activeDebate?.current.timeFormat[0].team; 
    console.log("my",startTeamName)
    setCanStartDebate(teamName === startTeamName)
 
     
-  },[data,activeDebate])
+  },[data,activeDebate?.current])
   const handleCopyLink=()=>{
 
     toast({
@@ -104,8 +116,14 @@ const DebateAction = ({
     })
   }
 
-
-
+  const passTurnToNextTeam=()=>{
+    if(removeInterval){
+     clearInterval(removeInterval.intervalRef?.current);
+     removeInterval.intervalArrRef.current=[];
+      finishHandle(true)
+    }
+  }
+ 
 
 
 
@@ -124,20 +142,18 @@ const DebateAction = ({
               START DEBATE
             </button> 
               }
-            
-
-       {  (  debateState?.isPaused && isLive) &&    <button className="pass_mic_button" onClick={handleResumeDebate}>
+           {  (  debateState?.isPaused && isLive) &&    <button className="pass_mic_button" onClick={handleResumeDebate}>
           <RxResume className="resumeIcon"/>
         RESUME DEBATE
         </button>   
 }
 
-          {/* {
-            isMicWithMe ?  <button className="pass_mic_button" onClick={passMicHandler}>
+          {
+            ( !debateState.isPaused && isMicWithUs) ?  <button className="pass_mic_button" onClick={passTurnToNextTeam}>
             <TbMicroscope/>
-           PASS MIC
+           PASS TURN  TO NEXT TEAM 
           </button>:""
-          }  */}
+          } 
     <div className="DebateActionWrapper">
       {
     debateState.isStarted ?    (micMuted ? <BsFillMicMuteFill onClick={handleMicToggle} /> :

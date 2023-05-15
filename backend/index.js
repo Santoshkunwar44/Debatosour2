@@ -32,6 +32,7 @@ const configuration = new Configuration({
 });
 
 const openAi = new OpenAIApi(configuration)
+module.exports=openAi
 
 app.use(cookieParser())
 app.use(morgan("common"))
@@ -54,10 +55,9 @@ app.use(session({
     saveUninitialized: true,
     store,
     cookie: {
-        secure: true,
+        secure:false,
         maxAge: 31556952000,
         httpOnly: true,
-        sameSite:"none"
     },
 }))
 // middlewares
@@ -65,33 +65,8 @@ app.use(passport.initialize())
 app.use(passport.session());
 
 
-app.post("/api/chatbot", async (req, res) => {
-    try {
-        const prompt = req.body.prompt
-        console.log(prompt)
-        const response = await openAi.createCompletion({
-            model: "text-davinci-003",
-            prompt: `hello how are  you ?`,
-            temperature: 0,
-            max_tokens: 64,
-            top_p: 1,
-            frequency_penalty: 0.0,
-            presence_penalty: 0,
-            stop:["\n"]
 
-        })
-        return res.status(200).json({ message: response.data.choices[0].text, success: true })
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ message: error, success: false })
-    }
-})
+
 
 require("./AllRoutes")(app)
-
-
-
-
-
-
 app.listen(8000, () => console.log(`server started at port 8000`))

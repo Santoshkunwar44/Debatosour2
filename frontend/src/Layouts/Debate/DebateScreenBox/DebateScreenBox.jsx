@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import DebatorView from '../DebatorView/DebatorView'
 import "./DebateScreenBox.css"
 import { useEffect, useState, useRef } from 'react';
@@ -7,35 +7,39 @@ import NoneJoined from '../NoneJoined/NoneJoined';
 import DebateScreenSkeleton from "../../Skeleton/DebateScreenBox/DebateScreenSkeleton"
 import { TbMicrophone2 } from "react-icons/tb"
 import SpeakTimeLeft from '../SpeakTimeLeft/SpeakTimeLeft';
+import { bindActionCreators } from 'redux';
+import { actionCreators } from '../../../redux/store';
 
 const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleCloseDebate, activeSpeakers, isLive, debateState, activeMicControlTeam, handleFinishSpeakTime }) => {
   const { activeDebate, activeParticipants } = useSelector((state) => state.debate);
+  const dispatch = useDispatch()
+  const {setRemoveIntervalFunc} = bindActionCreators(actionCreators,dispatch )
   const intervalArrRef = useRef([])
   const [teams, setTeams] = useState([]);
-
+  const intervalRef = useRef()
   const [countDown, setCountDown] = useState({
     min: null,
     sec: null
 
   });
-  const intervalRef = useRef()
+
 
   useEffect(() => {
-    if (activeDebate) {
+    if (activeDebate?.current) {
       let speakerTeams = roomMembers.filter(speaker => {
-        return activeDebate.teams.some(team => {
+        return activeDebate?.current.teams.some(team => {
           return team.members.some(member => {
             return member._id === speaker.id;
           });
-        });
+        })
       }).map(speaker => {
-        let team = activeDebate.teams.find(team => {
+        let team = activeDebate.current.teams.find(team => {
           return team.members.some(member => {
             return member._id === speaker.id;
           });
         });
         return { id: speaker.id, teamName: team.name, ...speaker };
-      }).reduce((acc, speaker) => {
+      })?.reduce((acc, speaker) => {
         if (acc[speaker.teamName]) {
           acc[speaker.teamName].push(speaker);
         } else {
@@ -49,11 +53,11 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
 
       const TeamArray = [
         {
-          name: activeDebate.teams[0].name,
+          name: activeDebate?.current.teams[0].name,
           members: []
         },
         {
-          name: activeDebate.teams[1].name,
+          name: activeDebate?.current.teams[1].name,
           members: []
         }
       ]
@@ -69,7 +73,7 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
       console.log("final", TeamArray)
       setTeams(TeamArray)
     }
-  }, [activeDebate, roomMembers])
+  }, [activeDebate?.current, roomMembers])
 
   useEffect(() => {
     if (!debateState ) return;
@@ -86,11 +90,16 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
     }
   }, [debateState, intervalArrRef])
 
+
+  useEffect(()=>{
+    handleSetFunc()
+  },[intervalArrRef.current,intervalRef.current])
+  
   const handleTimeLeft = () => {
     const { remainingTime  , changedAt} = debateState;
 
     intervalRef.current = setInterval(() => {
-      const end = changedAt+remainingTime;
+      const end = changedAt + remainingTime;
       const diff = end - Date.now();
 
       if (diff >= 0) {
@@ -129,18 +138,29 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
       })
     } 
 
+    const handleSetFunc=()=>{
+      let data={
+        intervalRef,
+        intervalArrRef
+      }
+      setRemoveIntervalFunc(data)
+    }
 
+    useEffect(()=>{
+      console.log("active",activeDebate,activeParticipants)
+    },[activeDebate?.current])
 
   return (
     <>
 
       <SpeakTimeLeft
         startTeam={startTeam}
-        debateState={debateState} countDown={countDown} />
-      <div className="DebateScreenBoxWrapper">
-
-        {
-          (activeDebate && activeParticipants) ?
+        debateState={debateState}
+         countDown={countDown} 
+         />
+      <div className="DebateScreenBoxWrapper" onClick={handleSetFunc}>
+          {
+          (activeDebate?.current && activeParticipants) ?
 
             <>
               <div className='box_wrappers'>
@@ -163,7 +183,7 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
                   }
                   {
                     !isLive &&
-                    <NotStartedView team={activeDebate?.teams[0]?.members} />
+                    <NotStartedView team={activeDebate?.current?.teams[0]?.members} />
                   }
 
                 </div>
@@ -185,7 +205,7 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
                     )) : <NoneJoined team={teams[1]} /> : ""
                   }
                   {
-                    !isLive && <NotStartedView pink={true} team={activeDebate?.teams[1]?.members} />
+                    !isLive && <NotStartedView pink={true} team={activeDebate?.current?.teams[1]?.members} />
                   }
                 </div>
               </div>

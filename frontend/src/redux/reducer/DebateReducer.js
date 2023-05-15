@@ -1,3 +1,4 @@
+import { changeVote } from "../../utils/services"
 import { ActionTypes } from "../action/actionTypes/ActionTypes"
 import { Enums } from "../action/actionTypes/Enumss"
 const INITIAL_DEBATE_STATE={
@@ -8,11 +9,15 @@ const INITIAL_DEBATE_STATE={
     activeParticipants:[],
     streamRef:null,
     roomLoading:false,
+    votedTeam:null,
+    teamsName:null,
+    
 }
 
 const DebateReducer=(state=INITIAL_DEBATE_STATE,action)=>{   
 
-    switch (action.type) {
+    switch(action.type) {
+
         case ActionTypes.SET_ACTIVE_DEBATE:
             return {...state, activeDebate: action.payload}
             
@@ -33,12 +38,16 @@ const DebateReducer=(state=INITIAL_DEBATE_STATE,action)=>{
             
          case ActionTypes.SET_ACTIVE_PARTICIPANTS:
             return {...state,activeParticipants:action.payload}
+
          case ActionTypes.ADD_STREAM_REF:
             return {...state,streamRef:action.payload}
         
         case  ActionTypes.SET_ROOM_LOADING:
             return {...state,roomLoading:action.payload}
-        
+            
+        case  ActionTypes.SET_VOTED_TEAM:
+            return {...state,votedTeam:action.payload}
+
         default:
             return state;
     }

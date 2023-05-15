@@ -53,7 +53,12 @@ const Profile = () => {
                     </div>
                     <MyDebateBox own={profileId === data?._id } />
                 </div>
+                <div>
+                {
+                    profileId ===data?._id &&   <h2 className='main_text'> DEBATES IN WHICH I AM  INVITED   </h2>
+                }
 
+</div>
 
             </div>
 

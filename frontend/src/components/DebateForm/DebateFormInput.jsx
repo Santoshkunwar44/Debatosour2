@@ -15,7 +15,7 @@ import { debateFormat } from '../../utils/data'
 
 
 const DebateFormInput = () => {
-  const { data } = useSelector((state) => state.user)
+  const { data:currentUser } = useSelector((state) => state.user)
   const [duration, setDuration] = useState({
     hour: 1,
     minute: 0
@@ -26,12 +26,11 @@ const DebateFormInput = () => {
   const [formLevel,setFormLevel] =useState(0);
   const navigate = useNavigate()
   const toast = useToast()
-  const currentUser = getLoggedInUserData();
   const [debateForm, setDebateForm] = useState({
     topic: "",
     type: "",
     startTime: 0,
-    admin: data,
+    admin: currentUser?._id,
     duration: 0,
     team_format:"",
     timeFormat:{},
@@ -61,11 +60,11 @@ const DebateFormInput = () => {
     }
   }, [durationType])
 useEffect(()=>{
-  if(!data)return ;
+  if(!currentUser)return ;
   setDebateForm((prev)=>({
-    ...prev, admin:data?._id
+    ...prev, admin:currentUser?._id
   }))
-},[data])
+},[currentUser])
   useEffect(() => {
     let durationInMs = 1000 * 60 * ((duration.hour * 60) + (duration.minute))
     setDebateForm((prev) => ({
@@ -121,7 +120,7 @@ useEffect(()=>{
   }
   const handleCreateDebate = async () => {
 
-    if (!data) {
+    if (!currentUser) {
       toast({
         description: "You need to login first.",
         status: 'error',
@@ -150,19 +149,18 @@ useEffect(()=>{
     let thePayload = {
       ...theFormCopy,
       teams: theTeams,
-      admin: data,
+      admin: currentUser?._id,
       endTime: date.getTime() + theFormCopy.duration
     }
 
+    
     const isValid = handleFormValidate(thePayload)
     let teamMebersCount = thePayload.teams.reduce((acc, item) => {
 
       let theLen = item.members.length
       return acc + theLen
-
-
-
     }, 0)
+
     thePayload.participantsCount = teamMebersCount
 
     if (isValid) {
@@ -352,6 +350,8 @@ if(formatArr){
   return <option value={""} disabled>select team format</option>
 }
   }
+
+  console.log(currentUser?.subscription)
   return (
     <div className='DebateFormWrapper'>
       <div className="create_debate_header">
@@ -474,7 +474,7 @@ if(formatArr){
 
        <DebateFormat setDebateForm={setDebateForm} debateForm={debateForm} teams={debateForm.teams}/>
       }
-      {currentUser?.subStatus && <button type='submit' className='create_debate_btn' disabled={!data} onClick={handleCreateDebate}>
+      {currentUser?.subscription?.status && <button type='submit' className='create_debate_btn' disabled={!currentUser} onClick={handleCreateDebate}>
         CREATE DEBATE!
       </button>}
     </div>

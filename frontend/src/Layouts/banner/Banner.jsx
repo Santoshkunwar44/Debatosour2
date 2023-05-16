@@ -42,6 +42,31 @@ if(!validLink){
     navigate(`/watch?debateId=${debateId}`)
   }
 }
+const handleCreateDebate=()=>{
+  if(!userData){
+
+    navigate("/login")
+    handleShowToastBar("You need to login first ")
+
+  }else if(userData && userData?.subscription?.status ){
+    navigate("/create");
+  }else{
+    navigate("/subscription")
+    handleShowToastBar("You need a premium subscription to create debate")
+  }
+}
+const handleShowToastBar=(text)=>{
+
+  toast({
+    title: '',
+    description: text,
+    status: 'error',
+    duration: 5000,
+    position: "top",
+    isClosable: true,
+  })
+
+}
   return (
     <div className="BannerWrapper">
       <div className="banner_bg_image">
@@ -65,14 +90,12 @@ if(!validLink){
       <div className="banne_bottom_option_box">
 
 
-       <Link to= { userData?.subscription?.status ?  "/create" :"/subscription"}>
-          <button className="banner_bottom_button_option_button">
+          <button onClick={handleCreateDebate} className="banner_bottom_button_option_button">
             <MdOutlineAdd />
             <p>
               Create Debate
             </p>
           </button>
-        </Link>
 
         <Link to="/chatbot">
           <button className="prepare_for_debate_btn">

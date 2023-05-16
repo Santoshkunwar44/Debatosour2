@@ -5,18 +5,44 @@ import { useDispatch, useSelector } from "react-redux"
 import { bindActionCreators } from "redux"
 import { actionCreators } from "../../../redux/store"
 import { unVoteTeamApi, voteAndUnvoteTeamApi, voteTeamApi } from "../../../utils/Api"
+import { useToast } from "@chakra-ui/react"
+import { useNavigate } from "react-router-dom"
 
 const DebateTeam = ({  team }) => {
-  const {votedTeam ,activeDebate} =useSelector(state=>state.debate);
+  const { isLive, votedTeam ,activeDebate} =useSelector(state=>state.debate);
   const {data} =useSelector(state=>state.user)
   const {rtmChannel} =useSelector(state=>state.other)
+  const navigate = useNavigate()
   const dispatch =useDispatch( )
   const {setVotedTeamAction  ,AddActiveDebate} = bindActionCreators(actionCreators,dispatch )
+  const toast =useToast()
 
 
   const handleVote=async()=>{
 
-    if(!data || !activeDebate)return;
+    if(!activeDebate)return;
+    if(!data){
+      toast({
+        title: '',
+        description: "You need to sign in to vote",
+        status: 'error',
+        duration: 5000,
+        position: "top",
+        isClosable: true,
+      })
+      navigate("/login")
+      return;
+    }
+    if(!isLive){
+   return   toast({
+          title: '',
+          description: "Cannot vote debate has not started   ",
+          status: 'error',
+          duration: 5000,
+          position: "top",
+          isClosable: true,
+        })
+    }
 
     let payload = {
       user:data?._id,
@@ -67,12 +93,10 @@ const DebateTeam = ({  team }) => {
         <h2 className='team_name'>{team.name}</h2>
         <div className='vote_box'>
           <div className='vote_count'>
-            {/* <BiUpvote/> */}
-
           </div>
           <button 
           onClick={handleVote}
-           className={`vote_button ${team?.name === votedTeam ? "voted":""}`}>
+           className={`vote_button ${team?.name === votedTeam ? "voted":"" } ${(!isLive || !data) &&"disabled_vote_button"}`}>
             <BiUpvote />
             <p>{team.vote.length}</p>
             <p>VOTE</p>

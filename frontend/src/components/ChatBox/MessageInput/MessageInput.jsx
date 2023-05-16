@@ -3,9 +3,12 @@ import "./MessageInput.css"
 import { BsFillSendFill } from "react-icons/bs"
 import { MdKeyboardVoice } from 'react-icons/md';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
+import { useSelector } from 'react-redux';
+import LoginToChat from '../../../Layouts/FirstLoginToChat/LoginToChat';
 
 const MessageInput = ({ isLiveChat, handleSendMessage }) => {
 
+  const {data:userData} =useSelector(state=>state.user)
   const [voiceText, setVoiceText] = useState("");
   const {
     transcript,
@@ -41,7 +44,10 @@ const MessageInput = ({ isLiveChat, handleSendMessage }) => {
   return (
     <div className='MessageInputWrapper'  >
 
-      <MdKeyboardVoice
+      {
+        !userData ? <LoginToChat/> : <>
+        
+        <MdKeyboardVoice
        className={`voiceText ${listening ? "active_speaking" : ""}`} 
        onClick={handleListen} />
 
@@ -61,6 +67,11 @@ const MessageInput = ({ isLiveChat, handleSendMessage }) => {
 
         <BsFillSendFill />
       </div>
+        
+        </>
+      }
+
+    
     </div>
   )
 }

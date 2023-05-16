@@ -334,3 +334,24 @@ h2 {
   gap: 1rem;
   align-items: center;
 }
+.input_row_box_parent{
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+.input_row_box_parent button{
+  height: 95%;
+  padding: 0 10px;
+  color: white;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background-color: var(--primary_color);
+  border-radius: 7px;
+
+  width: fit-content !important;
+}
+.input_row_box_parent input{
+  flex: 1 !important;
+}

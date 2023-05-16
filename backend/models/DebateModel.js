@@ -55,6 +55,10 @@ const MongooseSchema = mongoose.Schema({
         type: Number, // milliseconds
         required: [true, "endTime time is required"]
     },
+    hasEnded:{
+        type:Boolean,
+        default:false
+    },
 
     duration: {
         type: Number, // milliseconds
@@ -69,6 +73,10 @@ const MongooseSchema = mongoose.Schema({
         type: String,
         required: [true, 'debate type is required']
     },
+    passcode:{
+        type:Number,
+
+    }
   
 },{timestamps:true})
 module.exports = mongoose.model("Debate", MongooseSchema)

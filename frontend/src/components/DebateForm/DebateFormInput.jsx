@@ -1,7 +1,7 @@
 import { useToast } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { createDebateApi } from '../../utils/Api'
+import { createDebateApi, getIsPassocodeUniqueApi } from '../../utils/Api'
 import TeamForm from './TeamForm/TeamForm'
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css";
@@ -25,7 +25,8 @@ const DebateFormInput = () => {
   const [startTime, setStartTime] = useState(new Date());
   const [formLevel,setFormLevel] =useState(0);
   const navigate = useNavigate()
-  const toast = useToast()
+  const toast = useToast();
+  const [isPasscodeValid,setIsPasscodeValid]= useState(true)
   const [debateForm, setDebateForm] = useState({
     topic: "",
     type: "",
@@ -33,6 +34,7 @@ const DebateFormInput = () => {
     admin: currentUser?._id,
     duration: 0,
     team_format:"",
+    passcode:"",
     timeFormat:{},
     teams: [
       {
@@ -237,23 +239,7 @@ useEffect(()=>{
 
   }
 
-  const handleDates = (event, dateType) => {
-    let name = event.target.name
-    let value = event.target.value
-
-    if (dateType === "duration") {
-      if (name === "hour" && 24 < parseInt(value)) return;
-      if (name === "minute" && 59 < parseInt(value)) {
-        setDuration(prev => ({ ...prev, minute: 0 }))
-
-
-        return;
-      };
-      setDuration(prev => ({ ...prev, [name]: parseInt(value) }))
-    }
-
-
-  }
+  
 
   const handleFormValidate = (payload) => {
     const missingField = []
@@ -351,7 +337,29 @@ if(formatArr){
 }
   }
 
-  console.log(currentUser?.subscription)
+  const handlePassCodeChange=async(event)=>{
+
+    const value = event.target.value ;
+    if(value.length === 6){
+      const {data,status} =  await getIsPassocodeUniqueApi(value);
+      console.log("data",data)
+      if(status=== 200){
+        const {isUnique}= data.message
+        if(isUnique){
+          setIsPasscodeValid(true)
+          setDebateForm(prev=>({...prev,passcode:value}))
+        }else{
+          setIsPasscodeValid(false)
+        }
+      }
+
+      
+
+      }
+
+  }
+
+
   return (
     <div className='DebateFormWrapper'>
       <div className="create_debate_header">
@@ -366,10 +374,7 @@ if(formatArr){
             <label className="form_label" >Topic name</label>
             <input type="text" placeholder='Topic for debate' name='topic' onChange={handleInputChange} />
           </div>
-          {/* <div className='input_item'>
-            <label className="form_label">No of rounds</label>
-            <input name='noOfRounds' value={debateForm.noOfRounds} max={10} type="number" placeholder='Number of rounds' onChange={handleInputChange} />
-          </div> */}
+       
           <div className='input_item'>
             <label className="form_label">Debate Type</label>
             <select id="" name='type' onChange={handleInputChange}>
@@ -382,6 +387,16 @@ if(formatArr){
 
             </select>
           </div>
+          <div className='input_item'>
+{
+ !isPasscodeValid && <label >This passcode is already taken  try next ! </label>}
+<label className="form_label" >PASSCODE FOR DEBATE</label>
+
+<div className='input_row_box_parent'>
+<input type="number" minLength={6} maxLength={6} max={6} placeholder='random 6 digit number'  name='passcode' onChange={handlePassCodeChange} />
+<button>Auto Generate</button>
+</div>
+</div>
   
 
 

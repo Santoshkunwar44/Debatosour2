@@ -12,7 +12,7 @@ export const searchUserByIdApi = (userId) =>
   axiosInstance.get(`/user/search?userId=${userId}`);
 
 // DEBATE API ENDPOINTS
-
+export const getIsPassocodeUniqueApi=(passcode)=>axiosInstance.post("/debate/checkPasscode",{passcode})
 export const createDebateApi = (data) => axiosInstance.post("/debate", data);
 export const getDebateByIdApi = (debateId) =>
   axiosInstance.get(`/debate?_id=${debateId}`);

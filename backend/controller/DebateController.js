@@ -55,6 +55,8 @@ class DebateController {
     }
 
 
+
+
     async updateDebate(req, res) {
         const { debateId } = req.params
         if (!debateId) throw Error("debateId is required")
@@ -259,5 +261,54 @@ class DebateController {
                 return res.status(500).json({message:error.message,success:false})
         }
     }
+
+    async checkIfPasscodeIsUnique(req,res){
+
+        const {passcode} = req.body; 
+
+        try {
+                   const debate = await DebateModel.find({
+                        passcode,
+                        hasEnded:false
+                   })
+                   if(debate.length){
+                    res.status(200).json({message:{
+                        isUnique:false
+                    }})
+                   }else{
+                    res.status(200).json({message:{
+                        isUnique:true
+                    }})
+                   }
+        } catch (error) {
+        res.status(500).json({message:error.message,success:false})    
+        }
+    }
+
+
+    async getDebateOfUser(req,res){
+    let {future} = req.query
+    const {userId:admin} = req.params;
+    console.log(admin)
+    let debatesData;
+        try {
+                if(future==="true"){
+                   debatesData =  await DebateModel.find({
+                    hasEnded:false,
+                    admin
+                   })
+
+                }else{
+                    debatesData = await DebateModel.find({
+                        hasEnded:true,
+                        admin
+                    })
+                }
+                res.status(200).json({message:debatesData,success:true})
+        } catch (error) {
+                res.status(500).json({message:error.message,success:false})
+        }
+    }
+
 }
 module.exports = new DebateController();

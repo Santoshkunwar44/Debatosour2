@@ -13,6 +13,7 @@ import Login from "./pages/Auth/Login/Login";
 import { Loader } from "./Layouts/Loader/Loader";
 import CurrentDebates from "./pages/CurrentDebates/CurrentDebates";
 import CreateDebate from "./pages/CreateDebate/CreateDebate";
+import 'antd/dist/reset.css';
 import "./App.css"
 import Profile from "./pages/profile/Profile";
 import  Watchnow from "./pages/WatchNow/Watchnow";

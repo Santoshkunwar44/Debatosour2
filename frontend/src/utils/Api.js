@@ -12,7 +12,8 @@ export const searchUserByIdApi = (userId) =>
   axiosInstance.get(`/user/search?userId=${userId}`);
 
 // DEBATE API ENDPOINTS
-export const getIsPassocodeUniqueApi=(passcode)=>axiosInstance.post("/debate/checkPasscode",{passcode})
+export const getIsPassocodeUniqueApi = (passcode) =>
+  axiosInstance.post("/debate/checkPasscode", { passcode });
 export const createDebateApi = (data) => axiosInstance.post("/debate", data);
 export const getDebateByIdApi = (debateId) =>
   axiosInstance.get(`/debate?_id=${debateId}`);
@@ -52,21 +53,30 @@ export const setStripeSession = (data) =>
 
 // chat bot api
 export const getBotMessageApi = (data) => axiosInstance.post("/chatbot", data);
-export const updateUserapi = (userId, data) => axiosInstance.put(`/user/${userId}`, data)
-
-
+export const updateUserapi = (userId, data) =>
+  axiosInstance.put(`/user/${userId}`, data);
 
 // live chat api
-export const createChatApi =(data)=>axiosInstance.post("/chat/create",data)
-export const findChatApi =(debateId)=>axiosInstance.get(`/chat/find?debate=${debateId}`)
-export const chatBotApi=(prompt)=>axiosInstance.post("/chat/chatbot",{
-    prompt
-});
-
-
+export const createChatApi = (data) => axiosInstance.post("/chat/create", data);
+export const findChatApi = (debateId) =>
+  axiosInstance.get(`/chat/find?debate=${debateId}`);
+export const chatBotApi = (prompt) =>
+  axiosInstance.post("/chat/chatbot", {
+    prompt,
+  });
 
 // vote and unvote
 
-export const voteTeamApi =(data)=>axiosInstance.post("/debate/vote",data)
-export const unVoteTeamApi =(data)=>axiosInstance.post("/debate/unVote",data)
-export const voteAndUnvoteTeamApi =(data)=>axiosInstance.post("/debate/voteAndUnvote",data)
+export const voteTeamApi = (data) => axiosInstance.post("/debate/vote", data);
+export const unVoteTeamApi = (data) =>
+  axiosInstance.post("/debate/unVote", data);
+export const voteAndUnvoteTeamApi = (data) =>
+  axiosInstance.post("/debate/voteAndUnvote", data);
+
+// debates
+export const getPastDebatesOfCurrentUserApi = (data) =>
+  axiosInstance.get(`/debate/${data.userId}?future=${data.future}`);
+export const getFutureDebatesOfCurrentUserApi = (data) =>
+  axiosInstance.get(`/debate/${data.userId}?future=${data.future}`);
+export const getInvitationDebatesOfCurrentUserApi = (data) =>
+  axiosInstance.get(`/debate/${data.userId}?invitation=${data.invitation}`);

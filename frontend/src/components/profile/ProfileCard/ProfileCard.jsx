@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import "./ProfileCard.css"
-import { BsBroadcast, BsFillSpeakerFill } from "react-icons/bs"
+import { BsBroadcast, BsFillSpeakerFill, BsCurrencyDollar, BsFillCalendarFill } from "react-icons/bs"
 import { GoBroadcast } from "react-icons/go"
 import { getUsersDebateCountApi, logoutApi, updateUserapi } from "../../../utils/Api";
 import { bindActionCreators } from "redux";
@@ -148,6 +148,22 @@ const ProfileCard = ({ userData }) => {
 
 
                         </div>
+                    }
+                    {
+                        (data.subscription !== null) && <><div className="other_info_text_item">
+
+                            <BsCurrencyDollar className="upcoming_icon" />
+                            <p className="other_info_text">Plan: {data?.subscription?.plan}</p>
+
+
+                        </div>
+                        <div className="other_info_text_item">
+
+                            <BsFillCalendarFill className="upcoming_icon" />
+                            <p className="other_info_text">Reamining Days: {data?.subscription?.remainingDays}</p>
+
+
+                        </div></>
                     }
 
                 </div>

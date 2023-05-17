@@ -152,10 +152,10 @@ const DebateCard = ({ debate, isLive }) => {
             </button>
           }
 
-          <Link to={`/debate_room/${debate?._id}?audience=${true}`}>
+          <Link to={`/debate/${debate?.passcode}?audience=${true}`} state={{debate}}>
             <button> <MdOutlineViewInAr /> <p> {isLive ? "Watch" : "View Debate"} </p> </button>
           </Link>
-          <Link to={`/debate_room/${debate?._id}`}>
+          <Link to={`/debate/${debate?.passcode}`} state={{debate}}>
             {
               (isLive && isParticipant) ?
                 <button>  <AiOutlineUsergroupAdd /> <p>Participate</p> </button> : ""

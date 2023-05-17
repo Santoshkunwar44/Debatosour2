@@ -4,18 +4,17 @@ import {  useToast } from '@chakra-ui/react';
 import Participants from "../../Layouts/Debate/Participants/Participants"
 import Navbar from "../../Layouts/Navbar/Navbar"
 import LiveChat from "../../components/DebateRoom/LiveChat/LiveChat"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
-import { deleteDebateApi, getAgoraTokenApi, getDebateByIdApi, joinParticipantApi, removeParticipantApi } from "../../utils/Api"
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { deleteDebateApi, getAgoraTokenApi, getDebateByPassocde, joinParticipantApi, removeParticipantApi } from "../../utils/Api"
 import { bindActionCreators } from "redux"
 import { actionCreators } from "../../redux/store"
-import {  getTimeFromMs } from "../../utils/services"
+import {  getTimeCountDown, getTimeFromMs } from "../../utils/services"
 import { useDispatch } from "react-redux"
 import { useSelector } from "react-redux"
 import AgoraRTM from 'agora-rtm-sdk'
 import AgoraRTC from 'agora-rtc-sdk-ng'
 import DebateAction from "../../components/DebateRoom/DebateAction/DebateAction"
 import "./DebateRoom.css"
-import DebateFinishModal from "../../Layouts/modal/DebateFinishedModal/DebateFinishModal";
 import DebateInfo from "../../Layouts/Debate/DebateInfo/DebateInfo";
 const APPID = process.env.REACT_APP_AGORA_APP_ID;
 
@@ -31,7 +30,8 @@ const DebateRoom = () => {
   const otherState = useSelector(state => state.other)
   const [UrlSearchParams, setUrlSearchParams] = useSearchParams();
   const [WatchType, setWatchType] = useState()
-  const { debateId } = useParams()
+  let { debateId } = useParams()
+  debateId = debateId.toString()
   const dispatch = useDispatch()
   const rtmChannelRef = useRef()
   const { AddActiveDebate, SetRoomIsLiveOrNot, SetIsUserParticipant, setRtmChannelAction, setIsLoading, SetRoomLoading } = bindActionCreators(actionCreators, dispatch)
@@ -69,6 +69,7 @@ const DebateRoom = () => {
     min:0,
     sec:0,
   })
+  const debate = useLocation().state
 
   
 
@@ -400,7 +401,7 @@ const initChannelMessageEvent=()=>{
   const fetchDebateById = async () => {
     if (!debateId) return;
     try {
-      const res = await getDebateByIdApi(debateId)
+      const res = await getDebateByPassocde(debateId)
       if (res.status !== 200) throw Error(res.data.message)
       activeDebateRef.current = res.data.message[0];
 
@@ -735,26 +736,31 @@ const initChannelMessageEvent=()=>{
     <>
       <Navbar />
       <div className='DebateRoomWrapper' >
-        <div className='debate_room_top_header'>
+    { debateState.isStarted &&
+
+      <div className='debate_room_top_header'>
           <div className="debate_room_top_header_left">
             <img width={"40px"} src="/images/error_dino.png" alt="dinosour" />
-            <div>
           <h1 className='Debate_room_main_text' >
             {activeDebateRef.current?.topic}  </h1>
                 
-              </div>
 
             </div>
-          {/* { !isLive  &&   <div className="debate_room_top_header_right">
+          { !isLive  && 
+            (debateState.isStarted && !debateState.isPaused) && (  <>
+              <div>
 
-            <h1 className="main_timing_text"> {`STARTS IN ${getTimeCountDown(null,day,hour,hour,sec)} `}</h1>
-            </div>}
-            { (debateState.isStarted && !debateState.isPaused) &&   <div>
-
-            <h1 className="main_timing_text"> {`ROUND FINISH IN ${getTimeCountDown(timeRemainingRef.current)} `} </h1>
-            </div>} */}
+            <h1 className="main_timing_text">
+               {`ROUND FINISH IN ${getTimeCountDown(timeRemainingRef.current)} ` }
+               </h1>
+            </div>
+            
+            </>
+            )
+            }
       
         </div>
+      } 
         <DebateScreenBox
           debateState={debateState}
           startTeam={activeDebateRef.current?.timeFormat[0].team}
@@ -768,6 +774,7 @@ const initChannelMessageEvent=()=>{
           handleCloseDebate={handleCloseDebate}
           handleFinishSpeakTime={handleFinishSpeakTime}
         />
+  <div className="debate_bottom_content">
 
         <DebateAction
           isUserParticipant={isUserParticipant}
@@ -786,18 +793,13 @@ const initChannelMessageEvent=()=>{
           micControlTeam={activeMicControlTeam}
           finishHandle={handleFinishSpeakTime}
         />
-        {
-          debateState?.hasFinished && <DebateFinishModal handleCloseDebate={handleLeaveRoom} />
-        }
-     
      <DebateInfo/>
-
         <div className='debate_bottom_container'>
           <Participants />
           <LiveChat 
-          
           />
         </div>
+      </div>
       </div>
 
     </>

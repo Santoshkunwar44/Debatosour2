@@ -17,6 +17,7 @@ export const getIsPassocodeUniqueApi = (passcode) =>
 export const createDebateApi = (data) => axiosInstance.post("/debate", data);
 export const getDebateByIdApi = (debateId) =>
   axiosInstance.get(`/debate?_id=${debateId}`);
+export const getDebateByPassocde =(passcode)=>axiosInstance.get(`/debate?passcode=${passcode}`)
 export const getCurrentDebateApi = () =>
   axiosInstance.get(`/debate?live=${true}`);
 export const getAllDebateApi = () =>

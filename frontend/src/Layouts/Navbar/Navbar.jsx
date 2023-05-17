@@ -22,8 +22,8 @@ const Navbar = () => {
           <Link to={"/"}>
             <li className={`${location === "/" && "active_li"}`}>Home</li>
           </Link>
-          <Link to={"/live_debates"}>
-            <li className={`${location === "/live_debates" && "active_li"}`}> Debates</li>
+          <Link to={"/alldebates"}>
+            <li className={`${location === "/alldebates" && "active_li"}`}> Debates</li>
           </Link>
           <Link to={"/chatbot"}>
             <li className={`${location === "/chatbot" && "active_li"}`}>chatbot </li>

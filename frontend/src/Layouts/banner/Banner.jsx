@@ -6,6 +6,7 @@ import {useSelector} from "react-redux"
 import {useNavigate} from "react-router-dom"
 import { useToast } from '@chakra-ui/react';
 import "./Banner.css";
+import DebatePasscodeInput from "../../components/DebateForm/TeamForm/DebatePasscodeInput/DebatePasscodeInput";
 const Banner = () => {
 
  const [debateLink, setdebateLink] = useState("");
@@ -108,14 +109,15 @@ const handleShowToastBar=(text)=>{
 
 
       </div>
-      <div className="debate_link_box">
+      <DebatePasscodeInput/>
+      {/* <div className="debate_link_box">
 
         <input type="text" value={debateLink} onChange={(e)=>setdebateLink(e.target.value)} placeholder="Enter or paste link of debate"  />
 
           <button onClick={handleWatch} className={`watch_button ${!validLink && "disable_watch_button_banner" }`}>  <HiOutlineViewfinderCircle className="watch_icon" /> WATCH</button>
 
 
-      </div>
+      </div> */}
     </div>
   )
 }

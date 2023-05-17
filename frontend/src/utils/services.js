@@ -84,3 +84,11 @@ export const changeVote=(teams,type,userId ,teamsName )=>{
         }
     })
 }
+
+export function generateRandomNumber() {
+  var min = 100000; // Minimum 6-digit number (inclusive)
+  var max = 999999; // Maximum 6-digit number (inclusive)
+
+  var randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+  return randomNumber
+}

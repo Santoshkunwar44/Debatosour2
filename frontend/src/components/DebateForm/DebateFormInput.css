@@ -355,3 +355,10 @@ h2 {
 .input_row_box_parent input{
   flex: 1 !important;
 }
+.error_text{
+  font-size: 12px;
+  margin-top: 5px;
+  color: red;
+  letter-spacing: 0.88px;
+
+}

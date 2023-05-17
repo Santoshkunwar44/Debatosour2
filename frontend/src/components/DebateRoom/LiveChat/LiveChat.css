@@ -32,11 +32,11 @@
   font-size: 1.5rem;
   color: rgb(14, 11, 61);
 }
-h2 {
+/* h2 {
   font-size: 30px;
   font-weight: bold;
   color: rgb(14, 11, 61);
-}
+} */
 .live_chat_message_list {
   height: 100%;
   overflow-y: scroll;

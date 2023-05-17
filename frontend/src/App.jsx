@@ -17,6 +17,7 @@ import "./App.css"
 import Profile from "./pages/profile/Profile";
 import  Watchnow from "./pages/WatchNow/Watchnow";
 import  Subscription from "./pages/Subscription/Subscription";
+import DebateCompletionUi from "./components/DebateRoom/DebateCompletionUi/DebateCompletionUi";
 
 function App() {
   const { data } = useSelector((state) => state.user)
@@ -49,7 +50,6 @@ function App() {
     }
 
   }
-  console.log(data)
 
 
 
@@ -57,22 +57,19 @@ function App() {
     <>
       <div className="App">
 
-
         {
-          isLoading ? <Loader /> :""
+          ( roomLoading  || isLoading) ? <Loader /> :""
         }
-        {
-          roomLoading ? <Loader/> :""
-        }
+       
         <Routes>
           <Route path="" element={<Home />} />
-          <Route path="/live_debates" element={<CurrentDebates />} />
+          <Route path="/alldebates" element={<CurrentDebates />} />
           <Route path="/chatbot" element={<ChatBot />} />
           <Route path="/create" element={<CreateDebate />} />
           <Route path="/profile/:profileId" element={!data ? <Navigate to={"/login"} /> : <Profile />} />
           <Route path="/login" element={data ? <Navigate to={"/"} /> : <Login />} />
           <Route path="/signup" element={data ? <Navigate to={"/"} /> : <Signup />} />
-          <Route path="/debate_room/:debateId" element={<DebateRoom />} />
+          <Route path="/debate/:debateId" element={<DebateRoom />} />
           <Route path="/watch" element={<Watchnow />} />
           <Route path="/subscription" element={<Subscription />} />
 

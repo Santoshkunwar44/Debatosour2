@@ -9,6 +9,7 @@ import { TbMicrophone2 } from "react-icons/tb"
 import SpeakTimeLeft from '../SpeakTimeLeft/SpeakTimeLeft';
 import { bindActionCreators } from 'redux';
 import { actionCreators } from '../../../redux/store';
+import DebateBanner from '../../../components/DebateRoom/DebateBanner/DebateBanner';
 
 const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleCloseDebate, activeSpeakers, isLive, debateState, activeMicControlTeam, handleFinishSpeakTime }) => {
   const { activeDebate, activeParticipants } = useSelector((state) => state.debate);
@@ -153,7 +154,9 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
   return (
     <>
 
-      <SpeakTimeLeft
+    {
+      isLive ? <>
+  <SpeakTimeLeft
         startTeam={startTeam}
         debateState={debateState}
          countDown={countDown} 
@@ -220,6 +223,11 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
 
 
       </div>
+      </>:<DebateBanner/>
+
+    }
+
+    
     </>
   )
 }

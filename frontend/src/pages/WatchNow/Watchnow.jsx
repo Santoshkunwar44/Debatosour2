@@ -1,5 +1,5 @@
 import React  ,{useEffect,useState} from 'react';
-import {  useSearchParams } from "react-router-dom";
+import {  useLocation, useSearchParams } from "react-router-dom";
 import {getSingleDebateApi } from "../../utils/Api"
 import Navbar from "../../Layouts/Navbar/Navbar";
 import {format} from "timeago.js";
@@ -12,24 +12,18 @@ import "./WatchNow.css";
 
 
 const Watchnow = () => {
-  const  [searchParams, setSearchParams] = useSearchParams();
-  const [ debateData,setDebateData ] = useState(null) 
   const {data} =useSelector((state)=>state.user);
   const [ linkError,setLinkError] =useState(false)
   const [isLive,setIsLive] = useState(null)
-  const [ isParticipant,setIsParticipant] =useState(false)
+  const [ isParticipant,setIsParticipant] =useState(false);
+  const [debatorsInRoom,setDebatorsInRoom] =useState([])
+    const  debateData =  useLocation().state
 
-const debateId = searchParams.get("debateId");
 
-
-  useEffect(() => {
-    
-    if(!debateId)return;
-    fetchDebate();
-
-  }, [debateId])
   useEffect(()=>{
+    if(!data || !debateData)return;
     let now = new Date().getTime();
+    setDebatorsInRoom(debateData?.joinedParticipants)
     if (now < debateData?.startTime) {
       setIsLive(false)
     } else {
@@ -48,32 +42,9 @@ const debateId = searchParams.get("debateId");
   },[data,debateData])
 
 
-      const fetchDebate=async()=>{
-  try {
-    
-    const res = await getSingleDebateApi(debateId);
-    console.log("res",res.data)
-    if(res.status === 200){
-      if(Boolean(res.data.message?.isEnded)){
-        setIsLive(false)
-      }else{
-        setDebateData(res.data.message?.debate)
-        setIsLive(true)
-      }
-    }else if(res.status === 401){
-      setLinkError(true)
-    }
+   
 
 
-  } catch (error) {
-    console.log(error.response?.status,"sf")
-    if(error.response?.status === 401){
-      setLinkError(true)
-      console.log("inside ",error)
-    }
-  }
-}
-console.log(linkError)
 
 
     
@@ -91,19 +62,15 @@ console.log(linkError)
 <div className="watch_box_joined_participants_box">
   {
 
-   debateData?.joinedParticipants?.length > 0 &&  <p className="watch_box_joined_participants_text">Joined participants</p>
+debatorsInRoom?.length > 0 &&  <p className="watch_box_joined_participants_text">Joined participants</p>
   }
   <div className="joined_participants_list">
     {
-      debateData ?   debateData.joinedParticipants.length >0 ? debateData.joinedParticipants.map((user)=>(
+      debateData ?   debatorsInRoom.length >0 ? debatorsInRoom.map((user)=>(
     <div  className="joined_participants" key={user?._id}>
-
-
       <img src={user.avatar} alt="participant_profile_img" />
       <p>{user.firstName}</p>
-
       </div>
-
       )) : isLive && <p className="watch_now_no_one_text">No one is in the room 🚫</p> : "loading"
     }
     {
@@ -119,11 +86,11 @@ console.log(linkError)
   isLive ?
   <>
     <p className="watch_box_started_time">Started {format(debateData.startTime)}</p> 
-  <p className="watch_box_ending_time">Ends with {moment(debateData.endTime).fromNow()}</p>
+  
   </>
   :<>
     <p className="watch_box_started_time">Starts at {moment(debateData.startTime).format("LLL")}</p>
-    <p className="watch_box_ending_time">Ends at {moment(debateData.endTime).format("LLL")}</p>
+
   </>
 }
 
@@ -135,10 +102,10 @@ console.log(linkError)
     {
         isLive ?
     <>
-       <Link to={`/debate_room/${debateId}?audience=${true}`}>
+       <Link to={`/debate/${debateData?.passcode}?audience=${true}`}>
     <button> <MdOutlineViewInAr /> <p>Watch </p>  </button>
     </Link>
-  <Link     className={`    "watchNow_participateLink"  ${!isParticipant && "disable_participateBtn"}` } to={`/debate_room/${debateId}`}>
+  <Link     className={`    "watchNow_participateLink"  ${!isParticipant && "disable_participateBtn"}` } to={`/debate/${debateData?.passcode}`}>
       <button disabled={!isParticipant}  className="watch_now_participate_button">
         <AiOutlineUsergroupAdd/> <p>Participate</p>
       </button>

@@ -176,7 +176,7 @@ const DebateAction = ({
         LEAVE
       </button>
         } 
-    <CopyToClipboard text={`${process.env.REACT_APP_FRONTEND_URL}/watch?debateId=${roomId}`} onCopy={handleCopyLink}>
+    <CopyToClipboard text={`${process.env.REACT_APP_FRONTEND_URL}/debate/${activeDebate?.passcode}`} onCopy={handleCopyLink}>
       <button   className="copy_link_button">
         <HiOutlineClipboardDocument/> 
         <p>COPY LINK</p>

@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import DebateInformation from "./DebateInformation.jsx"
 import './DebateFormInput.css'
 import DebateFormat from './DebateFormat/DebateFormat'
-import { getLoggedInUserData } from '../../utils/services'
+import { generateRandomNumber, getLoggedInUserData } from '../../utils/services'
 import { debateFormat } from '../../utils/data'
 
 
@@ -336,18 +336,21 @@ if(formatArr){
   return <option value={""} disabled>select team format</option>
 }
   }
-
+console.log(debateForm)
   const handlePassCodeChange=async(event)=>{
 
     const value = event.target.value ;
+    if(value.length >6)return;
+    setDebateForm(prev=>({
+      ...prev,passcode:+value
+    }))
     if(value.length === 6){
       const {data,status} =  await getIsPassocodeUniqueApi(value);
-      console.log("data",data)
       if(status=== 200){
         const {isUnique}= data.message
         if(isUnique){
           setIsPasscodeValid(true)
-          setDebateForm(prev=>({...prev,passcode:value}))
+          setDebateForm(prev=>({...prev,passcode:+value}))
         }else{
           setIsPasscodeValid(false)
         }
@@ -358,6 +361,29 @@ if(formatArr){
       }
 
   }
+  const handleAutoGenerateePasscode=async()=>{
+
+   
+    let stop= false
+    
+    do {
+  const passcode =  generateRandomNumber()
+  const {data,status} =  await getIsPassocodeUniqueApi(passcode);
+  if(status=== 200){
+    const {isUnique}= data.message
+    if(!isUnique){
+      setIsPasscodeValid(false)
+    }else{
+      setIsPasscodeValid(true)
+      setDebateForm(prev=>({
+        ...prev, passcode
+      }))
+      stop = true;
+    }
+  }
+  } while (!stop);
+
+}
 
 
   return (
@@ -388,14 +414,15 @@ if(formatArr){
             </select>
           </div>
           <div className='input_item'>
-{
- !isPasscodeValid && <label >This passcode is already taken  try next ! </label>}
+
 <label className="form_label" >PASSCODE FOR DEBATE</label>
 
 <div className='input_row_box_parent'>
-<input type="number" minLength={6} maxLength={6} max={6} placeholder='random 6 digit number'  name='passcode' onChange={handlePassCodeChange} />
-<button>Auto Generate</button>
+<input type="number" minLength={6} maxLength={6} max={6} placeholder='random 6 digit number'  name='passcode' onChange={handlePassCodeChange} value={debateForm.passcode}/>
+<button onClick={handleAutoGenerateePasscode}>Auto Generate</button>
 </div>
+{
+ !isPasscodeValid && <label className='error_text' >This passcode is already taken  try next ! </label>}
 </div>
   
 

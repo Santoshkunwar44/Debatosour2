@@ -13,21 +13,23 @@ const LiveChat = () => {
   const dispatch = useDispatch()
   const [messageArr,setMessageArr] =useState([])
   const {data} = useSelector(state=>state.user)
+  const {activeDebate} =useSelector(state=>state.debate)
   const {setMessageArrAction} =bindActionCreators(actionCreators,dispatch )
   
   const {rtmChannel} = useSelector(state=>state.other);
-  const debateId = useParams().debateId;
+
   const inputRef = useRef()
   const scrollRef = useRef()
 
   useEffect(()=>{
-    if(!debateId)return ;
+    if(!activeDebate?.current)return ;
     handleGetAllChats()
-  },[debateId])
+  },[activeDebate?.current])
 
   const handleGetAllChats = async()=>{
+    const {_id} = activeDebate?.current
     try {
-        const res = await findChatApi(debateId);
+        const res = await findChatApi(_id);
         if(res.status===200){
           const {message} = res.data 
           setMessageArr(message)
@@ -43,7 +45,7 @@ const LiveChat = () => {
 
     const newChat ={
       owner:data?._id,
-      debate:debateId,
+      debate:activeDebate?.current?._id,
       text:msgText
     }
       try {

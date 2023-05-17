@@ -8,15 +8,14 @@ import { actionCreators } from "../../redux/store"
 import { useDispatch } from "react-redux"
 import './CurrentDebates.css'
 import { Enums } from "../../redux/action/actionTypes/Enumss"
-import Skeletonlay from "../../Layouts/Skeleton/Skeleton"
 import Skeleton from "../../Layouts/Skeleton/Skeleton"
 import NoLiveDebate from "../../Layouts/Debate/NoLiveDebate/NoLiveDebate"
-import { getLoggedInUserData } from "../../utils/services"
 
 
 const CurrentDebates = () => {
   const [theDebateArr, settheDebateArr] = useState(null);
   const { currentDebateTab } = useSelector((state) => state.debate)
+  const {data:currentUser}  =useSelector(state=>state.user)
   const dispatch = useDispatch()
   const { AddLiveDebateTab, AddUpcominggDebateTab } = bindActionCreators(actionCreators, dispatch)
 
@@ -34,7 +33,7 @@ const CurrentDebates = () => {
     }
     settheDebateArr(null)
   }
-  const currentUser = getLoggedInUserData();
+
 
   const handleFetchtheDebateArr = async () => {
     let res = null
@@ -61,7 +60,6 @@ const CurrentDebates = () => {
       <div className="CurrentDebatesWrapper">
         <div className="currentDebates_bg">
 
-
         </div>
         <div className="current_debates_header">
           <h3 className="live_debates text1">{currentDebateTab === Enums.UPCOMING_TAB ? "UPCOMING" : "ONGOING"}
@@ -69,7 +67,7 @@ const CurrentDebates = () => {
           </h3>
           <div className="tab_buttons_wrapper">
             <button className={`${currentDebateTab === Enums.UPCOMING_TAB ? "active_tab_button" : ""}`} onClick={() => { handleChangeDebateTabtype(Enums.UPCOMING_TAB) }}>Upcoming Debates </button>
-            {currentUser?.subStatus && <button className={`${currentDebateTab === Enums.LIVE_TAB ? "active_tab_button" : ""}`} onClick={() => { handleChangeDebateTabtype(Enums.LIVE_TAB) }}>Live Debates</button>}
+            {currentUser?.subscription?.status && <button className={`${currentDebateTab === Enums.LIVE_TAB ? "active_tab_button" : ""}`} onClick={() => { handleChangeDebateTabtype(Enums.LIVE_TAB) }}>Live Debates</button>}
           </div>
         </div>
 

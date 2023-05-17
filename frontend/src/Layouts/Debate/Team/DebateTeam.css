@@ -54,9 +54,9 @@ pointer-events: ${(props)=>!props.isLive ? "none":""}; */
   /* background: var(--secondary_color); */
   scale: 1.04;
 }
-svg {
+/* svg {
   font-size: 1.2rem;
-}
+} */
 
 .team_member_list {
   display: flex;

@@ -47,7 +47,7 @@ const Profile = () => {
         fetchPastDebates();
         fetchFutureDebates();
         fetchInvitationDebates();
-    },[])
+    },[data])
 
     const fetchNextUserProfile = async () => {
 
@@ -76,21 +76,6 @@ const Profile = () => {
                 {
                     nextUserProfile && <ProfileCard userData={nextUserProfile} />
                 }
-                {/* <div className='profile_container_my_debate'>
-                    <div className='profile_container_my_debate_heading'>
-                        <h2 className='main_text'>{profileId === data?._id ? "MY" : nextUserProfile?.firstName?.toUpperCase()}  <h2 className='secondary_main_text'>DEBATES</h2></h2>
-                        <div className='_profile_information_text'>
-                            <p> <b>Note :</b> The Debate  which is already ended are deleted from our database.So it is not shown anymore. </p>
-                        </div>
-                    </div>
-                    <MyDebateBox own={profileId === data?._id } />
-                </div> */}
-                {/* <div>
-                {
-                    profileId ===data?._id &&   <h2 className='main_text'> DEBATES IN WHICH I AM  INVITED   </h2>
-                }
-                </div> */}
-
                 <MyDebates 
                     pastDebates={pastDebates}
                     futureDebates={futureDebates}

@@ -101,3 +101,6 @@
   letter-spacing: 1px !important;
   background: var(--primary_color) !important;
 }
+p , h1{
+  margin-bottom: 0 !important;
+}

@@ -70,14 +70,11 @@ const handleShowToastBar=(text)=>{
 }
   return (
     <div className="BannerWrapper">
-      <div className="banner_bg_image">
 
-        <img className="cartoon_speech" src="/images/cartoon_speech.png" alt="dinasourImg" />
+     
  
-        {/* <img className="hello_dinasour" src="/images/dinasour_hello.png" alt="debateImage" /> */}
+    
 
-
-      </div>
       <div className="banner_content" >
         <p className="top_site_info">Virtual Debate platform</p>
         <h1 className="main_text_banner">Online platform to organize</h1>

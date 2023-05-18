@@ -25,8 +25,9 @@ const MyDebates = ({pastDebates, futureDebates, invitationDebates}) => {
     setSize(e.target.value);
   };
   return (
-    <div>
+    <div style={{width:"100%"}} className="myDebates">
       <Tabs
+        
         defaultActiveKey="1"
         type="card"
         size={size}

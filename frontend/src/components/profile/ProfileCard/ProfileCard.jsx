@@ -168,10 +168,10 @@ const ProfileCard = ({ userData }) => {
 
                 </div>
             </div>
-            {
+            {/* {
                 isMe === null ? "" : isMe ? <AvatarCarousel currentAvatar={userData?.avatar} onChange={handleUpdateAvatar} /> : ""
 
-            }
+            } */}
 
 
 

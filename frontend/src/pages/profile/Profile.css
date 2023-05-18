@@ -34,3 +34,6 @@
 ._profile_information_text b {
   color: var(--dark_primary_text_color);
 }
+.myDebates{
+  padding:  1rem 2rem;
+}

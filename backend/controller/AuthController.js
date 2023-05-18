@@ -8,7 +8,7 @@ const { getUserSubscriptionStatus } = require("../services/UtilityMethods");
 
 class AuthController {
   async register(req, res) {
-    const { email, password:thePassword } = req.body;
+    const { email, password: thePassword } = req.body;
     try {
       const userExist = await UserModel.findOne({ email });
       if (userExist) {
@@ -25,12 +25,14 @@ class AuthController {
 
       req.body.lastLoggedIn = Date.now();
       req.body.password = await hashPassword(thePassword);
-      req.body.stripeCustomerId = customer.id 
+      req.body.stripeCustomerId = customer.id;
       let savedUser = await UserModel.create(req.body);
-      savedUser._doc.subscription =  await getUserSubscriptionStatus(customer.id)
-      const {password,...other} =savedUser._doc
+      savedUser._doc.subscription = await getUserSubscriptionStatus(
+        customer.id
+      );
+      const { password, ...other } = savedUser._doc;
 
-      req.session.user =other
+      req.session.user = other;
 
       return res.status(200).json({ message: other, success: true });
     } catch (error) {
@@ -45,7 +47,7 @@ class AuthController {
       if (!userExist) {
         return res.status(403).json({ message: "This email is not registerd" });
       }
-      const { password, _id ,stripeCustomerId } = userExist._doc;
+      const { password, _id, stripeCustomerId } = userExist._doc;
       const isPasswordValid = await compareHashPassword(userPassword, password);
       const lastLoggedIn = Date.now();
       if (isPasswordValid) {
@@ -58,21 +60,22 @@ class AuthController {
             new: true,
           }
         );
-        
-     userExist._doc.subscription =   await  getUserSubscriptionStatus(stripeCustomerId)
-     userExist._doc.lastLoggedIn = lastLoggedIn
-      req.session.user = userExist._doc
-      console.log(userExist._doc)
 
-        res.status(200).json({  message:userExist._doc, success: true
-        });
+        userExist._doc.subscription = await getUserSubscriptionStatus(
+          stripeCustomerId
+        );
+        userExist._doc.lastLoggedIn = lastLoggedIn;
+        req.session.user = userExist._doc;
+        console.log(userExist._doc);
+
+        res.status(200).json({ message: userExist._doc, success: true });
       } else {
         res
           .status(403)
           .json({ message: "invalid credentails", success: false });
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       res.status(500).json({ message: error.message, success: false });
     }
   }

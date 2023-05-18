@@ -17,7 +17,8 @@ export const getIsPassocodeUniqueApi = (passcode) =>
 export const createDebateApi = (data) => axiosInstance.post("/debate", data);
 export const getDebateByIdApi = (debateId) =>
   axiosInstance.get(`/debate?_id=${debateId}`);
-export const getDebateByPassocde =(passcode)=>axiosInstance.get(`/debate?passcode=${passcode}`)
+export const getDebateByPassocde = (passcode) =>
+  axiosInstance.get(`/debate?passcode=${passcode}`);
 export const getCurrentDebateApi = () =>
   axiosInstance.get(`/debate?live=${true}`);
 export const getAllDebateApi = () =>
@@ -49,6 +50,8 @@ export const getSingleDebateApi = (debateId) =>
 export const getPrices = () => axiosInstance.get(`/user/prices`);
 export const setStripeSession = (data) =>
   axiosInstance.post(`/user/setStripeSession`, data);
+export const cancelSubscriptionApi = (data) =>
+  axiosInstance.post(`/user/cancelSubscription`, data);
 
 // chat bot api
 

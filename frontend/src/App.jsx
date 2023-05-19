@@ -18,7 +18,6 @@ import "./App.css"
 import Profile from "./pages/profile/Profile";
 import  Watchnow from "./pages/WatchNow/Watchnow";
 import  Subscription from "./pages/Subscription/Subscription";
-import DebateCompletionUi from "./components/DebateRoom/DebateCompletionUi/DebateCompletionUi";
 
 function App() {
   const { data } = useSelector((state) => state.user)

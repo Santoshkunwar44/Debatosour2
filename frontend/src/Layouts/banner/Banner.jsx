@@ -49,7 +49,7 @@ const handleCreateDebate=()=>{
     navigate("/login")
     handleShowToastBar("You need to login first ")
 
-  }else if(userData && userData?.subscription?.status ){
+  }else if(userData && userData?.subscription?.status==="active" ){
     navigate("/create");
   }else{
     navigate("/subscription")

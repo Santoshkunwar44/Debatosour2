@@ -67,8 +67,7 @@ class UserController {
       const deletedSubscription = await stripe.subscriptions.del(
         subscriptionId
       );
-      res.json(deletedSubscription);
-      return res.json(deletedSubscription);
+      return res.status(200).json(deletedSubscription);
     } catch (error) {
       console.log("*error: ", error);
       res

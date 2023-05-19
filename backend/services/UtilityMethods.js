@@ -26,7 +26,8 @@ class UtilityMethods {
         const remainingDays = currentPeriodEnd.diff(now, "days");
         return {
           plan: subscriptions.data[0].plan.interval,
-          status: true,
+          subscriptionId: subscriptions.data[0].id,
+          status: subscriptions.data[0].status,
           remainingDays,
         };
       }

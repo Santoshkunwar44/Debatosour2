@@ -61,9 +61,25 @@ class UserController {
     }
   }
 
+  async cancelSubscription(req, res) {
+    try {
+      const { subscriptionId } = req.body;
+      const deletedSubscription = await stripe.subscriptions.del(
+        subscriptionId
+      );
+      res.json(deletedSubscription);
+      return res.json(deletedSubscription);
+    } catch (error) {
+      console.log("*error: ", error);
+      res
+        .status(500)
+        .json({ message: "Failed to cancel subscription", success: false });
+    }
+  }
+
   async setStripeSession(req, res) {
     try {
-      const user = await UserModel.findOne({ email: req.body.email });
+      const user = await UserModel.findOne({ _id: req.body.userId });
       const session = await stripe.checkout.sessions.create(
         {
           mode: "subscription",
@@ -82,9 +98,7 @@ class UserController {
           apiKey: process.env.STRIPE_SECRET_KEY,
         }
       );
-      await UserModel.findOneAndUpdate({
-        email:req.body.email
-      })
+
       return res.json(session);
     } catch (error) {
       console.log("*error: ", error);
@@ -97,9 +111,10 @@ class UserController {
 
     if (sessionUser) {
       let updatedUser = await isUserUpdated(sessionUser);
-      const {stripeCustomerId} = updatedUser;
-      console.log( "the status", await getUserSubscriptionStatus(stripeCustomerId))
-      updatedUser.subscription =   await getUserSubscriptionStatus(stripeCustomerId)
+      const { stripeCustomerId } = updatedUser;
+      updatedUser.subscription = await getUserSubscriptionStatus(
+        stripeCustomerId
+      );
       return res.status(200).json({ message: updatedUser, success: true });
     } else {
       return res

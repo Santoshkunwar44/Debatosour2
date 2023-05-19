@@ -32,7 +32,7 @@ const DebateInfo = () => {
             <div className='debates_team_box'>
                 {
                     activeDebate?.current?.teams.map((team, index) => (
-                        <DebateTeam isLive={isLive} team={team} index={index} />
+                        <DebateTeam  key={index} isLive={isLive} team={team} index={index} />
                     ))
                 }
             </div>

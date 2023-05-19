@@ -14,7 +14,6 @@ const DebateAction = ({
   handleMicToggle,
    micMuted, 
    handleLeaveRoom 
-   ,roomId  
    ,isUserParticipant 
    , isLive,
    WatchType,
@@ -32,7 +31,8 @@ const DebateAction = ({
   const [teams, setTeams] = useState([]);
   const [ canStartDebate,setCanStartDebate] =useState(false);
   const [ isMicWithUs,setIsMicWithUs] =useState(false)
-    
+
+
   useEffect(() => {
     if (activeDebate?.current) {
       let speakerTeams = roomMembers.filter(speaker => {
@@ -99,11 +99,15 @@ const DebateAction = ({
     if(!data || !activeDebate?.current)return;
    let teamName =  getMyTeam(activeDebate?.current.teams,data._id)?.name;
    let startTeamName = activeDebate?.current.timeFormat[0].team; 
-   console.log("my",startTeamName)
    setCanStartDebate(teamName === startTeamName)
 
     
-  },[data,activeDebate?.current])
+  },[data,activeDebate?.current]);
+
+
+
+
+
   const handleCopyLink=()=>{
 
     toast({
@@ -124,7 +128,6 @@ const DebateAction = ({
     }
   }
  
-
 
 
   return (
@@ -176,7 +179,7 @@ const DebateAction = ({
         LEAVE
       </button>
         } 
-    <CopyToClipboard text={`${process.env.REACT_APP_FRONTEND_URL}/debate/${activeDebate?.passcode}`} onCopy={handleCopyLink}>
+    <CopyToClipboard text={`${process.env.REACT_APP_FRONTEND_URL}/debate/${activeDebate?.current.passcode}`} onCopy={handleCopyLink}>
       <button   className="copy_link_button">
         <HiOutlineClipboardDocument/> 
         <p>COPY LINK</p>

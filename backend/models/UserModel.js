@@ -25,6 +25,7 @@ const UserSchema = mongoose.Schema(
       type: String,
       default: "https://cdn-icons-png.flaticon.com/512/8353/8353258.png",
     },
+    equipedAvatars:[],
     lastLoggedIn: Number,
   },
   {

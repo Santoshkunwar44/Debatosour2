@@ -57,13 +57,11 @@ function App() {
   return (
     <>
       <div className="App">
-
         {
           ( roomLoading  || isLoading) ? <Loader /> :""
         }
-       
         <Routes>
-          <Route path="" element={<Home />} />
+          <Route path="" element={<Home/>} />
           <Route path="/alldebates" element={<CurrentDebates />} />
           <Route path="/chatbot" element={<ChatBot />} />
           <Route path="/create" element={<CreateDebate />} />

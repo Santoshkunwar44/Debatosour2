@@ -33,7 +33,7 @@ const Participants = () => {
             <AvatarGroup size='md' max={participants?.length - 1}>
               {
                 participants ? participants.map((participant) => (
-                  <Avatar referrerPolicy="no-referrer" className="avatars" name={participant.firstName} src={participant.avatar} />
+                  <Avatar key={participant?._id} referrerPolicy="no-referrer" className="avatars" name={participant.firstName} src={participant.avatar} />
                 )) : ""
               }
             </AvatarGroup>

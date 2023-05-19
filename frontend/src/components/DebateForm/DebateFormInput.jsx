@@ -11,6 +11,7 @@ import './DebateFormInput.css'
 import DebateFormat from './DebateFormat/DebateFormat'
 import { generateRandomNumber, getLoggedInUserData } from '../../utils/services'
 import { debateFormat } from '../../utils/data'
+import { Enums } from '../../redux/action/actionTypes/Enumss'
 
 
 
@@ -32,6 +33,7 @@ const DebateFormInput = () => {
     type: "",
     startTime: 0,
     admin: currentUser?._id,
+    judgeType:"",
     duration: 0,
     team_format:"",
     passcode:"",
@@ -170,6 +172,7 @@ useEffect(()=>{
 
         const res = await createDebateApi(thePayload)
         if (res.status === 200) {
+          const {message} = res.data
           toast({
             description: "Debate created successfully",
             status: 'success',
@@ -177,8 +180,7 @@ useEffect(()=>{
             position: "top",
             isClosable: true,
           })
-          navigate(`/debate_room/${res.data?.message?._id}`)
-
+          navigate(`/debate/${message?.passcode}`)
         } else {
           throw Error(res.data.message)
         }
@@ -336,7 +338,6 @@ if(formatArr){
   return <option value={""} disabled>select team format</option>
 }
   }
-console.log(debateForm)
   const handlePassCodeChange=async(event)=>{
 
     const value = event.target.value ;
@@ -350,7 +351,8 @@ console.log(debateForm)
         const {isUnique}= data.message
         if(isUnique){
           setIsPasscodeValid(true)
-          setDebateForm(prev=>({...prev,passcode:+value}))
+          setDebateForm(prev=>({...prev,passcode:+
+          value}))
         }else{
           setIsPasscodeValid(false)
         }
@@ -458,6 +460,15 @@ console.log(debateForm)
 
             </select>
           </div>
+            <div className='input_item'>
+              <label className="form_label">Judge Type</label>
+              <select value={debateForm.judgeType}  name='judgeType' className='team_format' onChange={handleInputChange}>
+              <option value={""} disabled selected >Choose Judge Type</option>
+              <option value={`${Enums.AIJUDGE}`}>AI Judge</option>
+              <option value={`${Enums.VOTING}`}>Voting</option>
+              <option value={`${Enums.NOJUDGE}`}>No Judge </option>
+              </select>
+            </div>
           {/* <div className='input_item'>
 
             <label className='form_label' >Starting time </label>

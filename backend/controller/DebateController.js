@@ -297,7 +297,6 @@ class DebateController {
   async getDebateOfUser(req, res) {
     let { future, invitation } = req.query;
     const { userId: admin } = req.params;
-    console.log(admin);
     let debatesData;
     try {
       if (invitation === "true") {
@@ -353,5 +352,13 @@ class DebateController {
       res.status(500).json({ message: error.message, success: false });
     }
   }
+
+
+
 }
+
+
+
+
+
 module.exports = new DebateController();

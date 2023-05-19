@@ -63,7 +63,7 @@ const CurrentDebates = () => {
         </div>
         <div className="current_debates_header">
           <h3 className="live_debates text1">{currentDebateTab === Enums.UPCOMING_TAB ? "UPCOMING" : "ONGOING"}
-            <h3 className="text2">DEBATES</h3>
+          DEBATES
           </h3>
           <div className="tab_buttons_wrapper">
             <button className={`${currentDebateTab === Enums.UPCOMING_TAB ? "active_tab_button" : ""}`} onClick={() => { handleChangeDebateTabtype(Enums.UPCOMING_TAB) }}>Upcoming Debates </button>

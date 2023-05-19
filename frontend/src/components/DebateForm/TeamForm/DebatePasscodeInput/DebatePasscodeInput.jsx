@@ -63,13 +63,7 @@ const DebatePasscodeInput = () => {
     }
   }
 
-  const handleKeyDown=(e)=>{
 
-    const {value} = e.target;
-    if(value.length >1)return;
-
-
-  }
   return (
     <>
       <div className={styles.passcode_wrapper}>
@@ -78,7 +72,7 @@ const DebatePasscodeInput = () => {
     {
       otpInputs.map((inp,index)=>(
         
-        <input type="number"  maxLength={"1"} placeholder='0'  ref={inp} onChange={(e)=>handleKeyUp(index,e)}/>
+        <input key={index} type="number"  maxLength={"1"} placeholder='0'  ref={inp} onChange={(e)=>handleKeyUp(index,e)}/>
         ))
       }
 

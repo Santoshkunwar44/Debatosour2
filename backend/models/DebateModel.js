@@ -55,6 +55,10 @@ const MongooseSchema = mongoose.Schema({
         type: Number, // milliseconds
         required: [true, "endTime time is required"]
     },
+    judgeType:{
+        type:String,
+        required:true,            
+    },
     hasEnded:{
         type:Boolean,
         default:false

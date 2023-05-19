@@ -1,5 +1,9 @@
 export const Enums = {
     UPCOMING_TAB: "UPCOMING_TAB",
-    LIVE_TAB: "LIVE_TAB"
+    LIVE_TAB: "LIVE_TAB",
+    AIJUDGE:"AIJUDGE",
+    VOTING:"VOTING",
+    NOJUDGE:"NOJUDGE",
+
 
 }

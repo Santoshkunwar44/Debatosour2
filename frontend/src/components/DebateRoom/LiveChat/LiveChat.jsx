@@ -93,9 +93,9 @@ const LiveChat = () => {
       {
         messageArr &&
       messageArr.map((message)=>(
-        <div >
+        <div  key={message?._id  }>
 
-        <MessageText    message={message} key={message?._ID  } own={message?.owner?._id === data?._id}/>
+        <MessageText    message={message}  own={message?.owner?._id === data?._id}/>
         </div>
       ))
  

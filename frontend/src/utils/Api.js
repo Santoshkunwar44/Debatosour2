@@ -1,5 +1,6 @@
 import { axiosInstance } from "./axios";
 
+//USER API ENDPOINTS
 export const RegisterUserApi = (data) =>
   axiosInstance.post("/auth/register", data);
 export const LoginUserApi = (data) => axiosInstance.post("/auth/login", data);
@@ -10,6 +11,7 @@ export const searchUserByNames = (username) =>
   axiosInstance.get(`/user/search?search_query=${username}`);
 export const searchUserByIdApi = (userId) =>
   axiosInstance.get(`/user/search?userId=${userId}`);
+
 
 // DEBATE API ENDPOINTS
 export const getIsPassocodeUniqueApi = (passcode) =>
@@ -54,8 +56,7 @@ export const setStripeSession = (data) =>
 
 // chat bot api
 export const getBotMessageApi = (data) => axiosInstance.post("/chatbot", data);
-export const updateUserapi = (userId, data) =>
-  axiosInstance.put(`/user/${userId}`, data);
+export const updateUserapi = (userId, data) =>axiosInstance.put(`/user/${userId}`, data);
 
 // live chat api
 export const createChatApi = (data) => axiosInstance.post("/chat/create", data);

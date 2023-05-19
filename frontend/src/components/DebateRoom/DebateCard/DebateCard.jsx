@@ -83,7 +83,7 @@ const DebateCard = ({ debate, isLive }) => {
         <AvatarGroup size='md' max={participants.length - 1}>
           {
             participants.map((participant) => (
-              <Avatar referrerPolicy="no-referrer" className="avatars" name={participant.firstName} src={participant.avatar} />
+              <Avatar key={participant?._id} referrerPolicy="no-referrer" className="avatars" name={participant.firstName} src={participant.avatar} />
             ))
           }
 

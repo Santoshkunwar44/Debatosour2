@@ -134,5 +134,7 @@ class UserController {
       res.status(500).json({ message: error, success: false });
     }
   }
+
+
 }
 module.exports = new UserController();

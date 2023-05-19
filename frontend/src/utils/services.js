@@ -1,3 +1,5 @@
+import { avatarsTypeData } from "./data";
+
 export const getMyTeam = (teams, myUserId) => {
   if (!teams || !myUserId) return;
 
@@ -91,4 +93,39 @@ export function generateRandomNumber() {
 
   var randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
   return randomNumber
+}
+
+export function getMysterAvatar(gameResult){
+  const randomNumber = Math.floor(Math.random()*100);
+  let mysteryAvatar ;
+
+  if(gameResult==="win"){
+    if(randomNumber<25){
+    mysteryAvatar=   getRandomAvatar(avatarsTypeData.common,"Common")
+    }else if(randomNumber < 50){
+     mysteryAvatar= getRandomAvatar(avatarsTypeData.rare,"Rare")
+      
+    }else if(randomNumber <75){
+   mysteryAvatar=   getRandomAvatar(avatarsTypeData.legendary,"Legendary")
+    }else{
+      mysteryAvatar= getRandomAvatar(avatarsTypeData.epic,"Epic")
+    }
+  }else if(gameResult==="lose"){
+
+    if(randomNumber<5){
+          mysteryAvatar=   getRandomAvatar(avatarsTypeData.legendary,"Legendary")
+      }else if(randomNumber < 15){
+          mysteryAvatar= getRandomAvatar(avatarsTypeData.epic,"Epic")
+      }else if(randomNumber <35){
+           mysteryAvatar=   getRandomAvatar(avatarsTypeData.rare,"Rare")
+      }else{
+         mysteryAvatar= getRandomAvatar(avatarsTypeData.common,"Common")
+      }
+  }
+  return mysteryAvatar;
+}
+
+const  getRandomAvatar=(avatars , avatarType)=>{
+  let randomNum = Math.floor(Math.random() * avatars.length);
+ return { type:avatarType,  avatar: avatars[randomNum]}
 }

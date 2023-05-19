@@ -35,11 +35,12 @@ const MessageInput = ({ isLiveChat, handleSendMessage }) => {
 
   const handleListen = () => {
     if (listening) {
-      SpeechRecognition.stopListening()
+      SpeechRecognition.stopListening();
     } else {
       SpeechRecognition.startListening({ continuous: true })
     }
   }
+  
   const removeInput=()=>setVoiceText("")
   return (
     <div className='MessageInputWrapper'  >

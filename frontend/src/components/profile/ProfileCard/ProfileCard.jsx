@@ -84,6 +84,16 @@ const ProfileCard = ({ userData }) => {
             console.log(error)
         }
     }
+    const getSubscriptionPlan=()=>{
+        const {subscription} = data;
+        if(!subscription.status || subscription?.status === "canceled" || !subscription){
+
+            return "Free"
+
+        }else if(subscription?.status === "active"){
+            return subscription?.plan + "ly"
+        }
+    }
 
     useEffect(() => {
         if (!userData?._id) return;
@@ -153,17 +163,21 @@ const ProfileCard = ({ userData }) => {
                         (data.subscription !== null) && <><div className="other_info_text_item">
 
                             <BsCurrencyDollar className="upcoming_icon" />
-                            <p className="other_info_text">Plan: {data?.subscription?.plan}</p>
+                            <p className="other_info_text"> Plan: {getSubscriptionPlan()}</p>
 
 
                         </div>
-                        <div className="other_info_text_item">
+                        {
+
+                        data?.subscription?.status==="active" &&    <div className="other_info_text_item">
 
                             <BsFillCalendarFill className="upcoming_icon" />
                             <p className="other_info_text">Reamining Days: {data?.subscription?.remainingDays}</p>
 
+                        </div>
 
-                        </div></>
+                        }
+                        </>
                     }
 
                 </div>

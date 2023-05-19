@@ -9,16 +9,19 @@ import {
   getLoggedInUserApi,
 } from "../../utils/Api";
 import "./Subscription.css";
-import { useSelector } from "react-redux";
-import { AddLoggedInUser } from "../../redux/action/actionCreators";
+import { useDispatch, useSelector } from "react-redux";
+import { bindActionCreators } from "redux";
+import { actionCreators } from "../../redux/store";
 
 const Subscription = () => {
   const [prices, setPrices] = useState([]);
   const [subStatus, setSubStatus] = useState("");
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const dispatch = useDispatch()
   const { data: loggedInUserData } = useSelector((state) => state.user);
   const toast = useToast();
+  const {SetRefreshNow} = bindActionCreators(actionCreators,dispatch)
   const fetchPrices = async () => {
     const { data: response, status } = await getPrices();
     if (status !== 200) throw Error(response.message);
@@ -27,10 +30,10 @@ const Subscription = () => {
 
   useEffect(() => {
     fetchPrices();
-    setSubStatus(loggedInUserData.subscription.status);
-  }, [loggedInUserData.subscription.status]);
+    setSubStatus(loggedInUserData?.subscription?.status);
+  }, [loggedInUserData?.subscription?.status]);
 
-  useEffect(() => {}, []);
+
 
   const createSession = async (priceId) => {
     const { data: response, status } = await setStripeSession({
@@ -51,9 +54,10 @@ const Subscription = () => {
     console.log("*res: ", res);
     if (res.status === 200) {
       setSubStatus(res.data.message.subscription.status);
-      AddLoggedInUser(res.data.message);
       setOpen(false);
       setConfirmLoading(false);
+      SetRefreshNow()
+      // AddLoggedInUser
     }
     toast({
       title: "",
@@ -98,7 +102,7 @@ const Subscription = () => {
               </h2>
               <h3>
                 {subStatus === "active" &&
-                  loggedInUserData.subscription.plan ===
+                  loggedInUserData?.subscription?.plan ===
                     price.recurring.interval && (
                     <Tag color="green">Current Plan</Tag>
                   )}
@@ -115,7 +119,7 @@ const Subscription = () => {
                 <li>Create Debate</li>
               </ul>
               {subStatus === "active" &&
-              loggedInUserData.subscription.plan ===
+              loggedInUserData?.subscription?.plan ===
                 price.recurring.interval ? (
                 <Popconfirm
                   title="Cancel Subscription"

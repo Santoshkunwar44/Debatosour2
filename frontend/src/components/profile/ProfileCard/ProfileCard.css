@@ -93,3 +93,8 @@
 .upcoming_icon {
   color: red !important ;
 }
+.profile_card_item{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

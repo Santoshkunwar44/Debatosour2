@@ -181,6 +181,17 @@ const ProfileCard = ({ userData }) => {
                     }
 
                 </div>
+                
+            </div>
+            <div>
+                <h1 className="profile_card_item_title">Equipped Avatars</h1>
+                <div className="image-row">
+                    {
+                        data.equipedAvatars?.map((item, index) => (
+                            <img className="circle-image" width={"40px"} src={item.avatar} alt="avatar1" />
+                        ))
+                    }
+                </div>
             </div>
             {/* {
                 isMe === null ? "" : isMe ? <AvatarCarousel currentAvatar={userData?.avatar} onChange={handleUpdateAvatar} /> : ""

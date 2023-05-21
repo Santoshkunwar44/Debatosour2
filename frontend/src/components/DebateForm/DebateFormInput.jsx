@@ -311,6 +311,17 @@ useEffect(()=>{
       return false
     }
 
+    if(payload.teams[0]?.name === payload.teams[1]?.name) {
+      toast({
+        description: `Teams should not have the same name`,
+        status: 'error',
+        duration: 5000,
+        position: "top",
+        isClosable: true,
+      });
+      return false
+    }
+
 
 
     return true

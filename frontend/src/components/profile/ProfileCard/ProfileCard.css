@@ -98,3 +98,13 @@
   flex-direction: column;
   gap: 10px;
 }
+.image-row {
+  display: flex;
+}
+.image-row img{
+  margin-top: 10px;
+  margin-right: 10px;
+}
+.circle-image {
+  border-radius: 50%;
+}

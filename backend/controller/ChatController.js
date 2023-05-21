@@ -1,5 +1,6 @@
 const openAi = require("../index")
 const ChatModel = require("../models/ChatModel")
+const DebateModel = require("../models/DebateModel")
 class ChatController{
 
     async createChat(req,res){
@@ -29,20 +30,31 @@ class ChatController{
 
 
     async chatBot(req,res){
-        
-    try {
-        const prompt = req.body.prompt
-     
-        const response = await openAi.createCompletion({
-            model: "text-davinci-003",
-            prompt,
-            temperature: 0.0,
-            max_tokens:512,
-            top_p: 1,
+        const {debateId} = req.query
+        console.log( debateId,"is transcript")
+        try {
+            const prompt = req.body.prompt
+            const response = await openAi.createCompletion({
+                model: "text-davinci-003",
+                prompt,
+                temperature: 0.0,
+                max_tokens:512,
+                top_p: 1,
             frequency_penalty: 0.0,
             presence_penalty: 0,
-
+            
         })
+        if( debateId){
+
+            
+            console.log(debateId,"is transcript");
+
+            await DebateModel.findByIdAndUpdate(debateId,{
+                $set:{
+                    transcript :response.data?.choices[0].text
+                }
+            })
+        }
         return res.status(200).json({ message: response.data?.choices[0].text, uid:Date.now() , success: true })
     } catch (error) {
         console.log(error)

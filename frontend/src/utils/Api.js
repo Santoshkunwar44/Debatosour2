@@ -65,8 +65,8 @@ export const updateUserapi = (userId, data) =>axiosInstance.put(`/user/${userId}
 export const createChatApi = (data) => axiosInstance.post("/chat/create", data);
 export const findChatApi = (debateId) =>
   axiosInstance.get(`/chat/find?debate=${debateId}`);
-export const chatBotApi = (prompt) =>
-  axiosInstance.post("/chat/chatbot", {
+export const chatBotApi = (prompt,debateId) =>
+  axiosInstance.post(`/chat/chatbot?debateId=${debateId}`, {
     prompt,
   });
 

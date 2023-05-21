@@ -79,6 +79,7 @@ const DebateRoom = () => {
 
   }
   const hasLeftRoom = useRef(false)
+  const {transcript,resetTranscript} = useSpeechRecognition()
   const RoomService = new DebateRoomServices({
     data,
     isLive,
@@ -93,6 +94,8 @@ const DebateRoom = () => {
     setUsername,
     audioTracks,
     RoomMembers,
+    transcript,
+    resetTranscript,
     setMicMuted,
     rtmChannelRef,
     activeSpeakers,
@@ -111,7 +114,7 @@ const DebateRoom = () => {
     setRoomLoading:SetRoomLoading,
     isAudience: UrlSearchParams.get("audience"),
   });
-const {transcript,resetTranscript} = useSpeechRecognition()
+
   const [handleRemaining, setHandleRemaining] = useState({
     day: 0,
     hour: 0,
@@ -307,7 +310,7 @@ const {transcript,resetTranscript} = useSpeechRecognition()
   return (
     <>
       <Navbar />
-      <div className='DebateRoomWrapper' onClick={()=>console.log(micMuted)} >
+      <div  className='DebateRoomWrapper' onClick={()=>RoomService.getChannelAttributeFunc()} >
         <div className='debate_room_top_header'>
           {isLive &&
             <div className="debate_room_top_header_left">

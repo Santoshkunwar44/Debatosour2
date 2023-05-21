@@ -1,9 +1,10 @@
 import AgoraRTC from "agora-rtc-sdk-ng";
 import { Rtc_client, Rtm_client  } from "../pages/debateRoom/DebateRoom";
 import { Enums } from "../redux/action/actionTypes/Enumss";
-import { getAgoraTokenApi, joinParticipantApi, updateDebateApi } from "./Api";
+import { chatBotApi, getAgoraTokenApi, joinParticipantApi, updateDebateApi } from "./Api";
 import { avatarsTypeData } from "./data";
 import SpeechRecognition from "react-speech-recognition";
+import moment from "moment";
 
 export const getMyTeam = (teams, myUserId) => {
   if (!teams || !myUserId) return;
@@ -170,7 +171,7 @@ return `
 class DebateRoomServices{
 
   #username;
-  constructor({rtmChannelRef ,hasLeftRoom ,navigate,rtcUid ,data:user , lastApiCallConfig, setRoomLoading ,activeDebateRef , debateStateRef, setUsername ,setDebateState ,setActiveMicControlTeam  ,isAudience ,setRoomMembers ,setMicMuted ,debateId ,RoomMembers ,audioTracks ,setActiveSpeakers ,setRtmChannelAction ,isLive  ,micMuted  ,AddActiveDebate,setMessage ,roundShotsCount ,showToast ,activeSpeakers ,timeRemainingRef ,otherState  ,activeMicControlTeam
+  constructor({rtmChannelRef ,hasLeftRoom ,navigate,rtcUid ,data:user , lastApiCallConfig, setRoomLoading ,activeDebateRef , debateStateRef, setUsername ,setDebateState ,setActiveMicControlTeam  ,isAudience ,setRoomMembers ,setMicMuted ,debateId ,RoomMembers ,audioTracks ,setActiveSpeakers ,setRtmChannelAction ,isLive  ,micMuted  ,AddActiveDebate,setMessage ,roundShotsCount ,showToast , transcript,resetTranscript, activeSpeakers ,timeRemainingRef ,otherState  ,activeMicControlTeam
   }){
     this.navigate = navigate
     this.rtmChannelRef = rtmChannelRef; 
@@ -195,6 +196,7 @@ class DebateRoomServices{
     this.setMicMuted = setMicMuted;
     this.activeMicControlTeam=activeMicControlTeam;
     this.micMuted  = micMuted;
+    this.resetTranscript = resetTranscript;
     this.isLive= isLive ;
     this.SetRoomLoading=setRoomLoading ;
     this.setRtmChannelAction = setRtmChannelAction;
@@ -202,9 +204,15 @@ class DebateRoomServices{
     this.roundShotsCount = roundShotsCount;
     this.otherState = otherState ;
     this.hasLeftRoom=hasLeftRoom;
+    this.transcript= transcript;
+
+
+   
 
   }
-
+  getMyTeamMethod(){
+    return this.activeDebate.current.teams.find((team) => team.members.find((mem) => mem._id === this.currentUser._id));
+   }
 
   getMemberWithHighUid(){
     let myUid = Number(this.rtcUid)
@@ -262,6 +270,12 @@ class DebateRoomServices{
 
   }
 
+
+   getTeamName(){
+    if(this.activeDebate.current){
+      return this.activeDebate.current.teams.map(team=>team.name)
+    }
+  }
   async initVolumeIndicator  () {
 
     //1
@@ -296,73 +310,11 @@ class DebateRoomServices{
     
     const {channelId} = this.rtmChannelRef.current;
     const attr = await Rtm_client.getChannelAttributes(channelId);
+    const  {speechText} = attr
+    console.log( speechText ? JSON.parse(speechText.value):{} )
     return attr
   }
-  async addSpeechToChannel(transcript,resetTranscript){
 
-
-    if(!this.currentUser || this.activeDebate.judgeType !== Enums.AIJUDGE || !transcript)return;
-
-    const attr =  await this.getChannelAttributeFunc();
-
-    let  speechText = attr?.speechText?.value;
-    const thePast = speechText ? JSON.parse(speechText) : []
-    let currentRound=this.debateState.round_shot
-    const userId = this.currentUser?._id
-    let myTeam =  getMyTeam(this.activeDebate.teams,userId).name;
-    myTeam  = this.debateState.speakTeam === "both" ? 'both' : myTeam
-    let currentRoundSpeech = {}
-
-
-       let remoteCurrentRoundSpeech= thePast[currentRound-1];
-
-        if(remoteCurrentRoundSpeech){
-         let  ourTeamSpeech=  remoteCurrentRoundSpeech[myTeam] 
-         if(ourTeamSpeech){
-
-           let mySpeechText = ourTeamSpeech[userId]
-           // check if the user is speaking first time or has the previous speech text
-           if(mySpeechText){
-            mySpeechText= `${mySpeechText} ${transcript}`
-          }else{
-            mySpeechText= ` ${transcript}`
-          }
-          
-          currentRoundSpeech={
-            [myTeam]:{
-              ...ourTeamSpeech,
-              round:currentRound,
-              [userId]: mySpeechText
-            }
-          }
-          
-        }else{
-          currentRoundSpeech={  
-            [myTeam]:{
-              round:currentRound,
-              [userId]: transcript
-            }
-          }
-        }
-          
-        }else{
-          currentRoundSpeech={
-          [myTeam]:{
-            round:currentRound,
-            [userId]: transcript
-          }
-        }
-        }
-
-        
-      let newArr = [...thePast  ] 
-      newArr[currentRound-1 ] = currentRoundSpeech
-      resetTranscript()
-      // await  updateChannelSpeechText(newArr)
-
-
-
-  } 
   async LeaveRtmChannel(){
     await this.RemoveMeAsASpeaker()
     await this.rtmChannelRef.current?.leave();
@@ -465,7 +417,7 @@ class DebateRoomServices{
 
 
   }
-  async handleLastApiCall(){
+  async handleLastApiCallForVoting(){
     const {_id,judgeType,teams} = this.activeDebate.current ;
    const winnerTeam =  this.getWinnerByVote(teams);
    const payload={
@@ -478,7 +430,7 @@ class DebateRoomServices{
    try {
      const {status,data} = await updateDebateApi(_id,payload);
      if(status ===200){
-      this.lastApiCallConfig.current.hasApiCalled = true;
+   
      }else{
       throw Error("something went wrong")
      }
@@ -486,13 +438,48 @@ class DebateRoomServices{
       console.log(error);
    }
   }
+  async handlLastApiCallForTranscript(){
+    const attribute = await this.getChannelAttributeFunc();
+    const speech = attribute.speechText.value;
+    const [teamOne,teamTwo] =  this.getTeamName()
+     const speechOne =  speech[teamOne];
+     const speechTwo = speech[teamTwo];
+     let {startTime , topic  ,debateType } = this.activeDebate.current;
+     startTime = moment(startTime).format('LLLL');
+
+   const theArgumentext =   generateArgument({
+      speechOne,
+      speechTwo,
+      teamOne,
+      teamTwo,
+      topic,
+      debateType,
+      startedTime:startTime
+  })
+
+try {
+  await  chatBotApi(theArgumentext)
+  
+} catch (error) {
+}
+
+
+
+
+  }
 async handleLastSetup(){
 
 
   let myUid = Number(this.rtcUid)
   const nextUser = this.RoomMembers.find((mem)=>Number(mem.rtcUid) > myUid)
+  const {judgeType} = this.activeDebate.current;
   if(!nextUser){
-  await  this.handleLastApiCall()
+  if(judgeType===Enums.AIJUDGE){
+    await this.handlLastApiCallForTranscript()
+  }else if(judgeType===Enums.VOTING){
+    await  this.handleLastApiCallForVoting()
+  }
+  this.lastApiCallConfig.current.hasApiCalled = true;
   await  this.createChannelMessage({
     type:"last_api_call_success"
   })
@@ -771,6 +758,34 @@ async handleDebateInitChange  (nextround, isMicPassed)  {
   }
   await this.createChannelMessage(messagePayload)
 }
+async addSpeechToChannel(){
+
+  if(!this.currentUser || this.activeDebate.current?.judgeType !== Enums.AIJUDGE || !this.transcript)return;
+
+  const attr =  await this.getChannelAttributeFunc();
+
+  let  speechText = attr?.speechText?.value;
+  const thePast = speechText ? JSON.parse(speechText) : {}
+  const myTeam = this.getMyTeamMethod().name;
+  console.log("myteam name",myTeam ,thePast);
+  
+  let teamSpeech;
+  if(thePast[myTeam]){
+    teamSpeech  = thePast[myTeam];
+    teamSpeech   = `${teamSpeech} ${this.transcript}`;
+  }else{
+    teamSpeech=this.transcript;
+  }
+
+  let newArguments={
+    ...thePast,
+    [myTeam]:teamSpeech
+  }
+
+
+  await this.UpdateChannelAttr("speechText",newArguments)
+
+} 
 
 async handleFinishSpeakTime  (isMicPassed)  {
   const { timeFormat ,judgeType } = this.activeDebate.current;
@@ -788,6 +803,7 @@ async handleFinishSpeakTime  (isMicPassed)  {
     this.handleDebateInitChange(nextRoundShot, isMicPassed)
   }
   if(judgeType===Enums.AIJUDGE){
+  await  this.addSpeechToChannel()
   }
 }
 

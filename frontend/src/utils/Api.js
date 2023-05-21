@@ -86,3 +86,4 @@ export const getFutureDebatesOfCurrentUserApi = (data) =>
 export const getInvitationDebatesOfCurrentUserApi = (data) =>
   axiosInstance.get(`/debate/${data.userId}?invitation=${data.invitation}`);
 export const updateDebateApi=(debateId,data)=>axiosInstance.put(`/debate/${debateId}`,data)
+export const addAvatarEquipedMembersInDebate=(debateId,userId)=>axiosInstance.put(`/debate/addAvatarEquipedMembersInDebate/${debateId}/${userId}`)

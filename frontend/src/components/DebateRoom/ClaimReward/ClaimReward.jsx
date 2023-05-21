@@ -1,25 +1,42 @@
-import React, { useState  } from 'react'
+import React, { useEffect, useState  } from 'react'
 import {useSelector} from "react-redux"
 import styles from "./ClaimReward.module.css"
 import { getMysterAvatar } from '../../../utils/services'
 import { IoIosDoneAll } from 'react-icons/io';
 import {GiPerspectiveDiceSixFacesSix} from "react-icons/gi"
-import {  updateUserapi } from '../../../utils/Api';
+import {  addAvatarEquipedMembersInDebate, updateUserapi } from '../../../utils/Api';
+import { useToast } from '@chakra-ui/react';
+import { useParams } from 'react-router-dom';
 
 
-const ClaimReward = () => {
+const ClaimReward = ({debateResult ,setGoToNext ,activeDebate}) => {
   const {data:currentUser} = useSelector(state=>state.user)
   const [mysteryAvatarResult ,setMysteryAvatarResult] = useState(null);
   const [claimed,setClaimed] =useState(false)
+  const toast =useToast();
+  const {debateId} = useParams()
+
+
+
+  useEffect(()=>{
+    if(!activeDebate || !currentUser)return;
+
+   setClaimed(activeDebate.avatarEquipedMembers.some(mem=>mem === currentUser._id))
+
+  },[activeDebate ,currentUser])
+
+
 
   const handleOpenMysteryBox =()=>{
-    setMysteryAvatarResult(  getMysterAvatar("win"))
+    console.log( getMysterAvatar(debateResult))
+    setMysteryAvatarResult(  getMysterAvatar(debateResult))
   }
   const handleClaimReward=async()=>{
     if(!currentUser)return;
+    const {_id} = currentUser;
     const prevAvatars = currentUser?.equipedAvatars ?? []
     try {
-      await updateUserapi(currentUser?._id ,{
+      await updateUserapi(_id ,{
         equipedAvatars:[
           ...prevAvatars,
           {
@@ -28,12 +45,27 @@ const ClaimReward = () => {
           }
         ]
       })
+      await addAvatarEquipedMembersInDebate(debateId,_id)
       setClaimed(true)
+      showToast("Avatar Equiped");
+      setGoToNext(true)
     } catch (error) {
-      
     }
-
   }
+
+  const showToast=(text)=>{
+    toast({
+      title: '',
+      description: text,
+      status: 'success',
+      duration: 5000,
+      position: "top",
+      isClosable: true,
+    })
+  }
+
+
+
   return (
     <div className={styles.claimRewardContainer}>
 
@@ -44,7 +76,7 @@ const ClaimReward = () => {
         mysteryAvatarResult ? <h4 className={styles.avatarsType}> {mysteryAvatarResult.type} Avatar</h4> :""
       }
       {
-       !mysteryAvatarResult &&  <button className={styles.mystryButton} onClick={handleOpenMysteryBox}>  
+       (!mysteryAvatarResult && !claimed) &&  <button className={styles.mystryButton} onClick={handleOpenMysteryBox}>  
        <GiPerspectiveDiceSixFacesSix/>
        <p>
 
@@ -54,10 +86,10 @@ const ClaimReward = () => {
           } 
 
       {
-      (mysteryAvatarResult && !claimed) && <button className={styles.mystryButton} onClick={handleClaimReward}> Claim Avatar</button>
+      ((mysteryAvatarResult && !claimed)) && <button className={styles.mystryButton} onClick={handleClaimReward}> Claim Avatar</button>
       }
       {
-          ( mysteryAvatarResult && claimed) && <button className={styles.mystryButton}> 
+          (( mysteryAvatarResult && claimed) || claimed) && <button className={styles.mystryButton}> 
            <IoIosDoneAll/>
            <p>Claimed </p>
            </button>

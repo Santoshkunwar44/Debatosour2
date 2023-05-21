@@ -81,6 +81,8 @@ const MongooseSchema = mongoose.Schema({
         type:Number,
     },
     winner:{
-    }
+    },
+    transcript:{},
+    avatarEquipedMembers:[User]
 },{timestamps:true});
 module.exports = mongoose.model("Debate", MongooseSchema)

@@ -35,12 +35,8 @@ class DebateController {
           .sort({ startTime: 1 });
       } else {
         fetchedDebate = await DebateModel.find({
-          ...searchQuery,
-          $and: [
-            {
-              endTime: { $gt: new Date() },
-            },
-          ],
+          ...searchQuery
+         
         })
           .populate(["admin", "teams.members", "joinedParticipants"])
           .sort({ startTime: 1 });
@@ -354,7 +350,20 @@ class DebateController {
   }
 
 
-
+  async addAvatarEquipedMembersInDebate(req,res){
+    const {debateId,userId}= req.params;
+    try {
+         await DebateModel.findByIdAndUpdate(debateId,{
+          $push:{
+            avatarEquipedMembers:userId
+          }
+        });
+        
+      res.status(200).json({message:"successfully added ",success:true})
+    } catch (error) {
+      res.status(500).json({message:error.message,success:false})
+    }
+  }
 }
 
 

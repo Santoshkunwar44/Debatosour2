@@ -31,6 +31,12 @@ export const getLoggedInUserData = () => {
   return JSON.parse(localStorage.getItem("user"));
 };
 
+export const getNameAndVoteOfTeams=(teams)=>{
+  const sortedTeams = teams.sort((a, b) => b.vote.length - a.vote.length);
+
+  return sortedTeams.map(team=>({name:team.name , vote:team.vote.length}))
+}
+
 
 export const removeLoggedInUserData=()=>{
   localStorage.removeItem("user")
@@ -102,8 +108,7 @@ export function generateRandomNumber() {
 export function getMysterAvatar(gameResult){
   const randomNumber = Math.floor(Math.random()*100);
   let mysteryAvatar ;
-
-  if(gameResult==="win"){
+  if(gameResult===Enums.WON){
     if(randomNumber<25){
     mysteryAvatar=   getRandomAvatar(avatarsTypeData.common,"Common")
     }else if(randomNumber < 50){
@@ -114,7 +119,7 @@ export function getMysterAvatar(gameResult){
     }else{
       mysteryAvatar= getRandomAvatar(avatarsTypeData.epic,"Epic")
     }
-  }else if(gameResult==="lose"){
+  }else if(gameResult===Enums.LOSE || gameResult === Enums.MATCH_TIED){
 
     if(randomNumber<5){
           mysteryAvatar=   getRandomAvatar(avatarsTypeData.legendary,"Legendary")

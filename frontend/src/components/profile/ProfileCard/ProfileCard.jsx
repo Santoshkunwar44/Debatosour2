@@ -188,7 +188,7 @@ const ProfileCard = ({ userData }) => {
                 <div className="image-row">
                     {
                         data.equipedAvatars?.map((item, index) => (
-                            <img className="circle-image" width={"40px"} src={item.avatar} alt="avatar1" />
+                            <img className="circle-image" width={"40px"} src={item.avatar} alt="avatar1" onClick={() => handleUpdateAvatar(item.type, item.avatar) } />
                         ))
                     }
                 </div>

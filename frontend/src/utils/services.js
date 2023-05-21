@@ -142,10 +142,35 @@ const  getRandomAvatar=(avatars , avatarType)=>{
 export const checkIfUserAlreadyExist=(speakers,uid)=>{
   return speakers.find(speaker=>speaker?.uid ===uid)
 }
+
+export const generateArgument =({
+  startedTime,
+  teamOne,
+  teamTwo,
+  debateType ,
+  speechOne,
+  speechTwo,
+  topic,
+
+})=>{
+
+
+return `
+ GIVE THE TITLE OF THIS DEBATE INCLUDING THE WINNERS NAME AT THE LAST LINE I WANT A JAVASCRIPT CODE AN OBJECT WITH PROPERTY WINNER ENCLOSED IN CURLY BRASIS {} . AND ITS VALUE SUMMERIZE THE BELOW DEBATE IN 300 WORDS AND 3 PARAGRAPHS . This debate was started in ${startedTime} . This type of debate was  ${debateType} . the debate was on ${topic}. 
+
+ . THERE ARE TWO TEAMS "${teamOne}" and "${teamTwo}" .  The argument of the debate is below in the form of array of object . but i want response in palin text except for the last line that i mentioned above. 
+ 
+  There are two object one with ${teamOne} team speech and another ${teamTwo} teams speech . Now I want you to analyze this debate and choose the debate winner . And also explain why that team won the debate . And the decision should be precised . The debate should not be tied . There should be only one winner const arguments=[ ${teamOne}:{ ${speechOne} } , ${teamTwo}:{ ${speechTwo} } ]
+
+
+`
+
+}
+
 class DebateRoomServices{
 
   #username;
-  constructor({rtmChannelRef ,navigate,rtcUid ,data:user , lastApiCallConfig, setRoomLoading ,activeDebateRef , debateStateRef, setUsername ,setDebateState ,setActiveMicControlTeam  ,isAudience ,setRoomMembers ,setMicMuted ,debateId ,RoomMembers ,audioTracks ,setActiveSpeakers ,setRtmChannelAction ,isLive  ,micMuted  ,AddActiveDebate,setMessage ,roundShotsCount ,showToast ,activeSpeakers ,timeRemainingRef ,otherState  ,activeMicControlTeam
+  constructor({rtmChannelRef ,hasLeftRoom ,navigate,rtcUid ,data:user , lastApiCallConfig, setRoomLoading ,activeDebateRef , debateStateRef, setUsername ,setDebateState ,setActiveMicControlTeam  ,isAudience ,setRoomMembers ,setMicMuted ,debateId ,RoomMembers ,audioTracks ,setActiveSpeakers ,setRtmChannelAction ,isLive  ,micMuted  ,AddActiveDebate,setMessage ,roundShotsCount ,showToast ,activeSpeakers ,timeRemainingRef ,otherState  ,activeMicControlTeam
   }){
     this.navigate = navigate
     this.rtmChannelRef = rtmChannelRef; 
@@ -176,7 +201,14 @@ class DebateRoomServices{
     this.lastApiCallConfig= lastApiCallConfig;
     this.roundShotsCount = roundShotsCount;
     this.otherState = otherState ;
+    this.hasLeftRoom=hasLeftRoom;
 
+  }
+
+
+  getMemberWithHighUid(){
+    let myUid = Number(this.rtcUid)
+    return this.RoomMembers.find((mem)=>Number(mem.rtcUid) > myUid)
   }
 
   getWinnerByVote(teams){
@@ -356,12 +388,17 @@ class DebateRoomServices{
   async getRoomSpeaker(){
     if (Rtm_client && this.rtmChannelRef.current) {
       const res = await Rtm_client.getChannelAttributes(this.rtmChannelRef.current.channelId);
-      let speakerId = res?.speaker?.value;
-      if (!speakerId || speakerId === "null") {
+      let speakerId = res?.speaker?.value ;
+      if(speakerId) {
+        speakerId = JSON.parse(speakerId);  
+        if(speakerId==="null"){
+          return false;
+        }else{
+          return speakerId
+        }
+      }else{
         return false
-      } else {
-        return speakerId
-      }
+      } 
     }
 
   }
@@ -376,9 +413,6 @@ class DebateRoomServices{
       }
     }
   }
-
-
-
   async showAdminName(){
     console.log("admin",this.#username)
   }
@@ -467,7 +501,6 @@ async handleLastSetup(){
 
 }
 
-
   async handleCloseDebate () {
     const { timeFormat } = this.activeDebate.current;
     let debateRoundsPayload = {
@@ -536,13 +569,14 @@ async handleMemberLeft (MemberId)  {
 }
 async handleChannelMessage  (message)  {
   const data = JSON.parse(message.text);
-  console.log("icoming message",data)
   if (data.type === "round_change") {
     if (this.roundShotsCount.current !== 1 && data?.rounds?.isMicPassed) {
-  this.removIntervalFunc()
+      this.removIntervalFunc()
     }
 
+    
     const { rounds, speakers } = data
+    console.log("next",rounds?.round_shot)
     if (this.roundShotsCount.current >= rounds.round_shot) return;
     if (speakers.teamName === "both") {
       this.changeMicControlTeam("both")
@@ -668,6 +702,7 @@ async checkIfUserCanUnMute (){
     this.showToast("Next team has  mic control", "error");
     return false;
   }     
+  console.log(await this.getRoomSpeaker())
   if (await this.getRoomSpeaker()) {
     this.showToast("Someone else is speaking", "error");
     return false;
@@ -680,32 +715,96 @@ async checkIfUserCanUnMute (){
 
 }
 async handleMicTogggle  () {
-  console.log("toggling")
   if (this.micMuted) {
-    console.log("toggling unmuting",)
     if (!await this.checkIfUserCanUnMute()) {
       return;
     };
     await this.UpdateChannelAttr("speaker",this.rtcUid.toString())
     this.audioTracks.localAudioTracks.setMuted(false)
-    this.setMicMuted(false)
+    this.setMicMuted(prev=>!prev)
     await  SpeechRecognition.startListening()
   }
   else {
-    console.log("toggling muting",)
     this.audioTracks.localAudioTracks.setMuted(true)
-    this.setMicMuted(true)
+    this.setMicMuted(prev=>!prev)
     await this.UpdateChannelAttr("speaker","null")
     await this.addSpeechToChannel()
   }
+}
 
+async handleDebateInitChange  (nextround, isMicPassed)  {
 
+  if (!this.activeDebate.current) return;
+
+  const { timeFormat } = this.activeDebate.current;
+  const { team: teamName, time } = timeFormat[nextround - 1];
+  const team = this.getTeamDataByName(teamName);
+  let debateRoundsPayload = {
+    round_shot: nextround,
+    speakTeam: teamName,
+    speakTime: time,
+    isStarted: true,
+    noOfRounds: timeFormat.length,
+    changedAt: Date.now(),
+    hasFinished: false,
+    remainingTime: time * 60 * 1000,
+    startedAt: Date.now(),
+    isPaused: false,
+    both: teamName === "both",
+    isMicPassed: isMicPassed ?? false
+  }
+  this.changeDebateState(debateRoundsPayload);
+  this.changeMicControlTeam(team ?? "both");
+  await this.UpdateChannelAttr("debateRounds", debateRoundsPayload)
+  await this.setTheSpeakerTeamToChannel(team ?? "both")
+
+  let rounds = {
+    ...debateRoundsPayload
+  }
+  let speakers = {
+    teamName: teamName,
+  }
+  let messagePayload = {
+    speakers,
+    rounds,
+    type: "round_change"
+  }
+  await this.createChannelMessage(messagePayload)
+}
+
+async handleFinishSpeakTime  (isMicPassed)  {
+  const { timeFormat ,judgeType } = this.activeDebate.current;
+  let debateShot = this.debateState.current.round_shot;
+  let totalShot = timeFormat?.length
+  let nextRoundShot = ++debateShot;
+  this.roundShotsCount.current = nextRoundShot;
+  console.log("the currrent round" , this.debateState.current.round_shot,this.roundShotsCount.current)
+  if(!this.micMuted){
+   await this.handleMicTogggle()
+  }
+  if (nextRoundShot > totalShot) {
+    await this.handleCloseDebate()
+  } else {
+    this.handleDebateInitChange(nextRoundShot, isMicPassed)
+  }
+  if(judgeType===Enums.AIJUDGE){
+  }
+}
+
+async startDebate() {
+  this.roundShotsCount.current = 1;
+  await this.handleDebateInitChange(1)
 }
 
 
-
-
+async handleLeaveRoom  () {
+  this.hasLeftRoom.current = true
+  await this.closeTracks()
+  this.navigate(-1)
+}
 
 
 }
 export  { DebateRoomServices}
+
+

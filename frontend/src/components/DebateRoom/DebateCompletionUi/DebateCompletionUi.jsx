@@ -39,7 +39,6 @@ const DebateCompletionUi = () => {
     }
   },[activeDebate,currentUser]);
 
-  console.log(completionStep  )
 
 
   const fetchDebateById=async()=>{

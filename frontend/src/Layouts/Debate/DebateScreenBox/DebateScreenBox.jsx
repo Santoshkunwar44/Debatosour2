@@ -11,7 +11,9 @@ import { bindActionCreators } from 'redux';
 import { actionCreators } from '../../../redux/store';
 import DebateBanner from '../../../components/DebateRoom/DebateBanner/DebateBanner';
 
-const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleCloseDebate, activeSpeakers, isLive, debateState, activeMicControlTeam, handleFinishSpeakTime }) => {
+const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleCloseDebate, activeSpeakers, isLive, debateState, activeMicControlTeam ,
+RoomService
+}) => {
   const { activeDebate, activeParticipants } = useSelector((state) => state.debate);
   const dispatch = useDispatch()
   const {setRemoveIntervalFunc} = bindActionCreators(actionCreators,dispatch )
@@ -124,7 +126,7 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
         timeRemainingRef.current = 0;
         clearInterval(intervalRef.current)
         intervalArrRef.current = []
-        handleFinishSpeakTime()
+        RoomService.handleFinishSpeakTime()
         // end this round and pass mic to next team and update the channel
       }
     }, 1000);

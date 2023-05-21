@@ -78,11 +78,13 @@ const DebateRoom = () => {
     })
 
   }
+  const hasLeftRoom = useRef(false)
   const RoomService = new DebateRoomServices({
     data,
     isLive,
     rtcUid,
     navigate,
+    hasLeftRoom,
     debateId,
     micMuted,
     showToast,
@@ -116,7 +118,7 @@ const {transcript,resetTranscript} = useSpeechRecognition()
     min: 0,
     sec: 0,
   })
-  const hasLeftRoom = useRef(false)
+
   useEffect(()=>{
     setRoomService(RoomService)
   },[])
@@ -269,68 +271,11 @@ const {transcript,resetTranscript} = useSpeechRecognition()
       roundShotsCount.current = debateRounds?.round_shot
     }
   }
-  const startDebate = async () => {
-    roundShotsCount.current = 1;
-    await handleDebateInitChange(1)
-  }
-  const handleDebateInitChange = async (nextround, isMicPassed) => {
 
-    if (!activeDebateRef.current) return;
 
-    const { timeFormat } = activeDebateRef.current;
-    const { team: teamName, time } = timeFormat[nextround - 1];
-    const team = RoomService.getTeamDataByName(teamName);
-    let debateRoundsPayload = {
-      round_shot: nextround,
-      speakTeam: teamName,
-      speakTime: time,
-      isStarted: true,
-      noOfRounds: timeFormat.length,
-      changedAt: Date.now(),
-      hasFinished: false,
-      remainingTime: time * 60 * 1000,
-      startedAt: Date.now(),
-      isPaused: false,
-      both: teamName === "both",
-      isMicPassed: isMicPassed ?? false
-    }
-    console.log(debateRoundsPayload, 'payload')
-    setDebateState(debateRoundsPayload);
-    setActiveMicControlTeam(team ?? "both");
-    await RoomService.UpdateChannelAttr("debateRounds", debateRoundsPayload)
-    await RoomService.setTheSpeakerTeamToChannel(team ?? "both")
 
-    let rounds = {
-      ...debateRoundsPayload
-    }
-    let speakers = {
-      teamName: teamName,
-    }
-    let messagePayload = {
-      speakers,
-      rounds,
-      type: "round_change"
-    }
-    await RoomService.createChannelMessage(messagePayload)
-  }
 
-  const handleFinishSpeakTime = async (isMicPassed) => {
-    const { timeFormat } = activeDebateRef.current
-    let debateShot = debateState.round_shot;
-    let totalShot = timeFormat?.length
-    let nextRoundShot = ++debateShot;
-    roundShotsCount.current = nextRoundShot;
-    if(!micMuted){
-     await RoomService.handleMicTogggle()
-    }
-    await RoomService.addSpeechToChannel(transcript, resetTranscript)
-    if (nextRoundShot > totalShot) {
-      await RoomService.handleCloseDebate()
-    } else {
-      handleDebateInitChange(nextRoundShot, isMicPassed)
-    }
-  }
- 
+  
   const fetchDebateById = async () => {
     if (!debateId) return;
     try {
@@ -358,15 +303,11 @@ const {transcript,resetTranscript} = useSpeechRecognition()
     }
 
   }
-  const handleLeaveRoom = async () => {
-    hasLeftRoom.current = true
-    await RoomService.closeTracks()
-    navigate(-1)
-  }
+
   return (
     <>
       <Navbar />
-      <div className='DebateRoomWrapper' >
+      <div className='DebateRoomWrapper' onClick={()=>console.log(micMuted)} >
         <div className='debate_room_top_header'>
           {isLive &&
             <div className="debate_room_top_header_left">
@@ -397,7 +338,7 @@ const {transcript,resetTranscript} = useSpeechRecognition()
           isUserParticipant={isUserParticipant}
           isNotWatch={WatchType !== "AUDIENCE"}
           activeMicControlTeam={activeMicControlTeam}
-          handleFinishSpeakTime={handleFinishSpeakTime}
+          RoomService={RoomService}
           handleCloseDebate={RoomService.handleCloseDebate}
           startTeam={activeDebateRef.current?.timeFormat[0].team}
         />
@@ -413,9 +354,6 @@ const {transcript,resetTranscript} = useSpeechRecognition()
           setMicMuted={setMicMuted}
           roomMembers={RoomMembers}
           debateState={debateState}
-          handleStartDebate={startDebate}
-          handleLeaveRoom={handleLeaveRoom}
-          finishHandle={handleFinishSpeakTime}
           micControlTeam={activeMicControlTeam}
           isUserParticipant={isUserParticipant}
           activeMicControlTeam={activeMicControlTeam}

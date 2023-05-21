@@ -63,7 +63,7 @@ const ChatBot = () => {
       if(i === text.length){
         clearInterval(timer )
       }
-    }, 70);
+    }, 10);
       
 
 

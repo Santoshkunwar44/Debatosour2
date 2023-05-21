@@ -11,17 +11,13 @@ import {TiArrowBackOutline} from "react-icons/ti";
 import {useSelector} from "react-redux"
 import { getMyTeam } from "../../../utils/services";
 const DebateAction = ({ 
-  handleMicToggle,
    micMuted, 
-   handleLeaveRoom 
-   ,isUserParticipant 
+   isUserParticipant 
    , isLive,
    WatchType,
    debateState,
-   handleStartDebate,
    micControlTeam,
    RoomService,
-   finishHandle,
   roomMembers}) => {
 
   const { activeDebate } = useSelector((state) => state.debate);
@@ -85,7 +81,6 @@ const DebateAction = ({
   }, [activeDebate?.current, roomMembers])
 
   useEffect(()=>{
-    console.log("miccontrol",micControlTeam)
       if(micControlTeam && data){
         const isMyTeam=   micControlTeam?.members?.find(mem => mem?._id === data?._id);
         console.log("miccontrol",isMyTeam)
@@ -120,12 +115,26 @@ const DebateAction = ({
     if(removeInterval){
      clearInterval(removeInterval.intervalRef?.current);
      removeInterval.intervalArrRef.current=[];
-      finishHandle(true)
+      RoomService.handleFinishSpeakTime(true);
     }
   }
  
-const handleStartMicToggle=()=>{
-  RoomService.handleMicTogggle()
+const handleStartMicToggle=async()=>{
+  await RoomService.handleMicTogggle()
+}
+const handleStartDebate=async()=>{
+
+ await RoomService.startDebate()
+
+}
+const handleLeaveRoom=async()=>{
+
+  try {
+      await RoomService.handleLeaveRoom()
+  } catch (error) {
+    
+  }
+
 }
 
   return (
@@ -157,7 +166,7 @@ const handleStartMicToggle=()=>{
           } 
     <div className="DebateActionWrapper">
       {
-    debateState.isStarted ?    (micMuted ? <BsFillMicMuteFill onClick={handleStartMicToggle} /> :
+   ( debateState.isStarted && !debateState.isPaused) ?    (micMuted ? <BsFillMicMuteFill onClick={handleStartMicToggle} /> :
          <BsFillMicFill className="activeMic" onClick={handleStartMicToggle} />) :""
       }
       <button className="leaveBtn" onClick={handleLeaveRoom}>

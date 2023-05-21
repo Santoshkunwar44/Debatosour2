@@ -2,7 +2,7 @@ import { Avatar, AvatarGroup, useToast } from "@chakra-ui/react"
 import { MdDeleteOutline, MdOutlineViewInAr } from "react-icons/md"
 import { AiOutlineUsergroupAdd } from "react-icons/ai"
 import React, { useEffect, useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import moment from "moment"
 import { useSelector } from "react-redux"
 import { format } from "timeago.js"
@@ -17,6 +17,7 @@ const DebateCard = ({ debate, isLive }) => {
   const { data } = useSelector((state) => state.user)
   const [participants, setParticipants] = useState([]);
   const toast = useToast()
+  const navigate=useNavigate()
   useEffect(() => {
 
     let isParticipant = debate.teams.some(team => team.members.some(member => member._id === data?._id))
@@ -74,6 +75,17 @@ const DebateCard = ({ debate, isLive }) => {
 
   // Return a cleanup function to clear the interval when the component unmounts
 
+  const handleParticipateInDebate=()=>{
+    if(data?.subscription?.status==="active"){
+      navigate(`/debate/${debate?.passcode}`,{
+        state:debate
+      })
+    }else{
+      navigate("/subscription",{
+        state:{from:"alldebates"}
+      })
+    }
+  }
 
 
   return (
@@ -155,12 +167,10 @@ const DebateCard = ({ debate, isLive }) => {
           <Link to={`/debate/${debate?.passcode}?audience=${true}`} state={{debate}}>
             <button> <MdOutlineViewInAr /> <p> {isLive ? "Watch" : "View Debate"} </p> </button>
           </Link>
-          <Link to={`/debate/${debate?.passcode}`} state={{debate}}>
             {
               (isLive && isParticipant) ?
-                <button>  <AiOutlineUsergroupAdd /> <p>Participate</p> </button> : ""
+                <button onClick={handleParticipateInDebate}>  <AiOutlineUsergroupAdd /> <p>Participate</p> </button> : ""
             }
-          </Link>
         </div>
       </div>
     </div>

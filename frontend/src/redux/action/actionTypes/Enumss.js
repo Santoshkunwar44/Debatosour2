@@ -4,6 +4,7 @@ export const Enums = {
     AIJUDGE:"AIJUDGE",
     VOTING:"VOTING",
     NOJUDGE:"NOJUDGE",
+    MATCH_TIED:"MATCH_TIED",
 
 
 }

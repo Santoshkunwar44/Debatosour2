@@ -36,7 +36,7 @@ class ChatController{
         const response = await openAi.createCompletion({
             model: "text-davinci-003",
             prompt,
-            temperature: 0.5,
+            temperature: 0.0,
             max_tokens:512,
             top_p: 1,
             frequency_penalty: 0.0,

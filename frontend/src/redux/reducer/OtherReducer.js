@@ -6,6 +6,7 @@ const INITIAL_OTHER_STATE = {
     isLoading: false,
     refresh: false,
     removeInterval:null,
+    RoomService:null,
 
 }
 
@@ -24,9 +25,13 @@ const OtherReducer = (state = INITIAL_OTHER_STATE, action) => {
 
          case ActionTypes.SET_REMOVE_INTERVAL_FUNC:
                return { ...state,   removeInterval : action.payload}
+        
+        case ActionTypes.SET_ROOM_SERVICE:
+            console.log('setting room',action.payload)
+            return {...state, RoomService : action.payload}
 
         case ActionTypes.SET_RTM_CHANNEL:
-            console.log('settingRtm',action.payload)
+           
             return { ...state, rtmChannel:action.payload} 
 
         

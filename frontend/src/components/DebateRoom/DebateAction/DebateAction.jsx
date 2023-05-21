@@ -17,10 +17,10 @@ const DebateAction = ({
    ,isUserParticipant 
    , isLive,
    WatchType,
-   handleResumeDebate,
    debateState,
    handleStartDebate,
    micControlTeam,
+   RoomService,
    finishHandle,
   roomMembers}) => {
 
@@ -104,10 +104,6 @@ const DebateAction = ({
     
   },[data,activeDebate?.current]);
 
-
-
-
-
   const handleCopyLink=()=>{
 
     toast({
@@ -128,7 +124,9 @@ const DebateAction = ({
     }
   }
  
-
+const handleStartMicToggle=()=>{
+  RoomService.handleMicTogggle()
+}
 
   return (
     <>
@@ -145,7 +143,7 @@ const DebateAction = ({
               START DEBATE
             </button> 
               }
-           {  (  debateState?.isPaused && isLive) &&    <button className="pass_mic_button" onClick={handleResumeDebate}>
+           {  (  debateState?.isPaused && isLive) &&    <button className="pass_mic_button" onClick={async()=>await RoomService.handleResumeDebate()}>
           <RxResume className="resumeIcon"/>
         RESUME DEBATE
         </button>   
@@ -159,8 +157,8 @@ const DebateAction = ({
           } 
     <div className="DebateActionWrapper">
       {
-    debateState.isStarted ?    (micMuted ? <BsFillMicMuteFill onClick={handleMicToggle} /> :
-         <BsFillMicFill className="activeMic" onClick={handleMicToggle} />) :""
+    debateState.isStarted ?    (micMuted ? <BsFillMicMuteFill onClick={handleStartMicToggle} /> :
+         <BsFillMicFill className="activeMic" onClick={handleStartMicToggle} />) :""
       }
       <button className="leaveBtn" onClick={handleLeaveRoom}>
         <TiArrowBackOutline/>
@@ -179,7 +177,7 @@ const DebateAction = ({
         LEAVE
       </button>
         } 
-    <CopyToClipboard text={`${process.env.REACT_APP_FRONTEND_URL}/debate/${activeDebate?.current.passcode}`} onCopy={handleCopyLink}>
+    <CopyToClipboard text={`${process.env.REACT_APP_FRONTEND_URL}/debate/${activeDebate?.current?.passcode}`} onCopy={handleCopyLink}>
       <button   className="copy_link_button">
         <HiOutlineClipboardDocument/> 
         <p>COPY LINK</p>

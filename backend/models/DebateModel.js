@@ -79,8 +79,8 @@ const MongooseSchema = mongoose.Schema({
     },
     passcode:{
         type:Number,
-
+    },
+    winner:{
     }
-  
-},{timestamps:true})
+},{timestamps:true});
 module.exports = mongoose.model("Debate", MongooseSchema)

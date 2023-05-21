@@ -8,6 +8,7 @@ const Enums = {
     LEAVE: "leave",
     MIC_ACTION: "mic action",
     START_TOGGLE_MIC: "start toggle mic",
-    REMOVE_USER: "remove user"
+    REMOVE_USER: "remove user",
+
 }
 module.exports = Enums

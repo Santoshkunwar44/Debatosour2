@@ -12,6 +12,7 @@ import "./Subscription.css";
 import { useDispatch, useSelector } from "react-redux";
 import { bindActionCreators } from "redux";
 import { actionCreators } from "../../redux/store";
+import { useNavigate ,useLocation} from "react-router-dom";
 
 const Subscription = () => {
   const [prices, setPrices] = useState([]);
@@ -19,9 +20,11 @@ const Subscription = () => {
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const dispatch = useDispatch()
+  const location = useLocation() 
   const { data: loggedInUserData } = useSelector((state) => state.user);
   const toast = useToast();
   const {SetRefreshNow} = bindActionCreators(actionCreators,dispatch)
+  console.log("HELO",location)
   const fetchPrices = async () => {
     const { data: response, status } = await getPrices();
     if (status !== 200) throw Error(response.message);
@@ -36,13 +39,17 @@ const Subscription = () => {
 
 
   const createSession = async (priceId) => {
+    const prevPath  =location.state?.from
+
     const { data: response, status } = await setStripeSession({
       priceId: priceId,
       userId: loggedInUserData._id,
-      redirectUrl: process.env.REACT_APP_FRONTEND_URL,
+      redirectUrl: `${process.env.REACT_APP_FRONTEND_URL}/${prevPath}`,
     });
+
     if (status !== 200) throw Error(response.message);
     window.location.href = response.url;
+    // navigate(-1)
   };
 
   const cancelSubscription = async () => {
@@ -51,7 +58,7 @@ const Subscription = () => {
     });
     if (status !== 200) throw Error(response.message);
     const res = await getLoggedInUserApi();
-    console.log("*res: ", res);
+  
     if (res.status === 200) {
       setSubStatus(res.data.message.subscription.status);
       setOpen(false);

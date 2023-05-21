@@ -4,7 +4,6 @@ import MessageInput from '../../ChatBox/MessageInput/MessageInput'
 import MessageText from '../../ChatBox/MessageText'
 import "./LiveChat.css"
 import { createChatApi, findChatApi } from '../../../utils/Api';
-import { useParams } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import {IoChatbubblesSharp} from "react-icons/io5"
 import { actionCreators } from '../../../redux/store';
@@ -15,9 +14,7 @@ const LiveChat = () => {
   const {data} = useSelector(state=>state.user)
   const {activeDebate} =useSelector(state=>state.debate)
   const {setMessageArrAction} =bindActionCreators(actionCreators,dispatch )
-  
-  const {rtmChannel} = useSelector(state=>state.other);
-
+  const {rtmChannel,RoomService} = useSelector(state=>state.other);
   const inputRef = useRef()
   const scrollRef = useRef()
 
@@ -76,10 +73,12 @@ const LiveChat = () => {
   },[])
 
   const sendRtmChannelMessage=async(data)=>{
-    console.log("sending",rtmChannel)
     data.type="live_chat"
-    if(rtmChannel?.current){
-      await rtmChannel.current.sendMessage({ text: JSON.stringify(data) })
+    console.log("sending",rtmChannel.current ,RoomService)
+    if(RoomService){
+      console.log("inside",RoomService  )
+      // await rtmChannel.current.sendMessage({ text: JSON.stringify(data) })
+   await   RoomService.createChannelMessage(data)
   }
   }
 

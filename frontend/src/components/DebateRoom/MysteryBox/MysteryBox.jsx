@@ -4,8 +4,18 @@ import ClaimReward from "../ClaimReward/ClaimReward"
 import {BiUpvote,BiDownvote} from "react-icons/bi"
 import {GrFormNextLink} from "react-icons/gr"
 import {motion} from "framer-motion"
+import { useEffect   } from "react"
 
-const MysteryBox = ({handleNext}) => {
+const MysteryBox = ({handleNext ,debateResult ,activeDebate}) => {
+
+
+
+  useEffect(()=>{
+      if(!activeDebate)return;
+      const {winnerTeam} = activeDebate
+      debateResult(winnerTeam)
+    },[activeDebate])
+
   return (
     <>
     <motion.div

@@ -7,7 +7,6 @@ const INITIAL_USERSTATE = {
 const UserReducer = (state = INITIAL_USERSTATE, action) => {
   switch (action.type) {
     case ActionTypes.ADDUSER:
-      console.log("*pay: ", action.payload);
       return { ...state, data: action.payload };
 
     case ActionTypes.REMOVEUSER:

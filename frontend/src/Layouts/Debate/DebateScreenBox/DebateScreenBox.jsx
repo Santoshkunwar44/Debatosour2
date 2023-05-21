@@ -87,10 +87,14 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
       handlePausedTimeLeft()
 
     } else if (hasFinished) {
-      handleCloseDebate()
+      closeDebate()
     }
   }, [debateState, intervalArrRef])
 
+
+  const closeDebate=async()=>{
+      await handleCloseDebate()
+  }
 
   useEffect(()=>{
     handleSetFunc()
@@ -147,9 +151,6 @@ const DebateScreenBox = ({ timeRemainingRef, roomMembers, startTeam, handleClose
       setRemoveIntervalFunc(data)
     }
 
-    useEffect(()=>{
-      console.log("active",activeDebate,activeParticipants)
-    },[activeDebate?.current])
 
   return (
     <>

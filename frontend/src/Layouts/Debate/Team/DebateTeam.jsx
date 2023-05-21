@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom"
 const DebateTeam = ({  team }) => {
   const { isLive, votedTeam ,activeDebate} =useSelector(state=>state.debate);
   const {data} =useSelector(state=>state.user)
-  const {rtmChannel} =useSelector(state=>state.other)
+  const {rtmChannel ,RoomService} =useSelector(state=>state.other)
   const navigate = useNavigate()
   const dispatch =useDispatch( )
   const {setVotedTeamAction  ,AddActiveDebate} = bindActionCreators(actionCreators,dispatch )
@@ -72,14 +72,12 @@ const DebateTeam = ({  team }) => {
       updatedDebate = res.data.message;
       setVotedTeamAction(team.name)
     }
-
-
-
     activeDebate.current = updatedDebate
     AddActiveDebate(activeDebate)
-
-    if(rtmChannel?.current){
-      rtmChannel.current.sendMessage({text:JSON.stringify({...updatedDebate,type:"live_vote"})})
+    if(RoomService){
+      // r({text:JSON.stringify({...updatedDebate,type:"live_vote"})})
+      console.log("voting",RoomService  )
+      RoomService.createChannelMessage({...updatedDebate,type:"live_vote"})
     }
   } catch (error) {
     console.log(error)   

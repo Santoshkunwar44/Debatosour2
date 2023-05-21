@@ -16,9 +16,16 @@ const Watchnow = () => {
   const [ linkError,setLinkError] =useState(false)
   const [isLive,setIsLive] = useState(null)
   const [ isParticipant,setIsParticipant] =useState(false);
-  const [debatorsInRoom,setDebatorsInRoom] =useState([])
-    const  debateData =  useLocation().state
+  const  debateData =  useLocation().state
 
+  // when someone new joins the room  or leaves  -->
+  // -> api endpoints for joining and leaving --> 
+  //  -> debateControlller ->joinparticipants & removeParticipants
+  // you push the update from the backend to the frontend 
+  // and update this state 
+  // and display in the ui
+
+  const [debatorsInRoom,setDebatorsInRoom] =useState([])
 
   useEffect(()=>{
     if(!data || !debateData)return;

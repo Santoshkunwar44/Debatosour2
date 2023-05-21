@@ -1,14 +1,54 @@
 
 import styles from "./DebateCompletionUi.module.css"
 import Transcript from "../Transcript/Transcript"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import MysteryBox from "../MysteryBox/MysteryBox"
+import { useParams } from "react-router-dom"
+import { getDebateByIdApi } from "../../../utils/Api"
+import { useSelector } from "react-redux"
+import { getMyTeam } from "../../../utils/services"
+import { Enums } from "../../../redux/action/actionTypes/Enumss"
 
 
 const DebateCompletionUi = () => {
   const [ completionStep,setCompletionStep ] =useState("mystery")
-  const handleNext =()=>setCompletionStep("translate")
+  const {data:currentUser} =useSelector(state=>state.user)
+  const [activeDebate,setActiveDebate] = useState(null)
+  const [debateResult,setDebateResult] =useState("")
+  const {debateId} = useParams();  
   
+  const handleNext =()=>setCompletionStep("translate")
+
+  useEffect(()=>{
+    if(!debateId)return;
+    fetchDebateById()
+  },[debateId])
+  const fetchDebateById=()=>{
+    try {
+
+      const {data,status} = getDebateByIdApi(activeDebate)
+      if(status ===200){
+        setActiveDebate(data.message)
+      }
+    } catch (error) {
+      
+    }
+  }
+
+  useEffect(()=>{
+    if(activeDebate && currentUser){
+      const {winner,teams} = activeDebate;
+      const myTeamName  =     getMyTeam(teams,currentUser?._id).name; 
+      if(myTeamName===winner){
+      setDebateResult("won")
+    }else if(Enums.MATCH_TIED === winner){
+      setDebateResult("tied")
+    }else{
+      setDebateResult("lose")
+    }
+    }
+  },[activeDebate,currentUser])
+
   return (
     <div 
 
@@ -17,7 +57,7 @@ const DebateCompletionUi = () => {
     <div className={styles.modalBodyContent}
     >
           {
-            completionStep === "mystery" ? <MysteryBox handleNext={handleNext}/> :        <Transcript/>
+            completionStep === "mystery" ? <MysteryBox debateResult={debateResult} activeDebate={activeDebate} handleNext={handleNext}/> :        <Transcript activeDebate={activeDebate}/>
 
           }
        

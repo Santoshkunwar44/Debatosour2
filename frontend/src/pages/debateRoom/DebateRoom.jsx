@@ -1,15 +1,15 @@
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import { useEffect, useLayoutEffect, useState, useRef } from "react"
 import DebateScreenBox from "../../Layouts/Debate/DebateScreenBox/DebateScreenBox"
-import {  useToast } from '@chakra-ui/react';
+import { useToast } from '@chakra-ui/react';
 import Participants from "../../Layouts/Debate/Participants/Participants"
 import Navbar from "../../Layouts/Navbar/Navbar"
 import LiveChat from "../../components/DebateRoom/LiveChat/LiveChat"
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom"
-import {  getAgoraTokenApi, getDebateByPassocde, joinParticipantApi, removeParticipantApi } from "../../utils/Api"
+import { json, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { getAgoraTokenApi, getDebateByPassocde, joinParticipantApi, removeParticipantApi } from "../../utils/Api"
 import { bindActionCreators } from "redux"
 import { actionCreators } from "../../redux/store"
-import {  getMyTeam, getTimeCountDown, getTimeFromMs } from "../../utils/services"
+import { DebateRoomServices, getTimeCountDown, getTimeFromMs } from "../../utils/services"
 import { useDispatch } from "react-redux"
 import { useSelector } from "react-redux"
 import AgoraRTM from 'agora-rtm-sdk'
@@ -21,10 +21,10 @@ const APPID = process.env.REACT_APP_AGORA_APP_ID;
 const Rtm_client = AgoraRTM.createInstance(APPID);
 const Rtc_client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
 const rtcUid = Math.floor(Math.random() * 2032)
-
+export { Rtm_client, Rtc_client }
 
 const DebateRoom = () => {
-  const {  activeDebate, isLive, isUserParticipant, roomLoading } = useSelector((state) => state.debate);
+  const { activeDebate, isLive, isUserParticipant, roomLoading } = useSelector((state) => state.debate);
   const { data } = useSelector(state => state.user)
   const otherState = useSelector(state => state.other)
   const [UrlSearchParams, setUrlSearchParams] = useSearchParams();
@@ -33,22 +33,27 @@ const DebateRoom = () => {
   debateId = debateId.toString()
   const dispatch = useDispatch()
   const rtmChannelRef = useRef()
-  const { AddActiveDebate, SetRoomIsLiveOrNot, SetIsUserParticipant, setRtmChannelAction, setIsLoading, SetRoomLoading } = bindActionCreators(actionCreators, dispatch)
+  const { AddActiveDebate, SetRoomIsLiveOrNot, SetIsUserParticipant, setRtmChannelAction, setIsLoading, SetRoomLoading ,setRoomService } = bindActionCreators(actionCreators, dispatch)
   const [activeMicControlTeam, setActiveMicControlTeam] = useState(null)
   const [audioTracks, setAudioTracks] = useState({
     localAudioTracks: null,
     remoteAudioTracks: {}
   })
-  const roundShotsCount = useRef(0)
-  const activeDebateRef = useRef()
-  const [RoomMembers, setRoomMembers] = useState([]);
-  const {setMessage} = useSelector(state=>state.chat)
-  const [micMuted, setMicMuted] = useState(true)
-  const navigate = useNavigate()
-  const [rtmChannel, setRtmChannel] = useState();
-  const [activeSpeakers, setActiveSpeakers] = useState([])
   const toast = useToast();
+  const navigate = useNavigate()
+  const debateStateRef = useRef()
+  const activeDebateRef = useRef()
   const timeRemainingRef = useRef()
+  const roundShotsCount = useRef(0)
+  const [micMuted, setMicMuted] = useState(true)
+  const [RoomMembers, setRoomMembers] = useState([]);
+  const { setMessage } = useSelector(state => state.chat)
+  const [activeSpeakers, setActiveSpeakers] = useState([])
+  const [username, setUsername] = useState("santosh")
+  const lastApiCallConfig= useRef({
+    admin:null,
+    hasApiCalled:false,
+  })
   const [debateState, setDebateState] = useState({
     round_shot: 0,
     speakTime: 0,
@@ -62,49 +67,89 @@ const DebateRoom = () => {
     remainingTime: 0,
 
   })
-  const [ handleRemaining,setHandleRemaining] = useState({
-    day:0,
-    hour:0,
-    min:0,
-    sec:0,
+  const showToast = (message, type) => {
+    toast({
+      title: '',
+      description: message,
+      status: type,
+      duration: 5000,
+      position: "top",
+      isClosable: true,
+    })
+
+  }
+  const RoomService = new DebateRoomServices({
+    data,
+    isLive,
+    rtcUid,
+    navigate,
+    debateId,
+    micMuted,
+    showToast,
+    otherState,
+    setMessage,
+    setUsername,
+    audioTracks,
+    RoomMembers,
+    setMicMuted,
+    rtmChannelRef,
+    activeSpeakers,
+    setDebateState,
+    setRoomMembers,
+    debateStateRef,
+    roundShotsCount,
+    AddActiveDebate,
+    activeDebateRef,
+    timeRemainingRef,
+    lastApiCallConfig,
+    setActiveSpeakers,
+    setRtmChannelAction,
+    activeMicControlTeam,
+    setActiveMicControlTeam,
+    setRoomLoading:SetRoomLoading,
+    isAudience: UrlSearchParams.get("audience"),
+  });
+const {transcript,resetTranscript} = useSpeechRecognition()
+  const [handleRemaining, setHandleRemaining] = useState({
+    day: 0,
+    hour: 0,
+    min: 0,
+    sec: 0,
   })
-  const debate = useLocation().state;
-  const hasLeftRoom =useRef(false)
-  const {
-    transcript,
-    listening,
-    resetTranscript,
-  } = useSpeechRecognition();
-
-
-  useLayoutEffect(() => {
-    if (!isLive) return;
-    const getAgoraToken = async () => {
-      SetRoomLoading(true)
-      const res = await getAgoraTokenApi({ channelName: debateId, role: "publisher", uid: rtcUid, tokentype: "1000", expiry: 86400 })
-      if (res.status === 200) {
-        let { rtcToken, rtmToken } = res.data;
-        if (isLive) {
-          initRTC(rtcToken);
-          initRTM(rtmToken);
-        }
-      }
-    }
-
-    getAgoraToken()
-
-
-  }, [isLive]);
+  const hasLeftRoom = useRef(false)
+  useEffect(()=>{
+    setRoomService(RoomService)
+  },[])
   useEffect(() => {
 
     return async () => {
-      if(hasLeftRoom.current)return;
-      await handlePauseDebate()
-      await closeTracks()
+      if (hasLeftRoom.current) return;
+      await RoomService.handlePauseDebate()
+      await RoomService.closeTracks()
+      await removeParticipant()
       AddActiveDebate(null)
-      removeParticipant()
     }
-  }, [])
+  }, []);
+  useEffect(()=>{
+  if(activeDebateRef.current){
+    const {admin:{_id}} = activeDebateRef.current;
+
+    lastApiCallConfig.current={
+      ...lastApiCallConfig.current,
+      admin:_id
+    }
+  }
+  },[activeDebateRef.current])
+
+  useLayoutEffect(() => {
+    if (!isLive) return;
+    console.log("initializing agora",isLive)
+    RoomService.getAgoraToken()
+  }, [isLive]);
+
+  useEffect(() => {
+    debateStateRef.current = debateState
+  }, [debateState])
 
   useEffect(() => {
     if (UrlSearchParams.get("audience")) {
@@ -120,9 +165,6 @@ const DebateRoom = () => {
   }, [debateId]);
 
   useEffect(() => {
-
-
-
     let now = new Date().getTime();
     if (now < activeDebateRef.current?.startTime) {
       SetRoomIsLiveOrNot(false)
@@ -133,30 +175,30 @@ const DebateRoom = () => {
 
   }, [activeDebateRef.current, data])
 
-  useEffect(()=>{
-    if(!isLive && activeDebateRef.current){
-      const {startTime} = activeDebateRef.current;
-      let intervalId ;
-       intervalId =  setInterval(() => {
+  useEffect(() => {
+    if (!isLive && activeDebateRef.current) {
+      const { startTime } = activeDebateRef.current;
+      let intervalId;
+      intervalId = setInterval(() => {
 
         const diff = startTime - Date.now();
-        if(diff > 0){
+        if (diff > 0) {
 
-          const {day,hour,min,sec} = getTimeFromMs(diff)
+          const { day, hour, min, sec } = getTimeFromMs(diff)
           setHandleRemaining({
             hour,
             day,
             min,
             sec
           })
-        }else{
+        } else {
           clearInterval(intervalId)
           SetRoomIsLiveOrNot(true)
         }
 
       }, 1000);
     }
-  },[isLive ,activeDebateRef.current])
+  }, [isLive, activeDebateRef.current])
 
   useEffect(() => {
     if (!activeDebateRef.current) return;
@@ -175,7 +217,7 @@ const DebateRoom = () => {
   useEffect(() => {
 
 
-    if(!roomLoading)return;
+    if (!roomLoading) return;
 
     if (isLive && !UrlSearchParams.get("audience") && activeSpeakers.length > 0) {
       SetRoomLoading(false)
@@ -188,9 +230,7 @@ const DebateRoom = () => {
       SetRoomLoading(false)
     }
 
-  }, [isLive, activeSpeakers ,activeDebateRef.current ])
-
-
+  }, [isLive, activeSpeakers, activeDebateRef.current])
   useEffect(() => {
 
 
@@ -199,21 +239,16 @@ const DebateRoom = () => {
 
 
 
-  }, [rtmChannel, rtmChannelRef.current])
-
+  }, [rtmChannelRef.current])
 
   useEffect(()=>{
-    if(micMuted){
-      console.log(transcript)
-    }else{
-      SpeechRecognition.startListening({ continuous: true })
-
+    if(lastApiCallConfig.current.hasApiCalled){
+      navigate(`/completion/${activeDebateRef.current._id}`);
     }
-
-},[micMuted]);
+  },[lastApiCallConfig.current.hasApiCalled])
 
   const setInitialDebateState = async () => {
-    const attr = await getChannelAttributeFunc();
+    const attr = await RoomService.getChannelAttributeFunc()
     let { speakersData, debateRounds } = attr;
     if (speakersData) {
       speakersData = JSON.parse(speakersData?.value);
@@ -223,7 +258,7 @@ const DebateRoom = () => {
       } else if (activeSpeakerTeam === "both") {
         setActiveMicControlTeam("both")
       } else {
-        setActiveMicControlTeam(getTeamDataByName(activeSpeakerTeam.teamName))
+        setActiveMicControlTeam(RoomService.getTeamDataByName(activeSpeakerTeam.teamName))
       }
     } else {
       setActiveMicControlTeam(null);
@@ -234,19 +269,17 @@ const DebateRoom = () => {
       roundShotsCount.current = debateRounds?.round_shot
     }
   }
-
   const startDebate = async () => {
-
     roundShotsCount.current = 1;
     await handleDebateInitChange(1)
   }
-  const handleDebateInitChange = async (nextround,isMicPassed) => {
+  const handleDebateInitChange = async (nextround, isMicPassed) => {
 
     if (!activeDebateRef.current) return;
 
     const { timeFormat } = activeDebateRef.current;
     const { team: teamName, time } = timeFormat[nextround - 1];
-    const team = getTeamDataByName(teamName);
+    const team = RoomService.getTeamDataByName(teamName);
     let debateRoundsPayload = {
       round_shot: nextround,
       speakTeam: teamName,
@@ -259,13 +292,13 @@ const DebateRoom = () => {
       startedAt: Date.now(),
       isPaused: false,
       both: teamName === "both",
-      isMicPassed:isMicPassed ?? false
+      isMicPassed: isMicPassed ?? false
     }
-
+    console.log(debateRoundsPayload, 'payload')
     setDebateState(debateRoundsPayload);
     setActiveMicControlTeam(team ?? "both");
-    await updateChannelDebateRounds(debateRoundsPayload);
-    await setTheSpeakerTeamToChannel(team ?? "both")
+    await RoomService.UpdateChannelAttr("debateRounds", debateRoundsPayload)
+    await RoomService.setTheSpeakerTeamToChannel(team ?? "both")
 
     let rounds = {
       ...debateRoundsPayload
@@ -278,139 +311,26 @@ const DebateRoom = () => {
       rounds,
       type: "round_change"
     }
-    await createChannelMessage(messagePayload)
+    await RoomService.createChannelMessage(messagePayload)
   }
 
   const handleFinishSpeakTime = async (isMicPassed) => {
-    
-    const { timeFormat, teams } = activeDebateRef.current
+    const { timeFormat } = activeDebateRef.current
     let debateShot = debateState.round_shot;
     let totalShot = timeFormat?.length
     let nextRoundShot = ++debateShot;
     roundShotsCount.current = nextRoundShot;
- 
+    if(!micMuted){
+     await RoomService.handleMicTogggle()
+    }
+    await RoomService.addSpeechToChannel(transcript, resetTranscript)
     if (nextRoundShot > totalShot) {
-      handleCloseDebate()
+      await RoomService.handleCloseDebate()
     } else {
-      handleDebateInitChange(nextRoundShot,isMicPassed)
+      handleDebateInitChange(nextRoundShot, isMicPassed)
     }
   }
-
-  const updateChannelDebateRounds = async (payload) => {
-    if (!Rtm_client || !rtmChannelRef.current || !activeDebateRef.current) return;
-    await Rtm_client.addOrUpdateChannelAttributes(rtmChannelRef.current.channelId, {
-      debateRounds: JSON.stringify(payload)
-    });
-  }
-  const updateChannelSpeechText = async (payload) => {
-    if (!Rtm_client || !rtmChannelRef.current || !activeDebateRef.current) return;
-    await Rtm_client.addOrUpdateChannelAttributes(rtmChannelRef.current.channelId, {
-      speechText: JSON.stringify(payload)
-    });
-  }
-  const handleCloseDebate = async () => {
-
-
-    const { timeFormat } = activeDebateRef.current;
-    let debateRoundsPayload = {
-      round_shot: timeFormat.length + 1,
-      speakTeam: "",
-      speakTime: 0,
-      isStarted: false,
-      noOfRounds: timeFormat.length,
-      hasFinished: true,
-      startedAt: 0,
-      endTime: 0,
-      both: false,
-      isPaused: false,
-      changedAt: 0,
-    }
-    setDebateState(debateRoundsPayload)
-    setActiveMicControlTeam(null)
-    await updateChannelDebateRounds(debateRoundsPayload);
-    await setTheSpeakerTeamToChannel(null, true);
-  }
-  const getTeamDataByName = (teamName) => {
-    if (!activeDebateRef.current) return;
-    return activeDebateRef.current.teams.find(team => team.name === teamName)
-
-  }
-
-  const setTheSpeakerTeamToChannel = async (team, removeSpeakersFromChannel) => {
-    if (!team || !rtmChannel || !Rtm_client || !activeDebateRef.current) return;
-
-
-    let speakersDataPayload;
-    if (removeSpeakersFromChannel) {
-      speakersDataPayload = "null"
-
-    } else {
-      if (team === "both") {
-        speakersDataPayload = "both"
-      } else {
-        const speakersIds = team.members.map(mem => mem._id)
-        speakersDataPayload = {
-          speakersIds,
-          debateType: activeDebateRef.current.type,
-          teamName: team.name,
-        }
-      }
-    }
-
-    await Rtm_client.addOrUpdateChannelAttributes(rtmChannel.channelId, {
-      speakersData: JSON.stringify(speakersDataPayload)
-    })
-  }
-  const initRTC = async (token) => {
-    // Rtc_client.on("user-joined", handleUserJoined)
-    Rtc_client.on("user-published", handleUserPublished)
-    Rtc_client.on("user-left", handleUserLeave)
-    await Rtc_client.join(APPID, debateId, token, rtcUid);
-    if (!UrlSearchParams.get("audience")) {
-      audioTracks.localAudioTracks = await AgoraRTC.createMicrophoneAudioTrack()
-      audioTracks.localAudioTracks.setMuted(true)
-      await Rtc_client.publish(audioTracks.localAudioTracks);
-    }
-    initVolumeIndicator()
-  }
-  const initRTM = async (token) => {
-    let userType;
-    if (UrlSearchParams.get("audience")) {
-      userType = "audience";
-    } else {
-      userType = "host";
-    }
-    let uid = rtcUid.toString()
-    await Rtm_client.login({ uid, token });
-
-    if (UrlSearchParams.get("audience")) {
-      await Rtm_client.addOrUpdateLocalUserAttributes({ "name": "audience", "rtcUid": rtcUid?.toString(), 'avatar': "audience", "id": "audience", "type": userType, "mic": "muted" });
-    } else {
-      await Rtm_client.addOrUpdateLocalUserAttributes({ "name": `${data.firstName} ${data.lastName}`, "rtcUid": rtcUid?.toString(), 'avatar': data.avatar, "id": data._id, "type": userType, "mic": "muted" });
-      await addParticipant()
-    }
-    const channel = Rtm_client.createChannel(debateId);
-    rtmChannelRef.current = channel;
-    console.log("inside rtm");
-    setRtmChannelAction(rtmChannelRef)
-    setRtmChannel(channel)
-
-    channel.on("MemberJoined", handleMemberJoined)
-    channel.on("MemberLeft", handleMemberLeft);
-    await channel.join()
-
-    getChannelMembers(channel);
-
-  }
-  useEffect(()=>{
-    initChannelMessageEvent();
-  },[otherState,rtmChannel ])
-
-const initChannelMessageEvent=()=>{
-  if(!rtmChannel)return;
-  rtmChannel.on("ChannelMessage", handleChannelMessage)
-}
-
+ 
   const fetchDebateById = async () => {
     if (!debateId) return;
     try {
@@ -424,153 +344,10 @@ const initChannelMessageEvent=()=>{
       console.log(error)
     }
   }
-  const getChannelMembers = async (channel) => {
-    if (!channel) return;
-    const members = await channel.getMembers()
-    const uniqueMember = [...new Set(members)];
-
-
-    let allMembers = await Promise.all(uniqueMember.map(async (memId) => {
-
-      let { name, rtcUid, avatar, isAdmin, id, type } = await Rtm_client.getUserAttributes(memId, ['name', 'rtcUid', 'avatar', 'isAdmin', "id", "type"]);
-
-      return {
-        userId: memId,
-        username: name,
-        rtcUid,
-        avatar,
-        isMuted: true,
-        id: id,
-        type,
-        isAdmin: Boolean(isAdmin)
-      }
-
-    }));
-    allMembers = allMembers.filter(mem => mem.type !== "audience")
-    setRoomMembers(allMembers)
-  }
-  const createChannelMessage = async (message) => {
-    if (!rtmChannelRef.current) return;
-
-    await rtmChannelRef.current.sendMessage({ text: JSON.stringify(message) })
-  }
-  const handleChannelMessage = (message) => {
-    const data = JSON.parse(message.text);
-    console.log('received message',data,setMessage)
-    if (data.type === "round_change") {
-      if(roundShotsCount.current !==1 && data?.rounds?.isMicPassed){
-        removIntervalFunc()
-      }
-
-      const { rounds, speakers } = data
-      if (roundShotsCount.current >= rounds.round_shot) return;
-      if (speakers.teamName === "both") {
-        setActiveMicControlTeam("both")
-      } else {
-        setActiveMicControlTeam(getTeamDataByName(speakers.teamName))
-      }
-      setDebateState(rounds)
-    } else if (data.type === "resume_debate") {
-
-      setDebateState(data)
-    }else if(data.type==="live_chat"){
-      delete data.type
-      setMessage(prev=>([
-        ...prev,data 
-      ]))
-
-    }else if(data.type==="live_vote"){
-      delete data.type ;
-      activeDebate.current = data;
-      AddActiveDebate(activeDebate)
-    }
-  }
-  const removIntervalFunc=()=>{
-    const {removeInterval  } = otherState;
-    if(!removeInterval)return;
-        clearInterval(removeInterval?.intervalRef?.current);
-        removeInterval.intervalArrRef.current=[];
-  }
-  let initVolumeIndicator = async () => {
-
-    //1
-    AgoraRTC.setParameter('AUDIO_VOLUME_INDICATION_INTERVAL', 200);
-    Rtc_client.enableAudioVolumeIndicator();
-
-    //2
-    Rtc_client.on("volume-indicator", volumes => {
-      setActiveSpeakers(volumes)
-    })
-  }
-  const handleMemberJoined = async (MemberId) => {
-
-    let { name, rtcUid, avatar, isAdmin, id, type } = await Rtm_client.getUserAttributes(MemberId, ['name', 'id', 'rtcUid', 'avatar', 'isAdmin', 'type'])
-
-
-    const doesUserExist = RoomMembers.find(mem => mem.id === id)
-    if (type === "audience") return;
-    if (!doesUserExist) {
-
-
-      setRoomMembers(mem => ([
-        ...mem,
-        {
-          userId: MemberId,
-          username: name,
-          rtcUid,
-          avatar,
-          isMuted: true,
-          id,
-          isAdmin: Boolean(isAdmin)
-        }
-      ]))
-
-    }
-
-
-
-
-
-  }
-  const handleUserPublished = async (user, mediaType) => {
-    await Rtc_client.subscribe(user, mediaType);
-    if (mediaType === "audio") {
-      audioTracks.remoteAudioTracks[user.uid] = [user.audioTrack]
-      user.audioTrack.play()
-    }
-  }
-  const handleUserLeave = (theUser) => {
-
-    delete audioTracks.remoteAudioTracks[theUser.uid]
-
-  }
-  const handleMemberLeft = (MemberId) => {
-    setRoomMembers(mem => mem.filter(m => m.userId !== MemberId))
-  }
-
-  const handleMicTogggle = async () => {
-    if (micMuted) {
-      if (!await checkIfUserCanUnMute()) {
-        return;
-      };
-      updateChannelAttribute(false)
-      audioTracks.localAudioTracks.setMuted(false)
-      setMicMuted(false)
-    }
-    else {
-      updateChannelAttribute(true)
-      audioTracks.localAudioTracks.setMuted(true)
-      setMicMuted(true)
-     await addSpeechToChannel()
-    }
-
-
-  }
-
   const removeParticipant = async () => {
     if (!UrlSearchParams.get("audience") && data && activeDebateRef?.current) {
       try {
-     await removeParticipantApi(activeDebateRef?.current?._id, {
+        await removeParticipantApi(activeDebateRef?.current?._id, {
           participantId: data?._id
         })
 
@@ -581,305 +358,76 @@ const initChannelMessageEvent=()=>{
     }
 
   }
-  const addParticipant = async () => {
-    if (!UrlSearchParams.get("audience") && data) {
-      try {
-       await joinParticipantApi(activeDebateRef?.current?._id, {
-          participantId: data?._id
-        })
-      } catch (error) {
-        console.log(error)
-      }
-    }
-
-  }
-  const leaveRTMChannel = async () => {
-    if(!rtmChannel)return
-    await removeMeAsSpeaker()
-    await rtmChannel?.leave();
-    await Rtm_client?.logout();
-  }
-  const handleLeaveRoom = async() => {  
-    hasLeftRoom.current= true
-   await closeTracks()
+  const handleLeaveRoom = async () => {
+    hasLeftRoom.current = true
+    await RoomService.closeTracks()
     navigate(-1)
-  }  
-  const closeTracks = async () => {
-
-    console.log("rtc client",Rtc_client)
-    await addSpeechToChannel()
-    await handlePauseDebate();
-    await leaveRTMChannel();
-
-    if (!UrlSearchParams.get("audience") && audioTracks?.localAudioTracks) {
-      audioTracks.localAudioTracks?.stop()
-      audioTracks.localAudioTracks?.close()
-    }
-
-    if (Rtc_client) {
-      Rtc_client?.unpublish()
-      Rtc_client?.leave()
-    }
-
   }
-  // :returns false if no speaker || returns speakerId if there speaker
-  const getRoomSpeaker = async () => {
-
-
-    if (Rtm_client && rtmChannelRef.current) {
-      const res = await Rtm_client.getChannelAttributes(rtmChannelRef.current.channelId);
-      let speakerId = res?.speaker?.value;
-      if (!speakerId || speakerId === "null") {
-        return false
-      } else {
-        return speakerId
-      }
-    }
-  }
-
-  // imp
-  const removeMeAsSpeaker = async () => {
-    let speakerId = await getRoomSpeaker()
-    if (speakerId && Rtm_client && rtmChannelRef.current) {
-      if (speakerId.toString() === rtcUid.toString()) {
-        console.log("ia am removeing me final")
-        await Rtm_client.addOrUpdateChannelAttributes(rtmChannelRef.current.channelId, {
-          "speaker": "null"
-        })
-      }
-    }
-  }
-
-  const updateChannelAttribute = async (mute) => {
-
-
-    if (!rtmChannel || !Rtm_client) return;
-    if (mute) {
-      await Rtm_client.addOrUpdateChannelAttributes(rtmChannel.channelId, {
-        "speaker": "null"
-      })
-    } else {
-
-      if (rtcUid) {
-        await Rtm_client.addOrUpdateChannelAttributes(rtmChannel.channelId, {
-          "speaker": rtcUid.toString()
-        })
-      }
-    }
-
-  }
-  const getChannelAttributeFunc = async () => {
-
-    if (!Rtm_client || !rtmChannelRef.current) return;
-
-    const attr = await Rtm_client.getChannelAttributes(rtmChannelRef.current.channelId);
-
-
-    return attr
-
-  }
-
-  const checkIfUserCanUnMute = async () => {
-    if (!activeMicControlTeam) return;
-    if (activeMicControlTeam === "both") {
-      return true;
-    }
-
-
-    if (await getRoomSpeaker()) {
-      showToast("Someone else is speaking", "error");
-      return false;
-    }
-
-    if (activeMicControlTeam.members.some(user => user._id === data?._id)) {
-      return true
-    } else {
-      showToast("Next team has  mic control", "error");
-      return false;
-    }
-  }
-  const showToast = (message, type) => {
-    toast({
-      title: '',
-      description: message,
-      status: type,
-      duration: 5000,
-      position: "top",
-      isClosable: true,
-    })
-
-  }
-
-  const handlePauseDebate = async () => {
-
-    const { isPaused, isStarted } = debateState;
-    console.log("pausing", activeSpeakers, isStarted, isPaused)
-    if (!activeSpeakers || !isStarted || isPaused) return;
-
-    const otherDebators = activeSpeakers.filter(speaker => speaker.uid !== rtcUid);
-    let debateRoundsPayload = {
-      ...debateState,
-      changedAt: Date.now(),
-      isPaused: true,
-      remainingTime: timeRemainingRef.current
-    }
-    if (otherDebators.length === 0) {
-      await updateChannelDebateRounds(debateRoundsPayload)
-    };
-
-  }
-  const handleResumeDebate = async () => {
-    const { isPaused, isStarted } = debateState;
-    if (!isStarted || !isPaused) return;
-
-    const debateRoundsPayload = {
-      ...debateState,
-      isPaused: false,
-      changedAt: Date.now()
-    };
-
-    setDebateState(debateRoundsPayload);
-
-    await updateChannelDebateRounds(debateRoundsPayload);
-    await createChannelMessage({ ...debateRoundsPayload, type: "resume_debate" })
-
-
-
-  }
-
-  const addSpeechToChannel=async()=>{
-
-    if(!data)return;
-    const attr =  await getChannelAttributeFunc();
-    let myTeam =  getMyTeam(activeDebateRef.current.teams,data?._id).name;
-    let  speechText = attr?.speechText?.value;
-    
-    
-    let   speechArr =  speechText ? JSON.parse(speechText) :[]
-    
-    let currentRoundSpeech = {}
-    
-    console.log("the prev speech",speechArr)
-    console.log("the prev ",transcript)
-   
-       
-
-
-       let remoteCurrentRoundSpeech= speechArr[roundShotsCount.current-1];
-
-        // check if the object for this round this made
-       if(remoteCurrentRoundSpeech){
-        let teamSpeechTextObj = remoteCurrentRoundSpeech[myTeam];
-        let mySpeechText = teamSpeechTextObj[data._id]
-
-        // check if the user is speaking first time or has the previous speech text
-        if(mySpeechText){
-          mySpeechText= `${mySpeechText} ${transcript}`
-        }else{
-          mySpeechText= ` ${transcript}`
-        }
-        
-        currentRoundSpeech={
-          [myTeam]:{
-            ...teamSpeechTextObj,
-            [data._id]: mySpeechText
-          }
-        }
-
-       }else{
-
-        currentRoundSpeech ={
-          [myTeam]:{
-            [data._id]:transcript
-          }
-        }
-       }
-
-       speechArr[roundShotsCount.current-1] = currentRoundSpeech
-
-
-
-
-
-     await  updateChannelSpeechText(speechArr)
-     resetTranscript()
-
-
-
-      
-
-
-
-
-
-  } 
-
   return (
     <>
       <Navbar />
       <div className='DebateRoomWrapper' >
         <div className='debate_room_top_header'>
-    {  isLive &&
-
-          <div className="debate_room_top_header_left">
-            <img width={"40px"} src="/images/error_dino.png" alt="dinosour" />
-          <h1 className='Debate_room_main_text' >
-            {activeDebateRef.current?.topic}  </h1>
+          {isLive &&
+            <div className="debate_room_top_header_left">
+              <img width={"40px"} src="/images/error_dino.png" alt="dinosour" />
+              <h1 className='Debate_room_main_text' >
+                {activeDebateRef.current?.topic}  </h1>
             </div>
-    }
-          { isLive  && 
-            (debateState.isStarted && !debateState.isPaused) && (  <>
+          }
+          {isLive &&
+            (debateState.isStarted && !debateState.isPaused) && (<>
               <div>
 
-            <h1 className="main_timing_text">
-               {`ROUND FINISH IN ${getTimeCountDown(timeRemainingRef.current)} ` }
-               </h1>
-            </div>
-            
+                <h1 className="main_timing_text">
+                  {`ROUND FINISH IN ${getTimeCountDown(timeRemainingRef.current)} `}
+                </h1>
+              </div>
             </>
             )
-            }
-      
+          }
+
         </div>
         <DebateScreenBox
-          debateState={debateState}
-          startTeam={activeDebateRef.current?.timeFormat[0].team}
           isLive={isLive}
+          roomMembers={RoomMembers}
+          debateState={debateState}
+          activeSpeakers={activeSpeakers}
+          timeRemainingRef={timeRemainingRef}
           isUserParticipant={isUserParticipant}
           isNotWatch={WatchType !== "AUDIENCE"}
-          activeSpeakers={activeSpeakers}
-          roomMembers={RoomMembers}
           activeMicControlTeam={activeMicControlTeam}
-          timeRemainingRef={timeRemainingRef}
-          handleCloseDebate={handleCloseDebate}
           handleFinishSpeakTime={handleFinishSpeakTime}
+          handleCloseDebate={RoomService.handleCloseDebate}
+          startTeam={activeDebateRef.current?.timeFormat[0].team}
         />
-  <div className="debate_bottom_content">
-
-        <DebateAction
-          isUserParticipant={isUserParticipant}
+      
+        <div className="debate_bottom_content">
+        {
+          !debateStateRef.current?.hasFinished  &&   <DebateAction
           isLive={isLive}
-          WatchType={WatchType}
           roomId={debateId}
-          handleMicToggle={handleMicTogggle}
-          handleLeaveRoom={handleLeaveRoom}
           micMuted={micMuted}
+          WatchType={WatchType}
+          RoomService={RoomService}
           setMicMuted={setMicMuted}
           roomMembers={RoomMembers}
-          activeMicControlTeam={activeMicControlTeam}
           debateState={debateState}
           handleStartDebate={startDebate}
-          handleResumeDebate={handleResumeDebate}
-          micControlTeam={activeMicControlTeam}
+          handleLeaveRoom={handleLeaveRoom}
           finishHandle={handleFinishSpeakTime}
+          micControlTeam={activeMicControlTeam}
+          isUserParticipant={isUserParticipant}
+          activeMicControlTeam={activeMicControlTeam}
         />
-     <DebateInfo/>
-        <div className='debate_bottom_container'>
-          <Participants />
-          <LiveChat 
-          />
+        }
+          <DebateInfo />
+          <div className='debate_bottom_container'>
+            <Participants />
+            <LiveChat 
+            />
+          </div>
         </div>
-      </div>
       </div>
 
     </>
@@ -887,3 +435,5 @@ const initChannelMessageEvent=()=>{
 }
 
 export default DebateRoom
+
+

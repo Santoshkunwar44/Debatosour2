@@ -155,3 +155,10 @@ export const set_update_vote = (payload) => (dispatch) => {
     payload,
   });
 };
+
+export const setRoomService=(payload)=>(dispatch)=>{
+  dispatch({
+    type:ActionTypes.SET_ROOM_SERVICE,
+    payload
+  })
+}

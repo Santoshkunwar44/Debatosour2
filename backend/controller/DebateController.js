@@ -24,12 +24,13 @@ class DebateController {
         fetchedDebate = await DebateModel.find({
           $and: [
             { startTime: { $lt: new Date() } },
-            { endTime: { $gt: new Date() } },
+            {hasEnded:false}
           ],
         }).populate(["admin", "teams.members", "joinedParticipants"]);
       } else if (req.query.upcoming) {
         fetchedDebate = await DebateModel.find({
           startTime: { $gt: new Date() },
+          hasEnded:false
         })
           .populate(["admin", "teams.members", "joinedParticipants"])
           .sort({ startTime: 1 });

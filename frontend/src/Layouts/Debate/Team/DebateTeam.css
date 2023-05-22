@@ -69,3 +69,6 @@ pointer-events: ${(props)=>!props.isLive ? "none":""}; */
 .disabled_vote_button:hover{
   scale: 1 !important;
 }
+.disable_vote{
+  pointer-events: none !important;
+}

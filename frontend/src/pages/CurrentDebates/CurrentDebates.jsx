@@ -67,7 +67,7 @@ const CurrentDebates = () => {
           </h3>
           <div className="tab_buttons_wrapper">
             <button className={`${currentDebateTab === Enums.UPCOMING_TAB ? "active_tab_button" : ""}`} onClick={() => { handleChangeDebateTabtype(Enums.UPCOMING_TAB) }}>Upcoming Debates </button>
-            {currentUser?.subscription?.status && <button className={`${currentDebateTab === Enums.LIVE_TAB ? "active_tab_button" : ""}`} onClick={() => { handleChangeDebateTabtype(Enums.LIVE_TAB) }}>Live Debates</button>}
+             <button className={`${currentDebateTab === Enums.LIVE_TAB ? "active_tab_button" : ""}`} onClick={() => { handleChangeDebateTabtype(Enums.LIVE_TAB) }}>Live Debates</button>
           </div>
         </div>
 

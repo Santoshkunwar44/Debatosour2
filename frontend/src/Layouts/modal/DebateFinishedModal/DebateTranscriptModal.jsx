@@ -14,7 +14,7 @@ import {
   import styles from "./DebateFinishModal.module.css"
 import { AiOutlineCloudDownload } from 'react-icons/ai';
 
-  function DebateTranscriptModal({ children  }) {
+  function DebateTranscriptModal({ children  ,transcript }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     
     const handleOnClose=async()=>{
@@ -51,11 +51,15 @@ import { AiOutlineCloudDownload } from 'react-icons/ai';
             <ModalBody P={"0px"} >   
 
             <div className={styles.transcript_content} >
-      <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos enim similique nobis placeat! Impedit consequatur doloremque ipsum facere voluptatibus ipsam dolor deserunt! Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus expedita nisi soluta veritatis provident, deserunt hic inventore quibusdam debitis, amet minima, aliquid ipsam iusto? Quisquam quis doloremque quasi maxime accusamus voluptatum, voluptates illo temporibus, placeat eius asperiores. Delectus quasi facere nostrum! Eum, quis vel laborum odit nemo quae, numquam quam, nesciunt nisi dolor ratione odio.</p>
-      <br />
-      <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos enim similique nobis placeat! Impedit consequatur doloremque ipsum facere voluptatibus ipsam dolor deserunt! Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus expedita nisi soluta veritatis provident, deserunt hic inventore quibusdam debitis, amet minima, aliquid ipsam iusto? Quisquam quis doloremque quasi maxime accusamus voluptatum, voluptates illo temporibus, placeat eius asperiores. Delectus quasi facere nostrum! Eum, quis vel laborum odit nemo quae, numquam quam, nesciunt nisi dolor ratione odio.</p>
-      <br />
-      <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dignissimos enim similique nobis placeat! Impedit consequatur doloremque ipsum facere voluptatibus ipsam dolor deserunt! Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus expedita nisi soluta veritatis provident, deserunt hic inventore quibusdam debitis, amet minima, aliquid ipsam iusto? Quisquam quis doloremque quasi maxime accusamus voluptatum, voluptates illo temporibus, placeat eius asperiores. Delectus quasi facere nostrum! Eum, quis vel laborum odit nemo quae, numquam quam, nesciunt nisi dolor ratione odio.</p>
+    <p>
+      {
+        transcript.map(text=>(
+          <p className={styles.para}>
+            {text}
+            </p>
+        ))
+      }
+        </p>
             </div>
           
             </ModalBody>

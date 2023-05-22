@@ -161,4 +161,17 @@ export const setRoomService=(payload)=>(dispatch)=>{
     type:ActionTypes.SET_ROOM_SERVICE,
     payload
   })
+
+}
+  export const setLiveMessages=(payload)=>(dispatch)=>{
+    dispatch({
+      type:ActionTypes.SET_LIVE_MESSAGES,
+      payload
+    })
+}
+  export const addLiveMessages=(payload)=>(dispatch)=>{
+    dispatch({
+      type:ActionTypes.ADD_LIVE_MESSAGE,
+      payload
+    })
 }

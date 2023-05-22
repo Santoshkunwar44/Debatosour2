@@ -141,15 +141,7 @@ const DebateCard = ({ debate, isLive }) => {
               }
             </div>
 
-            <div className="info_key end_time">
-              <p>Ends  </p>
-              {
-                isLive === null ? "" : isLive ?
-                  <p>with {moment(debate.endTime).fromNow()}</p>
-                  : <>   <p>{moment(debate.endTime).format("LLL")}</p></>
-              }
-
-            </div>
+         
           </div>
           {/* <span className="started_time">Started 3 hours ago</span>    */}
         </div>

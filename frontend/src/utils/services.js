@@ -170,8 +170,7 @@ return `
 
 class DebateRoomServices{
 
-  #username;
-  constructor({rtmChannelRef ,hasLeftRoom ,navigate,rtcUid ,data:user , lastApiCallConfig, setRoomLoading ,activeDebateRef , debateStateRef, setUsername ,setDebateState ,setActiveMicControlTeam  ,isAudience ,setRoomMembers ,setMicMuted ,debateId ,RoomMembers ,audioTracks ,setActiveSpeakers ,setRtmChannelAction ,isLive  ,micMuted  ,AddActiveDebate,setMessage ,roundShotsCount ,showToast , transcript,resetTranscript, activeSpeakers ,timeRemainingRef ,otherState  ,activeMicControlTeam
+  constructor({rtmChannelRef ,hasLeftRoom , addLiveMessages, navigate,rtcUid ,data:user , lastApiCallConfig, setRoomLoading ,activeDebateRef , debateStateRef ,setDebateState ,setActiveMicControlTeam  ,isAudience ,setRoomMembers ,setMicMuted ,debateId ,RoomMembers ,audioTracks ,setActiveSpeakers ,setRtmChannelAction ,isLive  ,micMuted  ,AddActiveDebate,setMessage  ,showToast , transcript,resetTranscript, activeSpeakers ,timeRemainingRef ,otherState  ,activeMicControlTeam
   }){
     this.navigate = navigate
     this.rtmChannelRef = rtmChannelRef; 
@@ -181,7 +180,7 @@ class DebateRoomServices{
     this.showToast=showToast;
     this.debateState = debateStateRef;
     this.changeDebateState=setDebateState
-    this.changeUserName=setUsername;
+
     this.changeMicControlTeam= setActiveMicControlTeam;
     this.AddActiveDebate= AddActiveDebate;
     this.setMessage = setMessage;
@@ -201,17 +200,16 @@ class DebateRoomServices{
     this.SetRoomLoading=setRoomLoading ;
     this.setRtmChannelAction = setRtmChannelAction;
     this.lastApiCallConfig= lastApiCallConfig;
-    this.roundShotsCount = roundShotsCount;
     this.otherState = otherState ;
     this.hasLeftRoom=hasLeftRoom;
     this.transcript= transcript;
-
+    this.addLiveMessages= addLiveMessages;
 
    
 
   }
   getMyTeamMethod(){
-    return this.activeDebate.current.teams.find((team) => team.members.find((mem) => mem._id === this.currentUser._id));
+    return this.activeDebate.current.teams.find((team) => team.members.find((mem) => mem._id === this.currentUser?._id));
    }
 
   getMemberWithHighUid(){
@@ -248,16 +246,20 @@ class DebateRoomServices{
 
   async UpdateChannelAttr(key,payload){
     const {channelId} = this.rtmChannelRef.current
-    await Rtm_client.addOrUpdateChannelAttributes(channelId, {
-      [key]: JSON.stringify(payload)
-    })
+    try {
+      await Rtm_client.addOrUpdateChannelAttributes(channelId, {
+        [key]: JSON.stringify(payload)
+      })
+    } catch (error) {
+  console.log(error)      
+    }
   }
  
   async handlePauseDebate  () {
     const { isPaused, isStarted } = this.debateState?.current;
-    if (!this.activeSpeakers || !isStarted || isPaused) return;
-
-    const otherDebators = this.activeSpeakers.filter(speaker => speaker.uid !== this.rtcUid);
+    if (!this.RoomMembers || !isStarted || isPaused) return;
+    console.log("room members before leaving",this.RoomMembers)
+    const otherDebators = this.RoomMembers.filter(mem=>mem.id !== this.currentUser?._id)
     let debateRoundsPayload = {
       ...this.debateState?.current,
       changedAt: Date.now(),
@@ -269,8 +271,6 @@ class DebateRoomServices{
     };
 
   }
-
-
    getTeamName(){
     if(this.activeDebate.current){
       return this.activeDebate.current.teams.map(team=>team.name)
@@ -295,10 +295,15 @@ class DebateRoomServices{
     removeInterval.intervalArrRef.current = [];
   }
   async handleUserPublished  (user, mediaType)  {
-    await Rtc_client.subscribe(user, mediaType);
-    if (mediaType === "audio") {
-      this.audioTracks.remoteAudioTracks[user.uid] = [user.audioTrack]
-      user.audioTrack.play()
+    try {
+      
+      await Rtc_client.subscribe(user, mediaType);
+      if (mediaType === "audio") {
+        this.audioTracks.remoteAudioTracks[user.uid] = [user.audioTrack]
+        user.audioTrack.play()
+      }
+    } catch (error) {
+      console.log(error)
     }
   }
   async handleUserLeave(theUser) {
@@ -307,37 +312,54 @@ class DebateRoomServices{
   async getChannelAttributeFunc(){
 
     if (!Rtm_client || !this.rtmChannelRef.current) return;
-    
-    const {channelId} = this.rtmChannelRef.current;
-    const attr = await Rtm_client.getChannelAttributes(channelId);
-    const  {speechText} = attr
-    console.log( speechText ? JSON.parse(speechText.value):{} )
-    return attr
+    try {
+      
+      const {channelId} = this.rtmChannelRef.current;
+      const attr = await Rtm_client.getChannelAttributes(channelId);
+      const  {speechText} = attr
+      console.log( speechText ? JSON.parse(speechText.value):{} )
+      return attr
+    } catch (error) {
+      
+    }
   }
 
   async LeaveRtmChannel(){
-    await this.RemoveMeAsASpeaker()
-    await this.rtmChannelRef.current?.leave();
-    await Rtm_client?.logout();
+    try {
+      
+      await this.RemoveMeAsASpeaker()
+      await Rtm_client?.logout();
+      await this.rtmChannelRef.current?.leave();
+    } catch (error) {
+      
+    }
   }
   async closeTracks(){
     
-    await this.addSpeechToChannel()
-    await this.handlePauseDebate();
-    await this.LeaveRtmChannel();
-
-    if (!this.isAudience && this.audioTracks?.localAudioTracks) {
-      this.audioTracks.localAudioTracks?.stop()
-      this.audioTracks.localAudioTracks?.close()
-    }
-    if (Rtc_client) {
-      Rtc_client?.unpublish()
-      Rtc_client?.leave()
+    try {
+      
+      await this.addSpeechToChannel()
+      await this.handlePauseDebate();
+      await this.LeaveRtmChannel();
+      
+      if (!this.isAudience && this.audioTracks?.localAudioTracks) {
+        this.audioTracks.localAudioTracks?.stop()
+        this.audioTracks.localAudioTracks?.close()
+      }
+      if (Rtc_client) {
+       await Rtc_client?.unpublish()
+        await Rtc_client?.leave()
+      }
+    } catch (error) {
+        console.log(error)
     }
 
 
   }
   async getRoomSpeaker(){
+    try {
+      
+   
     if (Rtm_client && this.rtmChannelRef.current) {
       const res = await Rtm_client.getChannelAttributes(this.rtmChannelRef.current.channelId);
       let speakerId = res?.speaker?.value ;
@@ -352,10 +374,16 @@ class DebateRoomServices{
         return false
       } 
     }
+  } catch (error) {
+      console.log(error)
+  }
 
   }
   async RemoveMeAsASpeaker(){
-    const {current:RtmChannel} = this.rtmChannelRef
+    const {current:RtmChannel} = this.rtmChannelRef ;
+    try {
+      
+   
     let speakerId = await this.getRoomSpeaker();
     if (speakerId && Rtm_client && RtmChannel) {
       if (speakerId.toString() === this.rtcUid.toString()) {
@@ -364,12 +392,15 @@ class DebateRoomServices{
         })
       }
     }
+  } catch (error) {
+   console.log(error)   
   }
-  async showAdminName(){
-    console.log("admin",this.#username)
   }
   async getChannelMembers(channel){
     if(!channel)return
+    try {
+      
+  
     const members = await channel.getMembers()
     const uniqueMember = [...new Set(members)];
     let allMembers = await Promise.all(uniqueMember.map(async (memId) => {
@@ -387,9 +418,12 @@ class DebateRoomServices{
       }
 
     }));
-  return  allMembers = allMembers.filter(mem => mem.type !== "audience")
+    return  allMembers = allMembers.filter(mem => mem.type !== "audience")
+  } catch (error) {
+console.log(error)
   }
-  async setTheSpeakerTeamToChannel (team, removeSpeakersFromChannel)  {
+  }
+  async setTheSpeakerTeamToChannel(team, removeSpeakersFromChannel)  {
     if (!team ) return;
 
 
@@ -418,10 +452,11 @@ class DebateRoomServices{
 
   }
   async handleLastApiCallForVoting(){
-    const {_id,judgeType,teams} = this.activeDebate.current ;
+   const {_id,judgeType,teams} = this.activeDebate.current ;
    const winnerTeam =  this.getWinnerByVote(teams);
    const payload={
-    winner:winnerTeam
+    winner:winnerTeam,
+    hasEnded:true,
    }
    
    if(judgeType===Enums.AIJUDGE){
@@ -440,11 +475,15 @@ class DebateRoomServices{
   }
   async handlLastApiCallForTranscript(){
     const attribute = await this.getChannelAttributeFunc();
-    const speech = attribute.speechText.value;
+    let speech = attribute?.speechText?.value;
+    console.log(speech)
+    speech = speech ? JSON.parse(speech) : {};
+    console.log("speech1",speech)
+    if(!speech)return;
     const [teamOne,teamTwo] =  this.getTeamName()
      const speechOne =  speech[teamOne];
      const speechTwo = speech[teamTwo];
-     let {startTime , topic  ,debateType } = this.activeDebate.current;
+     let {startTime , topic  ,type ,_id } = this.activeDebate.current;
      startTime = moment(startTime).format('LLLL');
 
    const theArgumentext =   generateArgument({
@@ -453,12 +492,12 @@ class DebateRoomServices{
       teamOne,
       teamTwo,
       topic,
-      debateType,
+      debateType:type,
       startedTime:startTime
   })
-
+   console.log("argument",theArgumentext)
 try {
-  await  chatBotApi(theArgumentext)
+  await  chatBotApi(theArgumentext,_id)
   
 } catch (error) {
 }
@@ -470,24 +509,35 @@ try {
 async handleLastSetup(){
 
 
-  let myUid = Number(this.rtcUid)
-  const nextUser = this.RoomMembers.find((mem)=>Number(mem.rtcUid) > myUid)
-  const {judgeType} = this.activeDebate.current;
-  if(!nextUser){
-  if(judgeType===Enums.AIJUDGE){
-    await this.handlLastApiCallForTranscript()
-  }else if(judgeType===Enums.VOTING){
-    await  this.handleLastApiCallForVoting()
+    
+  
+
+  const nextUser = this.getMemberWithHighUid();
+  if(nextUser)return;
+  try {
+    
+    this.lastApiCallConfig.startApiCalled=true;
+    await this.createChannelMessage({
+      type:"start_last_api_call"
+    })
+    
+    const {judgeType} = this.activeDebate.current;
+    if(judgeType===Enums.AIJUDGE){
+      await this.handlLastApiCallForTranscript()
+    }else if(judgeType===Enums.VOTING){
+      await  this.handleLastApiCallForVoting()
+    }
+    this.lastApiCallConfig.current.hasApiCalled = true;
+    await this.createChannelMessage({
+      type:"last_api_call_success"
+    })
+    
+  } catch (error) {
+    console.log(error) 
   }
-  this.lastApiCallConfig.current.hasApiCalled = true;
-  await  this.createChannelMessage({
-    type:"last_api_call_success"
-  })
+    
   }
-
-
-}
-
+  
   async handleCloseDebate () {
     const { timeFormat } = this.activeDebate.current;
     let debateRoundsPayload = {
@@ -504,19 +554,23 @@ async handleLastSetup(){
       changedAt: 0,
     }
     this.changeDebateState(debateRoundsPayload)
-    this.changeMicControlTeam(null)
-    await this.UpdateChannelAttr("debateRounds",debateRoundsPayload)
-    await this.setTheSpeakerTeamToChannel(null , true)
-    await this.handleLastSetup()
-  }
- handleChangeUsername(){
-  this.changeUserName("manas")
+    this.changeMicControlTeam(null);
+    if(this.getMemberWithHighUid())return;
+try {
+  await this.UpdateChannelAttr("debateRounds",debateRoundsPayload)
+  await this.setTheSpeakerTeamToChannel(null , true)
+  await this.handleLastSetup()
+} catch (error) {
+  console.log(error)
 }
+  }
+
 async handleMemberJoined   (MemberId)  {
 
+  try {
+    
+
   let { name, rtcUid, avatar, isAdmin, id, type } = await Rtm_client.getUserAttributes(MemberId, ['name', 'id', 'rtcUid', 'avatar', 'isAdmin', 'type'])
-
-
   const doesUserExist = this.RoomMembers.find(mem => mem.id === id)
   if (type === "audience") return;
   if (!doesUserExist) {
@@ -533,10 +587,13 @@ async handleMemberJoined   (MemberId)  {
         isAdmin: Boolean(isAdmin)
       }
     ]))
+    
 
   }
 
-
+} catch (error) {
+    console.log(error)
+}
 
 
 
@@ -555,35 +612,30 @@ async handleMemberLeft (MemberId)  {
   this.changeRoomMember(mem => mem.filter(m => m.userId !== MemberId))
 }
 async handleChannelMessage  (message)  {
-  const data = JSON.parse(message.text);
-  if (data.type === "round_change") {
-    if (this.roundShotsCount.current !== 1 && data?.rounds?.isMicPassed) {
-      this.removIntervalFunc()
-    }
 
-    
-    const { rounds, speakers } = data
-    console.log("next",rounds?.round_shot)
-    if (this.roundShotsCount.current >= rounds.round_shot) return;
-    if (speakers.teamName === "both") {
-      this.changeMicControlTeam("both")
-    } else {
-      this.changeMicControlTeam(this.getTeamDataByName(speakers.teamName))
-    }
-    this.changeDebateState(rounds)
-  } else if (data.type === "resume_debate") {
+  const data = JSON.parse(message.text);
+    console.log("incoming",data)
+  if (data.type === "resume_debate") {
     this.changeDebateState(data)
   } else if (data.type === "live_chat") {
-    delete data.type
-    this.setMessage(prev => ([
-      ...prev, data
-    ]))
+    delete data.type;
+    console.log("adding message",this.setMessage)
+    this.addLiveMessages(data)
   } else if (data.type === "live_vote") {
     delete data.type;
     this.activeDebate.current = data;
     this.AddActiveDebate(this.activeDebate)
   }else if(data.type==="last_api_call_success"){
     this.lastApiCallConfig.current.hasApiCalled=true
+  }else if(data.type==="debate_start"){
+    const {rounds,speakers} = data;
+    if(rounds.isMicPassed){
+     await this.removIntervalFunc();
+    }
+    this.changeDebateState(rounds);
+    this.changeMicControlTeam(speakers)
+  }else if(data.type==="start_last_api_call"){
+    this.lastApiCallConfig.startApiCalled=true;
   }
 }
 async InitRTM({token}){
@@ -622,8 +674,13 @@ console.log("error",error)
 
 async setChannelMember(channel){
     if (!channel) return;
-    const allMembers =  await this.getChannelMembers(channel)
-    this.changeRoomMember(allMembers)
+    try {
+      
+      const allMembers =  await this.getChannelMembers(channel)
+      this.changeRoomMember(allMembers)
+    } catch (error) {
+      
+    }
 }
 async initRTC  (token)  {
   try {
@@ -644,9 +701,9 @@ async initRTC  (token)  {
 }
 
 async getAgoraToken() {
-  this.SetRoomLoading(true)
-  console.log("inside agora",this.isLive)
-  const res = await getAgoraTokenApi({ channelName: this.debateId, role: "publisher", uid: this.rtcUid, tokentype: "1000", expiry: 86400 })
+  try {
+    this.SetRoomLoading(true)
+    const res = await getAgoraTokenApi({ channelName: this.debateId, role: "publisher", uid: this.rtcUid, tokentype: "1000", expiry: 86400 })
   if (res.status === 200) {
     let { rtcToken, rtmToken } = res.data;
     if (this.isLive) {
@@ -655,11 +712,25 @@ async getAgoraToken() {
       this.SetRoomLoading(false)
     }
   }
+} catch (error) {
+  
+}
 }
 async createChannelMessage(message)  {
-  await this.rtmChannelRef.current.sendMessage({ text: JSON.stringify(message) })
+  if(!this.rtmChannelRef.current)return;
+  try {
+    await this.rtmChannelRef.current.sendMessage({ text: JSON.stringify(message) })
+    
+  } catch (error) {
+    console.log(error)
+  }
 }
 async handleResumeDebate ()  {
+
+  if(!this.debateState.current)return;
+  try {
+    
+ 
   const { isPaused, isStarted } = this.debateState.current;
   if (!isStarted || !isPaused) return;
   const debateRoundsPayload = {
@@ -671,7 +742,9 @@ async handleResumeDebate ()  {
   this.changeDebateState(debateRoundsPayload);
   await this.UpdateChannelAttr("debateRounds",debateRoundsPayload)
   await this.createChannelMessage({ ...debateRoundsPayload, type: "resume_debate" })
-
+} catch (error) {
+    console.log(error)
+}
 
 
 }
@@ -684,7 +757,7 @@ async checkIfUserCanUnMute (){
     return true;
   }
 
-  const myTeam = getMyTeam(this.activeDebate?.current?.teams,this.currentUser?._id)?.name
+  const myTeam =this.getMyTeamMethod().name;
   if (this.activeMicControlTeam.name !== myTeam) {
     this.showToast("Next team has  mic control", "error");
     return false;
@@ -702,30 +775,38 @@ async checkIfUserCanUnMute (){
 
 }
 async handleMicTogggle  () {
+  try {
+    
+
   if (this.micMuted) {
     if (!await this.checkIfUserCanUnMute()) {
       return;
     };
-    await this.UpdateChannelAttr("speaker",this.rtcUid.toString())
     this.audioTracks.localAudioTracks.setMuted(false)
-    this.setMicMuted(prev=>!prev)
+    this.setMicMuted(false)
+    await this.UpdateChannelAttr("speaker",this.rtcUid.toString())
     await  SpeechRecognition.startListening()
   }
   else {
-    this.audioTracks.localAudioTracks.setMuted(true)
-    this.setMicMuted(prev=>!prev)
+    this.audioTracks.localAudioTracks.setMuted(true);
+    this.setMicMuted(true)
     await this.UpdateChannelAttr("speaker","null")
     await this.addSpeechToChannel()
   }
+} catch (error) {
+    console.log(error)
+}
 }
 
-async handleDebateInitChange  (nextround, isMicPassed)  {
+async handleDebateInitChange  (nextround, isMicPassed,isStarted)  {
 
+
+  try {
   if (!this.activeDebate.current) return;
-
   const { timeFormat } = this.activeDebate.current;
   const { team: teamName, time } = timeFormat[nextround - 1];
   const team = this.getTeamDataByName(teamName);
+
   let debateRoundsPayload = {
     round_shot: nextround,
     speakTeam: teamName,
@@ -742,24 +823,29 @@ async handleDebateInitChange  (nextround, isMicPassed)  {
   }
   this.changeDebateState(debateRoundsPayload);
   this.changeMicControlTeam(team ?? "both");
-  await this.UpdateChannelAttr("debateRounds", debateRoundsPayload)
-  await this.setTheSpeakerTeamToChannel(team ?? "both")
-
-  let rounds = {
-    ...debateRoundsPayload
+  
+  if(isStarted || isMicPassed ){
+    let startPayload={
+      type:"debate_start",
+      rounds:debateRoundsPayload,
+      speakers:team ?? "both"
+    }
+  
+    await this.createChannelMessage(startPayload)
   }
-  let speakers = {
-    teamName: teamName,
-  }
-  let messagePayload = {
-    speakers,
-    rounds,
-    type: "round_change"
-  }
-  await this.createChannelMessage(messagePayload)
+  
+  if(!await this.getMemberWithHighUid() || isStarted ){
+    await this.UpdateChannelAttr("debateRounds", debateRoundsPayload);
+    await this.setTheSpeakerTeamToChannel(team ?? "both");
+  };
+     
+} catch (error) {
+    console.log(error)
+}
 }
 async addSpeechToChannel(){
-
+  
+  try {
   if(!this.currentUser || this.activeDebate.current?.judgeType !== Enums.AIJUDGE || !this.transcript)return;
 
   const attr =  await this.getChannelAttributeFunc();
@@ -767,7 +853,7 @@ async addSpeechToChannel(){
   let  speechText = attr?.speechText?.value;
   const thePast = speechText ? JSON.parse(speechText) : {}
   const myTeam = this.getMyTeamMethod().name;
-  console.log("myteam name",myTeam ,thePast);
+  console.log("transcript",this.transcript);
   
   let teamSpeech;
   if(thePast[myTeam]){
@@ -782,45 +868,68 @@ async addSpeechToChannel(){
     [myTeam]:teamSpeech
   }
 
-
-  await this.UpdateChannelAttr("speechText",newArguments)
+    
+    
+    await this.UpdateChannelAttr("speechText",newArguments)
+  } catch (error) {
+    
+  }
 
 } 
-
-async handleFinishSpeakTime  (isMicPassed)  {
+async handleFinishSpeakTime(isMicPassed)  {
   const { timeFormat ,judgeType } = this.activeDebate.current;
   let debateShot = this.debateState.current.round_shot;
   let totalShot = timeFormat?.length
   let nextRoundShot = ++debateShot;
-  this.roundShotsCount.current = nextRoundShot;
-  console.log("the currrent round" , this.debateState.current.round_shot,this.roundShotsCount.current)
+  console.log("the currrent round" , this.debateState.current.round_shot ,nextRoundShot)
+  try {
+ 
   if(!this.micMuted){
    await this.handleMicTogggle()
   }
   if (nextRoundShot > totalShot) {
     await this.handleCloseDebate()
   } else {
-    this.handleDebateInitChange(nextRoundShot, isMicPassed)
+   await this.handleDebateInitChange(nextRoundShot, isMicPassed)
   }
   if(judgeType===Enums.AIJUDGE){
   await  this.addSpeechToChannel()
   }
+} catch (error) {
+console.log(error)
+}
 }
 
 async startDebate() {
-  this.roundShotsCount.current = 1;
-  await this.handleDebateInitChange(1)
+  await this.handleDebateInitChange(1,null,true)
 }
 
 
 async handleLeaveRoom  () {
-  this.hasLeftRoom.current = true
-  await this.closeTracks()
-  this.navigate(-1)
+  try {
+    
+    this.hasLeftRoom.current = true
+    await this.closeTracks()
+    this.navigate(-1)
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 
+async AmIParticipants(){
+if(!this.activeDebate?.current || !this.currentUser)return
+ return this.activeDebate.current.teams.some(team=>team.members.some(mem=>mem._id ===this.currentUser?._id));
+  
 }
+}
+
 export  { DebateRoomServices}
+
+
+
+
+
+
 
 

@@ -7,6 +7,7 @@ import { actionCreators } from "../../../redux/store"
 import { unVoteTeamApi, voteAndUnvoteTeamApi, voteTeamApi } from "../../../utils/Api"
 import { useToast } from "@chakra-ui/react"
 import { useNavigate } from "react-router-dom"
+import { Enums } from "../../../redux/action/actionTypes/Enumss"
 
 const DebateTeam = ({  team }) => {
   const { isLive, votedTeam ,activeDebate} =useSelector(state=>state.debate);
@@ -15,7 +16,8 @@ const DebateTeam = ({  team }) => {
   const navigate = useNavigate()
   const dispatch =useDispatch( )
   const {setVotedTeamAction  ,AddActiveDebate} = bindActionCreators(actionCreators,dispatch )
-  const toast =useToast()
+  const toast =useToast();
+  
 
 
   const handleVote=async()=>{
@@ -92,13 +94,15 @@ const DebateTeam = ({  team }) => {
         <div className='vote_box'>
           <div className='vote_count'>
           </div>
-          <button 
-          onClick={handleVote}
-           className={`vote_button ${team?.name === votedTeam ? "voted":"" } ${(!isLive || !data) &&"disabled_vote_button"}`}>
+          {
+           activeDebate?.judgeType===Enums.VOTING &&  <button 
+            onClick={handleVote}
+            className={`vote_button ${team?.name === votedTeam ? "voted":"" } ${(!isLive || !data) &&"disabled_vote_button"} ${RoomService.AmIParticipants() && "disable_vote"}`}>
             <BiUpvote />
             <p>{team.vote.length}</p>
             <p>VOTE</p>
           </button>
+              }
         </div>
       </div>
       <div className='team_member_list'>

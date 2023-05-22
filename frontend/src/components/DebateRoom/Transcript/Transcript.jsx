@@ -1,7 +1,32 @@
 import styles from "./Transcript.module.css"
 import DebateTranscriptModal from "../../../Layouts/modal/DebateFinishedModal/DebateTranscriptModal"
 import {motion} from "framer-motion"
-const Transcript = () => {
+import { useEffect, useState } from "react"
+const Transcript = ({activeDebate}) => {
+
+
+
+
+  const [ transcriptText,setTranscriptText ] =useState([]);
+
+  
+
+useEffect(()=>{
+  if(activeDebate?.transcript){
+    // writeMessage({text:activeDebate.transcript,_id:Date.now()})
+
+
+    let text = activeDebate?.transcript;
+    setTranscriptText(text.split("\n"))
+
+
+  }
+},[activeDebate])
+
+
+
+
+
   return (
     <motion.div 
     
@@ -33,7 +58,7 @@ const Transcript = () => {
                 Get the transcript of the debate in the text and audio format and download the transcript in 
                 pdf,jpg,png format .
             </div>
-            <DebateTranscriptModal>
+            <DebateTranscriptModal transcript={transcriptText}>
 
             <button className={styles.getTranscriptButton}>
                 GET TRANSCRIPT
@@ -48,3 +73,5 @@ const Transcript = () => {
 }
 
 export default Transcript
+
+

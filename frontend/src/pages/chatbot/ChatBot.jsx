@@ -27,14 +27,11 @@ const ChatBot = () => {
       
       setChatBotMsgArr((prev)=>{
         
-        console.log(prev,i)
 
-        // console.log("the prev ",prev ,prev.findIndex((msg)=>msg._id === _id) === -1)
 
 
         if(prev.findIndex((msg)=>msg._id === _id) === -1){
 
-          console.log("new one",prev)
           return [...prev, {
             ...message,
             text:nextText

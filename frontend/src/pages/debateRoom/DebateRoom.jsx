@@ -17,6 +17,7 @@ import AgoraRTC from 'agora-rtc-sdk-ng'
 import DebateAction from "../../components/DebateRoom/DebateAction/DebateAction"
 import "./DebateRoom.css"
 import DebateInfo from "../../Layouts/Debate/DebateInfo/DebateInfo";
+import AnalyzeResultModal from '../../Layouts/modal/DebateFinishedModal/AnalyzingResult';
 const APPID = process.env.REACT_APP_AGORA_APP_ID;
 const Rtm_client = AgoraRTM.createInstance(APPID);
 const Rtc_client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
@@ -33,7 +34,7 @@ const DebateRoom = () => {
   debateId = debateId.toString()
   const dispatch = useDispatch()
   const rtmChannelRef = useRef()
-  const { AddActiveDebate, SetRoomIsLiveOrNot, SetIsUserParticipant, setRtmChannelAction, setIsLoading, SetRoomLoading ,setRoomService } = bindActionCreators(actionCreators, dispatch)
+  const { AddActiveDebate, addLiveMessages, SetRoomIsLiveOrNot, SetIsUserParticipant, setRtmChannelAction, setIsLoading, SetRoomLoading ,setRoomService } = bindActionCreators(actionCreators, dispatch)
   const [activeMicControlTeam, setActiveMicControlTeam] = useState(null)
   const [audioTracks, setAudioTracks] = useState({
     localAudioTracks: null,
@@ -44,15 +45,15 @@ const DebateRoom = () => {
   const debateStateRef = useRef()
   const activeDebateRef = useRef()
   const timeRemainingRef = useRef()
-  const roundShotsCount = useRef(0)
   const [micMuted, setMicMuted] = useState(true)
   const [RoomMembers, setRoomMembers] = useState([]);
   const { setMessage } = useSelector(state => state.chat)
-  const [activeSpeakers, setActiveSpeakers] = useState([])
-  const [username, setUsername] = useState("santosh")
+  const [activeSpeakers, setActiveSpeakers] = useState([]);
+  const [makingLastApiCall,setMakingLastApiCall] =useState(false)
   const lastApiCallConfig= useRef({
     admin:null,
     hasApiCalled:false,
+    startApiCalled:false,
   })
   const [debateState, setDebateState] = useState({
     round_shot: 0,
@@ -90,8 +91,7 @@ const DebateRoom = () => {
     micMuted,
     showToast,
     otherState,
-    setMessage,
-    setUsername,
+    addLiveMessages,
     audioTracks,
     RoomMembers,
     transcript,
@@ -102,7 +102,6 @@ const DebateRoom = () => {
     setDebateState,
     setRoomMembers,
     debateStateRef,
-    roundShotsCount,
     AddActiveDebate,
     activeDebateRef,
     timeRemainingRef,
@@ -137,6 +136,11 @@ const DebateRoom = () => {
   }, []);
   useEffect(()=>{
   if(activeDebateRef.current){
+    const {hasEnded,_id:debateId} = activeDebateRef.current
+    // if(hasEnded){
+    //   navigate(`/completion/${debateId}`)
+    // }
+
     const {admin:{_id}} = activeDebateRef.current;
 
     lastApiCallConfig.current={
@@ -253,6 +257,7 @@ const DebateRoom = () => {
   },[lastApiCallConfig.current.hasApiCalled])
 
   const setInitialDebateState = async () => {
+    try {
     const attr = await RoomService.getChannelAttributeFunc()
     let { speakersData, debateRounds } = attr;
     if (speakersData) {
@@ -271,12 +276,11 @@ const DebateRoom = () => {
     if (debateRounds) {
       debateRounds = JSON.parse(debateRounds?.value)
       setDebateState(debateRounds);
-      roundShotsCount.current = debateRounds?.round_shot
     }
+  } catch (error) {
+      console.log(error)
   }
-
-
-
+  }
 
   
   const fetchDebateById = async () => {
@@ -310,6 +314,9 @@ const DebateRoom = () => {
   return (
     <>
       <Navbar />
+      {
+       (lastApiCallConfig.current.startApiCalled ) && <AnalyzeResultModal activeDebate={activeDebateRef.current}/>
+      }
       <div  className='DebateRoomWrapper' onClick={()=>RoomService.getChannelAttributeFunc()} >
         <div className='debate_room_top_header'>
           {isLive &&

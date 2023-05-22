@@ -419,8 +419,7 @@ if(formatArr){
             <select id="" name='type' onChange={handleInputChange}>
               <option selected disabled>choose debate type</option>
               <option value="British Parliamentary">British Parliamentary</option>
-              <option value="World Schools format (WSDC)">World Schools format (WSDC)</option>
-
+              {/* <option value="World Schools format (WSDC)">World Schools format (WSDC)</option> */}
               <option value="Public forum">Public forum</option>
               <option value="Lincoln–Douglas">Lincoln–Douglas</option>
 

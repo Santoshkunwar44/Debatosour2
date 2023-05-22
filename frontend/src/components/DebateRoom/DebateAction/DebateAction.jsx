@@ -128,14 +128,14 @@ const handleStartDebate=async()=>{
 
 }
 const handleLeaveRoom=async()=>{
-
   try {
       await RoomService.handleLeaveRoom()
   } catch (error) {
     
   }
-
 }
+
+console.log(micMuted)
 
   return (
     <>
@@ -157,7 +157,6 @@ const handleLeaveRoom=async()=>{
         RESUME DEBATE
         </button>   
 }
-
           {
             ( !debateState.isPaused && isMicWithUs) ?  <button className="pass_mic_button" onClick={passTurnToNextTeam}>
             <TbMicroscope/>

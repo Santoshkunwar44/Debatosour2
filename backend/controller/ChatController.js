@@ -31,27 +31,27 @@ class ChatController{
 
     async chatBot(req,res){
         const {debateId} = req.query
-        console.log( debateId,"is transcript")
         try {
             const prompt = req.body.prompt
             const response = await openAi.createCompletion({
                 model: "text-davinci-003",
                 prompt,
-                temperature: 0.0,
+                temperature: 0.5,
                 max_tokens:512,
                 top_p: 1,
             frequency_penalty: 0.0,
             presence_penalty: 0,
             
         })
-        if( debateId){
+        if( debateId !=="undefined"){
 
             
             console.log(debateId,"is transcript");
 
             await DebateModel.findByIdAndUpdate(debateId,{
                 $set:{
-                    transcript :response.data?.choices[0].text
+                    transcript :response.data?.choices[0].text,
+                    hasEnded:true
                 }
             })
         }

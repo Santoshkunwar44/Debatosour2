@@ -10,26 +10,28 @@ import { actionCreators } from '../../../redux/store';
 const LiveChat = () => {
 
   const dispatch = useDispatch()
-  const [messageArr,setMessageArr] =useState([])
   const {data} = useSelector(state=>state.user)
   const {activeDebate} =useSelector(state=>state.debate)
-  const {setMessageArrAction} =bindActionCreators(actionCreators,dispatch )
+  const {liveMessage} = useSelector(state=>state.chat)
+  const {addLiveMessages ,setLiveMessages} =bindActionCreators(actionCreators,dispatch )
   const {rtmChannel,RoomService} = useSelector(state=>state.other);
   const inputRef = useRef()
   const scrollRef = useRef()
-
+  console.log(liveMessage)
   useEffect(()=>{
     if(!activeDebate?.current)return ;
+    
     handleGetAllChats()
   },[activeDebate?.current])
 
   const handleGetAllChats = async()=>{
+
     const {_id} = activeDebate?.current
     try {
         const res = await findChatApi(_id);
         if(res.status===200){
           const {message} = res.data 
-          setMessageArr(message)
+          setLiveMessages(message)
         }else{
           throw Error(res.data?.message)
         }
@@ -50,9 +52,7 @@ const LiveChat = () => {
           const res = await createChatApi(newChat );
           const {message} = res?.data
           if(res.status===200){
-            setMessageArr(prev=>([
-              ...prev,message
-            ]))
+            addLiveMessages(message)
              await sendRtmChannelMessage(message)
              cb()
           }else{
@@ -66,11 +66,8 @@ const LiveChat = () => {
 
   useEffect(()=>{
     scrollRef.current.scrollTo(0,scrollRef.current.scrollHeight);
-    // scrollRef.current?.scrollIntoView()
-  },[messageArr])
-  useEffect(()=>{
-    setMessageArrAction(setMessageArr);
-  },[])
+  },[liveMessage])
+ 
 
   const sendRtmChannelMessage=async(data)=>{
     data.type="live_chat"
@@ -90,8 +87,8 @@ const LiveChat = () => {
       </div>
       <div  ref={scrollRef} className='live_chat_message_list'>
       {
-        messageArr &&
-      messageArr.map((message)=>(
+        liveMessage &&
+        liveMessage.map((message)=>(
         <div  key={message?._id  }>
 
         <MessageText    message={message}  own={message?.owner?._id === data?._id}/>

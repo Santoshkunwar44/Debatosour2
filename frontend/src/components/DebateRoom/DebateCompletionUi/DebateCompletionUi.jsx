@@ -24,7 +24,7 @@ const DebateCompletionUi = () => {
  
   useEffect(()=>{
     if(activeDebate && currentUser){
-
+      
       const {winner,teams,judgeType} = activeDebate;
      
       setCompletionStep( judgeType ===Enums.AIJUDGE ? Enums.TRANSCRIPT_TAB :Enums.MYSTERY_TAB)

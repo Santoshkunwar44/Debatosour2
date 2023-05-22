@@ -45,9 +45,6 @@ class ChatController{
         })
         if( debateId !=="undefined"){
 
-            
-            console.log(debateId,"is transcript");
-
             await DebateModel.findByIdAndUpdate(debateId,{
                 $set:{
                     transcript :response.data?.choices[0].text,

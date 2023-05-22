@@ -185,12 +185,12 @@ console.log(micMuted)
         LEAVE
       </button>
         } 
-    <CopyToClipboard text={`${process.env.REACT_APP_FRONTEND_URL}/debate/${activeDebate?.current?.passcode}`} onCopy={handleCopyLink}>
+    {/* <CopyToClipboard text={`${process.env.REACT_APP_FRONTEND_URL}/debate/${activeDebate?.current?.passcode}`} onCopy={handleCopyLink}>
       <button   className="copy_link_button">
         <HiOutlineClipboardDocument/> 
         <p>COPY LINK</p>
       </button>
-    </CopyToClipboard>
+    </CopyToClipboard> */}
       </div>
       </>
   )

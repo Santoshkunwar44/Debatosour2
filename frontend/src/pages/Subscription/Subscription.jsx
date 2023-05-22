@@ -44,7 +44,7 @@ const Subscription = () => {
     const { data: response, status } = await setStripeSession({
       priceId: priceId,
       userId: loggedInUserData._id,
-      redirectUrl: `${process.env.REACT_APP_FRONTEND_URL}/${prevPath}`,
+      redirectUrl: `${process.env.REACT_APP_FRONTEND_URL}`,
     });
 
     if (status !== 200) throw Error(response.message);

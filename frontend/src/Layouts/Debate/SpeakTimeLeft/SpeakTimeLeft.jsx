@@ -6,7 +6,7 @@ import {TiGroup} from "react-icons/ti"
 import { useSelector } from "react-redux"
 const SpeakTimeLeft = ({debateState,countDown ,startTeam}) => {
 
-  const {activeDebate} = useSelector(state=>state.debate)
+  const {activeDebate ,isLive} = useSelector(state=>state.debate)
   
   return (
          <>
@@ -15,8 +15,12 @@ const SpeakTimeLeft = ({debateState,countDown ,startTeam}) => {
     <div className="speakTime_left_box_time_show">
  
         <div className="speak_time_debate_state">
-          {
-         debateState?.isPaused ? "Paused" :   debateState?.isStarted ? "Ongoing":
+        
+          { 
+(isLive && !debateState?.isStarted && !debateState?.hasFinished) ? "Waiting for debators to start":
+
+
+          debateState?.isPaused ? "Paused" :   debateState?.isStarted ? "Ongoing":
          debateState?.hasFinished ? "Completed":"Not Started"  
           }
         </div>
@@ -47,16 +51,16 @@ const SpeakTimeLeft = ({debateState,countDown ,startTeam}) => {
             <p className="speak_time_key">Debate Type  </p>
             </td>
             
-            <td className="speak_time_value">{activeDebate?.type}</td>
+            <td className="speak_time_value">{activeDebate?.current?.type}</td>
           </tr>
             <tr className="speakTime_item" >
             <td className="speakTime_title">
 
             <AiOutlineFieldNumber/>
-            <p className="speak_time_key">Total Speak Count  </p>
+            <p className="speak_time_key">Total speech count  </p>
             </td>
             
-            <td className="speak_time_value">{activeDebate?.timeFormat?.length}</td>
+            <td className="speak_time_value">{activeDebate?.current?.timeFormat?.length}</td>
           </tr>
           {
            ( debateState?.isStarted || debateState?.isPaused ) &&

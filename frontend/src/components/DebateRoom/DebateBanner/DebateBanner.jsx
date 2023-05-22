@@ -1,7 +1,35 @@
 import { useSelector } from "react-redux"
 import styles from "./DebateBanner.module.css"
+import { getTimeCountDown, getTimeFromMs } from "../../../utils/services";
+import { useEffect, useState } from "react";
 const DebateBanner = () => {
     const {activeDebate} = useSelector(state=>state.debate);
+
+
+    const [remainingTime,setRemainingTime] =useState({
+      day:null,
+      hour:null,
+      min:null,
+      sec:null
+    })
+
+    useEffect(()=>{
+      if(activeDebate?.current){
+        setInterval(() => {
+
+          const {sec,min,hour,day} = getTimeFromMs(activeDebate?.current?.startTime);
+          setRemainingTime({
+            sec,
+            day,
+            hour,
+            min
+          })
+
+
+        }, 1000);
+      }
+    },[activeDebate?.current]);
+    console.log(remainingTime)
 
   return (
     <div className={styles.debateBanner}>
@@ -14,7 +42,7 @@ const DebateBanner = () => {
                         <img src="/icons/vs.png" alt="vs icon" />
                         <h3>Feros </h3>
                             </div>
-                  <h1 className={styles.startsInText}> STARTS IN 4 HR 3 MIN  3 SEC</h1> 
+                  <h1 className={styles.startsInText}> STARTS IN {getTimeCountDown(null,remainingTime.day,remainingTime.hour,remainingTime.min,remainingTime.sec)}</h1> 
 
                 </div>
                 <div className={styles.passcode_text}>Passcode  {activeDebate?.current?.passcode}</div>

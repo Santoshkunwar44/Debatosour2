@@ -74,6 +74,11 @@ const Login = () => {
 
 
   }
+  const handleKeyDown=async(e)=>{
+    if(e.key==="Enter"){
+    await  handleLogin()
+    }
+  }
   const handleGoogleLogin = () => {
     window.open(`${process.env.REACT_APP_BACKEND_URL}/auth/google`, '_blank')
   }
@@ -106,13 +111,13 @@ const Login = () => {
           <div className='auth_input_item'>
 
             <label>Email</label>
-            <input className="input_element" type="email" placeholder='Enter  your email address' value={loginData.data.email} onChange={(e) => handleInputChange("email", e.target.value)} />
+            <input onKeyDown={handleKeyDown} className="input_element" type="email" placeholder='Enter  your email address' value={loginData.data.email} onChange={(e) => handleInputChange("email", e.target.value)} />
 
           </div>
           <div className='auth_input_item'>
 
             <label>Password</label>
-            <input className="input_element" type="password" placeholder='Enter  your  password' value={loginData.data.password} onChange={(e) => handleInputChange("password", e.target.value)} />
+            <input  onKeyDown={handleKeyDown} className="input_element" type="password" placeholder='Enter  your  password' value={loginData.data.password} onChange={(e) => handleInputChange("password", e.target.value)} />
 
           </div>
           <div className='bottom_other_options'>

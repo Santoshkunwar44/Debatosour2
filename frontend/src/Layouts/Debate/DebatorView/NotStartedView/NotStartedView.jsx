@@ -1,6 +1,13 @@
 import "./NotStartedView.css"
 import UserProfile from "../../../popovers/viewprofile/UserProfile";
-const NotStartedView = ({ team, pink }) => {
+const NotStartedView = ({ team, pink  }) => {
+
+
+
+
+    
+
+
     return (
         <div className={`NotStartedViewWrapper  ${pink && "pink"}`}>
 

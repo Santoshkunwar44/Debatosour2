@@ -47,9 +47,8 @@ const DebateRoom = () => {
   const timeRemainingRef = useRef()
   const [micMuted, setMicMuted] = useState(true)
   const [RoomMembers, setRoomMembers] = useState([]);
-  const { setMessage } = useSelector(state => state.chat)
   const [activeSpeakers, setActiveSpeakers] = useState([]);
-  const [makingLastApiCall,setMakingLastApiCall] =useState(false)
+  const [startAnalyze,setStartAnalyze] =useState(false)
   const lastApiCallConfig= useRef({
     admin:null,
     hasApiCalled:false,
@@ -136,10 +135,6 @@ const DebateRoom = () => {
   }, []);
   useEffect(()=>{
   if(activeDebateRef.current){
-    const {hasEnded,_id:debateId} = activeDebateRef.current
-    // if(hasEnded){
-    //   navigate(`/completion/${debateId}`)
-    // }
 
     const {admin:{_id}} = activeDebateRef.current;
 
@@ -254,7 +249,22 @@ const DebateRoom = () => {
     if(lastApiCallConfig.current.hasApiCalled){
       navigate(`/completion/${activeDebateRef.current._id}`);
     }
-  },[lastApiCallConfig.current.hasApiCalled])
+  },[lastApiCallConfig.current.hasApiCalled]);
+  useEffect(()=>{
+
+    if(lastApiCallConfig.current.startApiCalled){
+      setStartAnalyze(true)
+    }
+  },[lastApiCallConfig.current.startApiCalled])
+
+
+
+
+
+
+
+
+  
 
   const setInitialDebateState = async () => {
     try {
@@ -311,11 +321,13 @@ const DebateRoom = () => {
 
   }
 
+  console.log(lastApiCallConfig.current.startApiCalled,"start")
+
   return (
     <>
       <Navbar />
       {
-       (lastApiCallConfig.current.startApiCalled ) && <AnalyzeResultModal activeDebate={activeDebateRef.current}/>
+       (startAnalyze ) && <AnalyzeResultModal activeDebate={activeDebateRef.current}/>
       }
       <div  className='DebateRoomWrapper' onClick={()=>RoomService.getChannelAttributeFunc()} >
         <div className='debate_room_top_header'>

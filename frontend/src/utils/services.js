@@ -45,6 +45,7 @@ export const removeLoggedInUserData=()=>{
 
 
 export const getTimeCountDown=(timeInMs , day,hour,min,sec)=>{
+  console.log(timeInMs)
   if(timeInMs){
       const { day,hour,min, sec} =    getTimeFromMs(timeInMs)
       return ` ${day ? `${day > 1 ? `${day}days` :`${day}day`} :` :""}  ${hour ? `${hour > 1 ? "hours":"hour"}:`:""} ${(min ||  hour) ? `${min}min :`:""} ${`${sec}sec`}
@@ -56,15 +57,34 @@ export const getTimeCountDown=(timeInMs , day,hour,min,sec)=>{
   }
 }
 
-export const getTimeFromMs=(timeInMs)=>{
-   const day =  Math.floor(timeInMs / 1000 / 60 / 60 / 24);
-   const hour = Math.floor((timeInMs / 1000 / 60 / 60) % 24);
-   let min = Math.floor(timeInMs / (1000 * 60));
-   let sec = Math.floor((timeInMs / 1000) % 60);
+export const getTimeFromMs=(startTime)=>{
+    const currentTime = Date.now();
+    const timeDifference = startTime - currentTime;
+  
+    if (timeDifference <= 0) {
+      return {
+      day: 0,
+        hour: 0,
+        min: 0,
+        sec: 0
+      };
+    }
+  
+    const seconds = Math.floor(timeDifference / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+  
+    return {
+      day: days,
+      hour: hours % 24,
+      min : minutes % 60,
+      sec: seconds % 60
+    };
+  }
+  
 
-    return {day,hour ,min,sec}
    
-}
 
 export const getTheVotedTeam=(teams,userId)=>{
 
@@ -516,7 +536,7 @@ async handleLastSetup(){
   if(nextUser)return;
   try {
     
-    this.lastApiCallConfig.startApiCalled=true;
+    this.lastApiCallConfig.current.startApiCalled=true;
     await this.createChannelMessage({
       type:"start_last_api_call"
     })
@@ -635,7 +655,8 @@ async handleChannelMessage  (message)  {
     this.changeDebateState(rounds);
     this.changeMicControlTeam(speakers)
   }else if(data.type==="start_last_api_call"){
-    this.lastApiCallConfig.startApiCalled=true;
+    console.log("start now")
+    this.lastApiCallConfig.current.startApiCalled=true;
   }
 }
 async InitRTM({token}){

@@ -19,7 +19,6 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    avatar: "",
     others: {
       missingFields: [],
       error: ""
@@ -43,9 +42,15 @@ const Signup = () => {
         }
       }
     }
-    console.log(fieldsMissing)
     if (fieldsMissing) {
-      return
+      return    toast({
+        title: '',
+        description: "Fill all the fields",
+        status: 'error',
+        duration: 5000,
+        position: "top",
+        isClosable: true,
+      })
     }
 
 
@@ -56,7 +61,6 @@ const Signup = () => {
         lastName: userDetails.lastName,
         password: userDetails.password,
         email: userDetails.email,
-        avatar: userDetails.avatar
       }
 
 
@@ -93,6 +97,11 @@ const Signup = () => {
     window.open(`${process.env.REACT_APP_BACKEND_URL}/auth/google`, '_blank')
   }
 
+  const handleKeyDown=async(e)=>{
+    if(e.key==="Enter"){
+    await  handleRegister()
+    }
+  }
   return (
     <div className='AuthWrapper'>
       <img draggable={false} className='dinasour_image' src='/images/dinasour_coffee.png' alt='dinasourImg' />
@@ -116,12 +125,12 @@ const Signup = () => {
           <div className="right_hr"></div>
 
         </div>
-
+{/* 
         <div className='auth_input_item'>
 
           <label>Choose Avatar </label>
           <AvatarCarousel currentAvatar={userDetails.avatar} onChange={handleInputChange} />
-        </div>
+        </div> */}
         <div className='form_wrapper'>
           <div className='single_item'>
 
@@ -155,7 +164,7 @@ const Signup = () => {
             <div className='auth_input_item'>
 
               <label>Password</label>
-              <input className={`input_element ${userDetails?.password !== userDetails.confirmPassword ? "error_input" : ""}`} type="password" placeholder='Enter your password'
+              <input onKeyDown={handleKeyDown} className={`input_element ${userDetails?.password !== userDetails.confirmPassword ? "error_input" : ""}`} type="password" placeholder='Enter your password'
                 value={userDetails.password}
                 onChange={(e) => handleInputChange("password", e.target.value)} />
 
@@ -163,7 +172,7 @@ const Signup = () => {
             <div className='auth_input_item'>
 
               <label>Confirm Password</label>
-              <input className={`input_element ${userDetails?.password !== userDetails.confirmPassword ? "error_input" : ""}`} type="password" placeholder='Confirm password'
+              <input onKeyDown={handleKeyDown} className={`input_element ${userDetails?.password !== userDetails.confirmPassword ? "error_input" : ""}`} type="password" placeholder='Confirm password'
 
                 value={userDetails.confirmPassword}
                 onChange={(e) => handleInputChange("confirmPassword", e.target.value)} />
@@ -176,7 +185,7 @@ const Signup = () => {
 
           </div>
 
-          <button className='login_button' onClick={() => handleRegister()}>
+          <button className='login_button'  onClick={() => handleRegister()}>
             Sign up
           </button>
           <Link to="/login">
